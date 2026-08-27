@@ -329,7 +329,7 @@ class SamperinAdminController extends Controller
 
         $rolePegawai = SamperinRole::where('role_slug', 'pegawai')->where('role_status', 1)->first();
 
-        return view('dashboard-admin.pegawai', compact('users', 'rolePegawai'));
+        return view('dashboard.pegawai', compact('users', 'rolePegawai'));
     }
 
     /*
