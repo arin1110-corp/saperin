@@ -13,14 +13,4 @@ class SamperinUserRole extends Model
     public $timestamps = false;
 
     protected $fillable = ['user_role_uid', 'user_role_user_uid', 'user_role_role_uid'];
-
-    public function user()
-    {
-        return $this->belongsTo(SamperinUser::class, 'user_role_user_uid', 'user_uid');
-    }
-
-    public function role()
-    {
-        return $this->belongsTo(SamperinRole::class, 'user_role_role_uid', 'role_uid');
-    }
 }

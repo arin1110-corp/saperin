@@ -2,8 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\SamperinUser;
+
 use Closure;
+
 use Illuminate\Http\Request;
+
 use Symfony\Component\HttpFoundation\Response;
 
 class SamperinRoleMiddleware
@@ -12,35 +16,100 @@ class SamperinRoleMiddleware
     {
         /*
         |--------------------------------------------------------------------------
-        | USER SESSION
+        | USER ID SESSION
         |--------------------------------------------------------------------------
         */
 
-        $user = $request->attributes->get('samperin_user');
+        $userId = session('samperin_user_id');
+
+        /*
+        |--------------------------------------------------------------------------
+        | BELUM LOGIN
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$userId) {
+            return redirect()->route('samperin.login');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | USER
+        |--------------------------------------------------------------------------
+        */
+
+        $user = SamperinUser::find($userId);
+
+        /*
+        |--------------------------------------------------------------------------
+        | USER TIDAK ADA
+        |--------------------------------------------------------------------------
+        */
 
         if (!$user) {
-            abort(401, 'User SAMPERIN belum login.');
+            session()->invalidate();
+
+            session()->regenerateToken();
+
+            return redirect()->route('samperin.login');
         }
 
         /*
         |--------------------------------------------------------------------------
-        | USER AKTIF
+        | STATUS
         |--------------------------------------------------------------------------
         */
 
-        if (!$user->isPegawai()) {
-            abort(403, 'Akun pegawai tidak aktif.');
+        if ((int) $user->user_status !== 1) {
+            session()->invalidate();
+
+            session()->regenerateToken();
+
+            return redirect()
+                ->route('samperin.login')
+                ->withErrors([
+                    'login' => 'Akun Anda sudah tidak aktif.',
+                ]);
         }
 
         /*
         |--------------------------------------------------------------------------
-        | CEK ROLE
+        | ROLE
+        |--------------------------------------------------------------------------
+        |
+        | Role menggunakan UID.
+        |
+        | user_role_user_uid
+        | user_role_role_uid
+        |
+        */
+
+        $hasRole = $user
+            ->roles()
+
+            ->whereIn('role_slug', $roles)
+
+            ->where('role_status', 1)
+
+            ->exists();
+
+        /*
+        |--------------------------------------------------------------------------
+        | TIDAK PUNYA ROLE
         |--------------------------------------------------------------------------
         */
 
-        if (!$user->hasAnyRole($roles)) {
-            abort(403, 'Anda tidak memiliki hak akses.');
+        if (!$hasRole) {
+            abort(403, 'Anda tidak memiliki hak akses ke halaman ini.');
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN USER KE REQUEST
+        |--------------------------------------------------------------------------
+        */
+
+        $request->attributes->set('samperin_user', $user);
 
         return $next($request);
     }

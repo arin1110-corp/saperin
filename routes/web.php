@@ -4,19 +4,42 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\SamperinLoginController;
+use App\Http\Controllers\Admin\SamperinAdminController;
+use App\Http\Controllers\Kepeg\SamperinPegawaiImportController;
+use App\Http\Controllers\SamperinRoleController;
 use App\Models\SamperinUser;
 
 /*
 |--------------------------------------------------------------------------
-| LOGIN
+| SAMPERIN ROUTES
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', [SamperinLoginController::class, 'showLogin'])->name('samperin.login');
+/*
+|--------------------------------------------------------------------------
+| GUEST / LOGIN
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/login', [SamperinLoginController::class, 'showLogin'])->name('samperin.login');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [SamperinLoginController::class, 'showLogin'])->name('samperin.login');
 
-Route::post('/login', [SamperinLoginController::class, 'login'])->name('samperin.login.process');
+    Route::post('/login', [SamperinLoginController::class, 'login'])->name('samperin.login.process');
+});
+
+/*
+|--------------------------------------------------------------------------
+| ROOT
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', function () {
+    if (session()->has('samperin_user_id')) {
+        return redirect()->route('samperin.dashboard');
+    }
+
+    return redirect()->route('samperin.login');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -28,7 +51,7 @@ Route::post('/logout', [SamperinLoginController::class, 'logout'])->name('samper
 
 /*
 |--------------------------------------------------------------------------
-| AUTHENTICATED
+| USER LOGIN
 |--------------------------------------------------------------------------
 */
 
@@ -40,52 +63,32 @@ Route::middleware('samperin.auth')->group(function () {
     */
 
     Route::get('/dashboard', function () {
-        /*
-            |--------------------------------------------------------------------------
-            | USER ID
-            |--------------------------------------------------------------------------
-            */
-
         $userId = session('samperin_user_id');
-
-        /*
-            |--------------------------------------------------------------------------
-            | BELUM LOGIN
-            |--------------------------------------------------------------------------
-            */
 
         if (!$userId) {
             return redirect()->route('samperin.login');
         }
 
-        /*
-            |--------------------------------------------------------------------------
-            | CARI USER
-            |--------------------------------------------------------------------------
-            */
-
         $user = SamperinUser::find($userId);
-
-        /*
-            |--------------------------------------------------------------------------
-            | USER TIDAK DITEMUKAN
-            |--------------------------------------------------------------------------
-            */
 
         if (!$user) {
             session()->invalidate();
+
+            session()->regenerateToken();
 
             return redirect()->route('samperin.login');
         }
 
         /*
-            |--------------------------------------------------------------------------
-            | USER NONAKTIF
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | USER STATUS
+        |--------------------------------------------------------------------------
+        */
 
         if ((int) $user->user_status !== 1) {
             session()->invalidate();
+
+            session()->regenerateToken();
 
             return redirect()
                 ->route('samperin.login')
@@ -95,103 +98,10 @@ Route::middleware('samperin.auth')->group(function () {
         }
 
         /*
-            |--------------------------------------------------------------------------
-            | ADMIN
-            |--------------------------------------------------------------------------
-            |
-            | Kalau administrator mencoba membuka
-            | /dashboard, arahkan ke admin dashboard.
-            |
-            */
-
-        if (session('samperin_is_admin')) {
-            return redirect()->route('samperin.admin.dashboard');
-        }
-
-        /*
-            |--------------------------------------------------------------------------
-            | USER BIASA
-            |--------------------------------------------------------------------------
-            */
-
-        return view('dashboard-awal.index', compact('user'));
-    })->name('samperin.dashboard');
-
-    /*
-    |--------------------------------------------------------------------------
-    | ADMIN DASHBOARD
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/admin/dashboard', function () {
-        /*
-            |--------------------------------------------------------------------------
-            | USER ID
-            |--------------------------------------------------------------------------
-            */
-
-        $userId = session('samperin_user_id');
-
-        /*
-            |--------------------------------------------------------------------------
-            | BELUM LOGIN
-            |--------------------------------------------------------------------------
-            */
-
-        if (!$userId) {
-            return redirect()->route('samperin.login');
-        }
-
-        /*
-            |--------------------------------------------------------------------------
-            | CARI USER
-            |--------------------------------------------------------------------------
-            */
-
-        $user = SamperinUser::find($userId);
-
-        /*
-            |--------------------------------------------------------------------------
-            | USER TIDAK DITEMUKAN
-            |--------------------------------------------------------------------------
-            */
-
-        if (!$user) {
-            session()->invalidate();
-
-            return redirect()->route('samperin.login');
-        }
-
-        /*
-            |--------------------------------------------------------------------------
-            | USER NONAKTIF
-            |--------------------------------------------------------------------------
-            */
-
-        if ((int) $user->user_status !== 1) {
-            session()->invalidate();
-
-            return redirect()
-                ->route('samperin.login')
-                ->withErrors([
-                    'login' => 'Akun Anda sudah tidak aktif.',
-                ]);
-        }
-
-        /*
-            |--------------------------------------------------------------------------
-            | CEK ROLE ADMIN
-            |--------------------------------------------------------------------------
-            |
-            | Struktur database:
-            |
-            | samperin_user
-            |       ↓
-            | samperin_user_role
-            |       ↓
-            | samperin_role
-            |
-            */
+        |--------------------------------------------------------------------------
+        | CEK ROLE ADMIN
+        |--------------------------------------------------------------------------
+        */
 
         $isAdmin = DB::table('samperin_user_role')
 
@@ -205,44 +115,169 @@ Route::middleware('samperin.auth')->group(function () {
 
             ->exists();
 
-        /*
-            |--------------------------------------------------------------------------
-            | BUKAN ADMIN
-            |--------------------------------------------------------------------------
-            */
+        if ($isAdmin) {
+            if (!session()->has('active_role')) {
+                session([
+                    'active_role' => 'admin',
+                    'role_slug' => 'admin',
+                ]);
+            }
 
-        if (!$isAdmin) {
-            return redirect()->route('samperin.dashboard');
+            return redirect()->route('samperin.admin.dashboard');
         }
 
         /*
-            |--------------------------------------------------------------------------
-            | STATISTIK
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | CEK ROLE PEGAWAI
+        |--------------------------------------------------------------------------
+        */
 
-        $totalPegawai = SamperinUser::count();
+        $isPegawai = DB::table('samperin_user_role')
 
-        $pegawaiAktif = SamperinUser::where('user_status', 1)->count();
+            ->join('samperin_role', 'samperin_role.role_uid', '=', 'samperin_user_role.user_role_role_uid')
 
-        $pegawaiNonaktif = SamperinUser::where('user_status', '!=', 1)->count();
+            ->where('samperin_user_role.user_role_user_uid', $user->user_uid)
 
-        $pegawaiDenganEmail = SamperinUser::whereNotNull('user_email')->where('user_email', '!=', '')->count();
+            ->where('samperin_role.role_slug', 'pegawai')
+
+            ->where('samperin_role.role_status', 1)
+
+            ->exists();
+
+        if ($isPegawai) {
+            if (!session()->has('active_role')) {
+                session([
+                    'active_role' => 'pegawai',
+                    'role_slug' => 'pegawai',
+                ]);
+            }
+
+            return redirect()->route('kepeg.dashboard');
+        }
 
         /*
-            |--------------------------------------------------------------------------
-            | PEGAWAI TERBARU
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | DASHBOARD AWAL
+        |--------------------------------------------------------------------------
+        */
 
-        $pegawaiTerbaru = SamperinUser::query()->orderByDesc('user_id')->limit(8)->get();
+        return view('dashboard-awal.index', compact('user'));
+    })->name('samperin.dashboard');
 
+    /*
+    |--------------------------------------------------------------------------
+    | SWITCH ROLE
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post('/switch-role', [SamperinRoleController::class, 'switch'])->name('samperin.role.switch');
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('admin')
+        ->name('samperin.admin.')
+        ->middleware(['samperin.role:admin'])
+        ->group(function () {
         /*
             |--------------------------------------------------------------------------
             | DASHBOARD ADMIN
             |--------------------------------------------------------------------------
             */
 
-        return view('dashboard-admin.dashboard', compact('user', 'totalPegawai', 'pegawaiAktif', 'pegawaiNonaktif', 'pegawaiDenganEmail', 'pegawaiTerbaru'));
-    })->name('samperin.admin.dashboard');
+        Route::get('/dashboard', [SamperinAdminController::class, 'dashboard'])->name('dashboard');
+
+        /*
+            |--------------------------------------------------------------------------
+            | MANAJEMEN ROLE PEGAWAI
+            |--------------------------------------------------------------------------
+            */
+
+        Route::get('/role/pegawai', [SamperinAdminController::class, 'pegawai'])->name('pegawai');
+
+        /*
+            |--------------------------------------------------------------------------
+            | ALIAS MANAJEMEN ROLE
+            |--------------------------------------------------------------------------
+            |
+            | Digunakan oleh sidebar:
+            |
+            | route('samperin.admin.roles.index')
+            |
+            */
+
+        Route::get('/roles', [SamperinAdminController::class, 'pegawai'])->name('roles.index');
+
+        /*
+            |--------------------------------------------------------------------------
+            | TOGGLE ROLE PEGAWAI
+            |--------------------------------------------------------------------------
+            */
+
+        Route::patch('/role/pegawai/{userId}', [SamperinAdminController::class, 'togglePegawai'])->name('pegawai.toggle');
+        });
+
+    /*
+    |--------------------------------------------------------------------------
+    | KEPEGAWAIAN
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('kepeg')
+        ->name('kepeg.')
+        ->middleware(['samperin.role:admin,pegawai'])
+        ->group(function () {
+        /*
+            |--------------------------------------------------------------------------
+            | DASHBOARD KEPEGAWAIAN
+            |--------------------------------------------------------------------------
+            */
+
+        Route::get('/dashboard', function () {
+            $userId = session('samperin_user_id');
+
+            $user = SamperinUser::find($userId);
+
+            if (!$user) {
+                session()->invalidate();
+
+                session()->regenerateToken();
+
+                return redirect()->route('samperin.login');
+            }
+
+            /*
+                    |--------------------------------------------------------------------------
+                    | STATISTIK
+                    |--------------------------------------------------------------------------
+                    */
+
+            $totalPegawai = SamperinUser::count();
+
+            $pegawaiAktif = SamperinUser::where('user_status', 1)->count();
+
+            $pegawaiNonaktif = SamperinUser::where('user_status', 0)->count();
+
+            return view('dashboard-kepeg.dashboard', compact('user', 'totalPegawai', 'pegawaiAktif', 'pegawaiNonaktif'));
+        })->name('dashboard');
+
+        /*
+            |--------------------------------------------------------------------------
+            | IMPORT DATA PEGAWAI
+            |--------------------------------------------------------------------------
+            */
+
+        Route::get('/pegawai/import', [SamperinPegawaiImportController::class, 'index'])->name('pegawai.import');
+
+        /*
+            |--------------------------------------------------------------------------
+            | PROSES IMPORT
+            |--------------------------------------------------------------------------
+            */
+
+        Route::post('/pegawai/import', [SamperinPegawaiImportController::class, 'import'])->name('pegawai.import.process');
+        });
 });

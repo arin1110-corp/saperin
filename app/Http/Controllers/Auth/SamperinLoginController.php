@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\SamperinUser;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class SamperinLoginController extends Controller
@@ -18,6 +17,10 @@ class SamperinLoginController extends Controller
 
     public function showLogin()
     {
+        if (session()->has('samperin_user_id')) {
+            return redirect()->route('samperin.dashboard');
+        }
+
         return view('auth.login');
     }
 
@@ -37,12 +40,12 @@ class SamperinLoginController extends Controller
 
         $request->validate(
             [
-                'login' => ['required', 'string'],
+                'login' => 'required|string',
 
-                'password' => ['required', 'string'],
+                'password' => 'required|string',
             ],
             [
-                'login.required' => 'NIP, NIK, atau email wajib diisi.',
+                'login.required' => 'NIP atau email wajib diisi.',
 
                 'password.required' => 'Password wajib diisi.',
             ],
@@ -50,39 +53,23 @@ class SamperinLoginController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | DATA LOGIN
+        | INPUT
         |--------------------------------------------------------------------------
         */
 
         $login = trim($request->input('login'));
 
-        $password = $request->input('password');
-
         /*
         |--------------------------------------------------------------------------
         | CARI USER
         |--------------------------------------------------------------------------
-        |
-        | Login dapat menggunakan:
-        |
-        | - NIP
-        | - NIK
-        | - Email
-        |
         */
 
         $user = SamperinUser::query()
 
-            ->where('user_status', 1)
+            ->where('user_nip', $login)
 
-            ->where(function ($query) use ($login) {
-                $query
-                    ->where('user_nip', $login)
-
-                    ->orWhere('user_nik', $login)
-
-                    ->orWhere('user_email', $login);
-            })
+            ->orWhere('user_email', $login)
 
             ->first();
 
@@ -97,43 +84,43 @@ class SamperinLoginController extends Controller
                 ->withInput($request->only('login'))
 
                 ->withErrors([
-                    'login' => 'NIP, NIK, atau email tidak ditemukan.',
+                'login' => 'NIP/email atau password salah.',
                 ]);
         }
 
         /*
         |--------------------------------------------------------------------------
-        | PASSWORD BELUM ADA
+        | STATUS
         |--------------------------------------------------------------------------
         */
 
-        if (empty($user->user_password)) {
+        if ((int) $user->user_status !== 1) {
             return back()
                 ->withInput($request->only('login'))
 
                 ->withErrors([
-                    'password' => 'Akun ini belum memiliki password.',
+                'login' => 'Akun Anda sudah tidak aktif.',
                 ]);
         }
 
         /*
         |--------------------------------------------------------------------------
-        | CEK PASSWORD
+        | PASSWORD
         |--------------------------------------------------------------------------
         */
 
-        if (!Hash::check($password, $user->user_password)) {
+        if (!Hash::check($request->input('password'), $user->user_password)) {
             return back()
                 ->withInput($request->only('login'))
 
                 ->withErrors([
-                    'password' => 'Password yang Anda masukkan salah.',
+                'login' => 'NIP/email atau password salah.',
                 ]);
         }
 
         /*
         |--------------------------------------------------------------------------
-        | REGENERATE SESSION
+        | SESSION
         |--------------------------------------------------------------------------
         */
 
@@ -141,78 +128,23 @@ class SamperinLoginController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | SIMPAN USER KE SESSION
+        | SIMPAN USER ID
         |--------------------------------------------------------------------------
         */
 
         $request->session()->put('samperin_user_id', $user->user_id);
 
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN UID
+        |--------------------------------------------------------------------------
+        */
+
         $request->session()->put('samperin_user_uid', $user->user_uid);
 
         /*
         |--------------------------------------------------------------------------
-        | REMEMBER
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->boolean('remember')) {
-            $request->session()->put('samperin_remember', true);
-        } else {
-            $request->session()->forget('samperin_remember');
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK ROLE ADMINISTRATOR
-        |--------------------------------------------------------------------------
-        |
-        | Struktur:
-        |
-        | samperin_user
-        |       ↓
-        | samperin_user_role
-        |       ↓
-        | samperin_role
-        |
-        | Administrator:
-        |
-        | samperin_role.role_slug = admin
-        |
-        */
-
-        $isAdmin = DB::table('samperin_user_role')
-
-            ->join('samperin_role', 'samperin_role.role_uid', '=', 'samperin_user_role.user_role_role_uid')
-
-            ->where('samperin_user_role.user_role_user_uid', $user->user_uid)
-
-            ->where('samperin_role.role_slug', 'admin')
-
-            ->where('samperin_role.role_status', 1)
-
-            ->exists();
-
-        /*
-        |--------------------------------------------------------------------------
-        | SIMPAN STATUS ADMIN
-        |--------------------------------------------------------------------------
-        */
-
-        $request->session()->put('samperin_is_admin', $isAdmin);
-
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT ADMIN
-        |--------------------------------------------------------------------------
-        */
-
-        if ($isAdmin) {
-            return redirect()->route('samperin.admin.dashboard');
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT USER BIASA
+        | REDIRECT
         |--------------------------------------------------------------------------
         */
 
@@ -227,35 +159,9 @@ class SamperinLoginController extends Controller
 
     public function logout(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | HAPUS SESSION SAMPERIN
-        |--------------------------------------------------------------------------
-        */
-
-        $request->session()->forget(['samperin_user_id', 'samperin_user_uid', 'samperin_remember', 'samperin_is_admin']);
-
-        /*
-        |--------------------------------------------------------------------------
-        | INVALIDATE
-        |--------------------------------------------------------------------------
-        */
-
         $request->session()->invalidate();
 
-        /*
-        |--------------------------------------------------------------------------
-        | REGENERATE TOKEN
-        |--------------------------------------------------------------------------
-        */
-
         $request->session()->regenerateToken();
-
-        /*
-        |--------------------------------------------------------------------------
-        | KEMBALI KE LOGIN
-        |--------------------------------------------------------------------------
-        */
 
         return redirect()->route('samperin.login');
     }
