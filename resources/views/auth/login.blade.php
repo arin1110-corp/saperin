@@ -390,25 +390,16 @@
         */
 
         @media (min-width: 1024px) {
-
             body {
-
                 min-height: 100vh;
-
-                overflow: hidden;
-
+                overflow-y: auto;
+                overflow-x: hidden;
             }
-
 
             .login-wrapper {
-
-                height:
-                    calc(100vh - 24px);
-
-                max-height: 1000px;
-
+                min-height: calc(100vh - 24px);
+                max-height: none;
             }
-
         }
 
 
@@ -1117,8 +1108,7 @@
                 FORM
             ================================================== --}}
 
-                <form method="POST"
-                    action="{{ route('samperin.login.process') }}" class="mt-8">
+                <form method="POST" action="{{ route('samperin.login.process') }}" class="mt-8">
 
                     @csrf
 

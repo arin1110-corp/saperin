@@ -15,21 +15,9 @@ class SamperinRole extends Model
 
     protected $keyType = 'int';
 
-    /*
-    |--------------------------------------------------------------------------
-    | TIMESTAMP
-    |--------------------------------------------------------------------------
-    */
-
     public $timestamps = false;
 
-    /*
-    |--------------------------------------------------------------------------
-    | FILLABLE
-    |--------------------------------------------------------------------------
-    */
-
-    protected $fillable = ['role_id', 'role_uid', 'role_name', 'role_slug', 'role_status'];
+    protected $fillable = ['role_id', 'role_uid', 'role_nama', 'role_slug', 'role_status'];
 
     /*
     |--------------------------------------------------------------------------
@@ -42,18 +30,6 @@ class SamperinRole extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(
-            SamperinUser::class,
-
-            'samperin_user_role',
-
-            'user_role_role_uid',
-
-            'user_role_user_uid',
-
-            'role_uid',
-
-            'user_uid',
-        );
+        return $this->belongsToMany(SamperinUser::class, 'samperin_user_role', 'user_role_role_uid', 'user_role_user_uid', 'role_uid', 'user_uid');
     }
 }

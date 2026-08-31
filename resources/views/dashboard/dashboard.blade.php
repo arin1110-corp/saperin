@@ -1,18 +1,28 @@
 @extends('dashboard.layouts.app')
 
-@section('title', 'Dashboard Admin')
+@section('title', 'Dashboard')
 
-@section('breadcrumb', 'Administrator')
+@section('breadcrumb', 'Dashboard')
 
-@section('header-title', 'Administrasi Sistem')
+@section('header-title', 'Dashboard')
 
 
 @section('page-style')
 
     <style>
         /* =====================================================
-           HERO
-        ===================================================== */
+               DASHBOARD
+            ===================================================== */
+
+        .admin-content {
+            width: 100%;
+            min-width: 0;
+        }
+
+
+        /* =====================================================
+               HERO
+            ===================================================== */
 
         .admin-hero {
 
@@ -22,14 +32,14 @@
 
             min-height: 205px;
 
-            padding: 35px 38px;
+            padding: 32px 42px;
 
             border-radius: 17px;
 
             background:
                 linear-gradient(120deg,
-                    #14223b,
-                    #1d3355);
+                    #14223b 0%,
+                    #1d3355 100%);
 
             color: #fff;
 
@@ -56,6 +66,8 @@
             right: -95px;
             top: -140px;
 
+            pointer-events: none;
+
         }
 
 
@@ -73,33 +85,55 @@
             border:
                 27px solid rgba(255, 255, 255, .025);
 
-            right: 70px;
-            bottom: -140px;
+            right: 55px;
+            bottom: -145px;
+
+            pointer-events: none;
+
+        }
+
+
+        /* =====================================================
+               HERO LAYOUT
+            ===================================================== */
+
+        .admin-hero-layout {
+
+            position: relative;
+
+            z-index: 3;
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1fr) 315px;
+
+            gap: 30px;
+
+            align-items: center;
+
+            min-height: 140px;
 
         }
 
 
         .admin-hero-content {
 
-            position: relative;
-
-            z-index: 2;
-
-            max-width: 800px;
+            min-width: 0;
 
         }
 
 
         .admin-hero-label {
 
-            font-size: 10px;
+            font-size: 12px;
 
             text-transform: uppercase;
 
             letter-spacing: 1.5px;
 
             color:
-                rgba(255, 255, 255, .42);
+                rgba(255, 255, 255, .48);
 
         }
 
@@ -115,6 +149,14 @@
 
             letter-spacing: -1px;
 
+            font-weight: 800;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
         }
 
 
@@ -129,58 +171,178 @@
 
             margin: 0;
 
-            font-size: 13px;
+            max-width: 850px;
+
+            font-size: 15px;
 
             line-height: 1.75;
 
             color:
-                rgba(255, 255, 255, .58);
+                rgba(255, 255, 255, .64);
 
         }
 
 
+        /* =====================================================
+               HERO PROFILE
+            ===================================================== */
+
+        .admin-hero-profile {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: flex-end;
+
+            gap: 18px;
+
+            min-width: 0;
+
+        }
+
+
+        .admin-hero-avatar {
+
+            width: 88px;
+            height: 88px;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            overflow: hidden;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                #f5f6f8;
+
+            border:
+                3px solid #eb974e;
+
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, .18);
+
+            color: #b96a2d;
+
+            font-size: 27px;
+
+            font-weight: 800;
+
+        }
+
+
+        .admin-hero-avatar img {
+
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+
+        }
+
+
+        .admin-hero-profile-info {
+
+            min-width: 0;
+
+            max-width: 190px;
+
+        }
+
+
+        /* =====================================================
+               BADGE
+            ===================================================== */
+
         .admin-hero-badge {
 
-            position: absolute;
+            display: inline-flex;
 
-            right: 30px;
-            bottom: 29px;
+            align-items: center;
 
-            z-index: 3;
+            gap: 5px;
 
             padding:
-                9px 12px;
+                8px 11px;
 
             border-radius: 8px;
 
             background:
-                rgba(255, 255, 255, .08);
+                rgba(255, 255, 255, .09);
+
+            border:
+                1px solid rgba(255, 255, 255, .05);
 
             color:
-                rgba(255, 255, 255, .68);
+                rgba(255, 255, 255, .78);
 
-            font-size: 9px;
+            font-size: 11px;
+
+            white-space: nowrap;
+
+            margin-bottom: 9px;
 
         }
 
 
         .admin-hero-badge i {
 
-            color: #e9984e;
+            color: #eb974e;
+
+        }
+
+
+        .admin-hero-profile-name {
+
+            font-size: 15px;
+
+            font-weight: 800;
+
+            color: #fff;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+        }
+
+
+        .admin-hero-profile-nip {
+
+            margin-top: 5px;
+
+            font-size: 11px;
+
+            color:
+                rgba(255, 255, 255, .42);
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
 
         }
 
 
         /* =====================================================
-           STATS
-        ===================================================== */
+               STATS
+            ===================================================== */
 
         .admin-stats {
 
             display: grid;
 
             grid-template-columns:
-                repeat(4, 1fr);
+                repeat(4, minmax(0, 1fr));
 
             gap: 16px;
 
@@ -190,6 +352,8 @@
 
 
         .admin-stat {
+
+            min-width: 0;
 
             background: #fff;
 
@@ -270,7 +434,7 @@
 
         .admin-stat-label {
 
-            font-size: 9px;
+            font-size: 12px;
 
             color: #969eaa;
 
@@ -293,8 +457,8 @@
 
 
         /* =====================================================
-           GRID
-        ===================================================== */
+               GRID
+            ===================================================== */
 
         .admin-dashboard-grid {
 
@@ -311,6 +475,8 @@
 
 
         .admin-panel {
+
+            min-width: 0;
 
             background: #fff;
 
@@ -341,6 +507,8 @@
 
             justify-content: space-between;
 
+            gap: 15px;
+
         }
 
 
@@ -348,9 +516,11 @@
 
             margin: 0;
 
-            font-size: 15px;
+            font-size: 17px;
 
             font-weight: 750;
+
+            color: #182238;
 
         }
 
@@ -360,7 +530,7 @@
             margin:
                 5px 0 0;
 
-            font-size: 10px;
+            font-size: 12px;
 
             color: #969eaa;
 
@@ -369,18 +539,29 @@
 
         .admin-panel-link {
 
-            font-size: 9px;
+            flex-shrink: 0;
+
+            font-size: 11px;
 
             color: #c66d29;
 
             font-weight: 700;
 
+            text-decoration: none;
+
+        }
+
+
+        .admin-panel-link:hover {
+
+            color: #99501d;
+
         }
 
 
         /* =====================================================
-           EMPLOYEE
-        ===================================================== */
+               EMPLOYEE
+            ===================================================== */
 
         .admin-employee-list {
 
@@ -436,6 +617,18 @@
 
             flex-shrink: 0;
 
+            overflow: hidden;
+
+        }
+
+
+        .admin-employee-avatar img {
+
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+
         }
 
 
@@ -452,13 +645,15 @@
 
             display: block;
 
-            font-size: 12px;
+            font-size: 14px;
 
             white-space: nowrap;
 
             overflow: hidden;
 
             text-overflow: ellipsis;
+
+            color: #182238;
 
         }
 
@@ -471,7 +666,7 @@
 
             color: #969eaa;
 
-            font-size: 9px;
+            font-size: 11px;
 
         }
 
@@ -483,9 +678,11 @@
 
             border-radius: 6px;
 
-            font-size: 8px;
+            font-size: 10px;
 
             font-weight: 700;
+
+            flex-shrink: 0;
 
         }
 
@@ -509,8 +706,8 @@
 
 
         /* =====================================================
-           QUICK
-        ===================================================== */
+               QUICK
+            ===================================================== */
 
         .admin-quick {
 
@@ -538,6 +735,13 @@
 
             background: #fafbfc;
 
+            text-decoration: none;
+
+            transition:
+                background .15s ease,
+                border-color .15s ease,
+                transform .15s ease;
+
         }
 
 
@@ -553,6 +757,8 @@
             background: #fff9f4;
 
             border-color: #efd4bd;
+
+            transform: translateX(2px);
 
         }
 
@@ -576,12 +782,16 @@
 
             font-size: 16px;
 
+            flex-shrink: 0;
+
         }
 
 
         .admin-quick-text {
 
             flex: 1;
+
+            min-width: 0;
 
         }
 
@@ -590,7 +800,9 @@
 
             display: block;
 
-            font-size: 12px;
+            font-size: 14px;
+
+            color: #182238;
 
         }
 
@@ -601,9 +813,15 @@
 
             margin-top: 4px;
 
-            font-size: 9px;
+            font-size: 11px;
 
             color: #969eaa;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
 
         }
 
@@ -612,14 +830,16 @@
 
             color: #b2bac5;
 
-            font-size: 10px;
+            font-size: 11px;
+
+            flex-shrink: 0;
 
         }
 
 
         /* =====================================================
-           SYSTEM INFO
-        ===================================================== */
+               SYSTEM INFO
+            ===================================================== */
 
         .admin-info {
 
@@ -664,7 +884,7 @@
 
             display: block;
 
-            font-size: 12px;
+            font-size: 14px;
 
             color: #99501d;
 
@@ -676,7 +896,7 @@
             margin:
                 5px 0 0;
 
-            font-size: 9px;
+            font-size: 11px;
 
             line-height: 1.6;
 
@@ -686,17 +906,64 @@
 
 
         /* =====================================================
-           RESPONSIVE
-        ===================================================== */
+               EMPTY
+            ===================================================== */
 
-        @media (max-width: 1050px) {
+        .admin-empty {
+
+            padding: 40px 10px;
+
+            text-align: center;
+
+            color: #9aa2ae;
+
+            font-size: 12px;
+
+        }
+
+
+        .admin-empty i {
+
+            display: block;
+
+            font-size: 29px;
+
+            margin-bottom: 9px;
+
+        }
+
+
+        /* =====================================================
+               RESPONSIVE 1100
+            ===================================================== */
+
+        @media (max-width: 1100px) {
+
+            .admin-hero-layout {
+
+                grid-template-columns:
+                    minmax(0, 1fr) 280px;
+
+                gap: 20px;
+
+            }
+
+
+            .admin-hero {
+
+                padding-left: 30px;
+                padding-right: 30px;
+
+            }
+
 
             .admin-stats {
 
                 grid-template-columns:
-                    repeat(2, 1fr);
+                    repeat(2, minmax(0, 1fr));
 
             }
+
 
             .admin-dashboard-grid {
 
@@ -707,6 +974,62 @@
         }
 
 
+        /* =====================================================
+               TABLET
+            ===================================================== */
+
+        @media (max-width: 850px) {
+
+            .admin-hero-layout {
+
+                grid-template-columns: 1fr;
+
+                gap: 20px;
+
+            }
+
+
+            .admin-hero {
+
+                min-height: auto;
+
+                padding:
+                    27px 28px 28px;
+
+            }
+
+
+            .admin-hero h1 {
+
+                white-space: normal;
+
+                overflow: visible;
+
+                text-overflow: unset;
+
+            }
+
+
+            .admin-hero-profile {
+
+                justify-content: flex-start;
+
+            }
+
+
+            .admin-hero-profile-info {
+
+                max-width: 300px;
+
+            }
+
+        }
+
+
+        /* =====================================================
+               MOBILE
+            ===================================================== */
+
         @media (max-width: 600px) {
 
             .admin-stats {
@@ -715,31 +1038,106 @@
 
             }
 
+
             .admin-hero {
 
-                padding: 25px;
+                padding: 24px;
+
+                border-radius: 14px;
 
             }
+
 
             .admin-hero h1 {
 
-                font-size: 23px;
+                font-size: 24px;
+
+                letter-spacing: -.5px;
 
             }
+
 
             .admin-hero p {
 
-                font-size: 11px;
+                font-size: 13px;
+
+                line-height: 1.7;
 
             }
 
+
+            .admin-hero-profile {
+
+                gap: 13px;
+
+            }
+
+
+            .admin-hero-avatar {
+
+                width: 70px;
+                height: 70px;
+
+                font-size: 22px;
+
+            }
+
+
+            .admin-hero-profile-info {
+
+                max-width: calc(100% - 85px);
+
+            }
+
+
+            .admin-stat {
+
+                padding: 17px;
+
+            }
+
+
+            .admin-panel-header {
+
+                padding:
+                    17px;
+
+            }
+
+
+            .admin-employee-list {
+
+                padding-left: 17px;
+                padding-right: 17px;
+
+            }
+
+        }
+
+
+        /* =====================================================
+               VERY SMALL
+            ===================================================== */
+
+        @media (max-width: 400px) {
+
+            .admin-hero-profile-name {
+
+                font-size: 12px;
+
+            }
+
+
+            .admin-hero-profile-nip {
+
+                font-size: 10px;
+
+            }
+
+
             .admin-hero-badge {
 
-                position: static;
-
-                display: inline-block;
-
-                margin-top: 15px;
+                font-size: 10px;
 
             }
 
@@ -751,52 +1149,172 @@
 
 @section('content')
 
+    @php
+
+        /*
+        |--------------------------------------------------------------------------
+        | USER LOGIN
+        |--------------------------------------------------------------------------
+        */
+
+        $dashboardUser = $user ?? (session('user_info') ?? session('user'));
+
+        $dashboardNama = $dashboardUser->user_nama ?? 'Administrator';
+
+        $dashboardNip = $dashboardUser->user_nip ?? '-';
+
+        /*
+        |--------------------------------------------------------------------------
+        | FOTO USER
+        |--------------------------------------------------------------------------
+        */
+
+        $dashboardFoto = null;
+
+        if ($dashboardUser) {
+            try {
+                $foto = $dashboardUser->foto()->first();
+
+                if ($foto && !empty($foto->user_foto_file)) {
+                    $dashboardFoto = $foto->user_foto_file;
+                }
+            } catch (\Throwable $e) {
+                $dashboardFoto = null;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FOTO URL
+        |--------------------------------------------------------------------------
+        */
+
+        if ($dashboardFoto) {
+            if (str_starts_with($dashboardFoto, 'http://') || str_starts_with($dashboardFoto, 'https://')) {
+                $dashboardFotoUrl = $dashboardFoto;
+            } else {
+                $dashboardFotoUrl = asset(ltrim($dashboardFoto, '/'));
+            }
+        } else {
+            $dashboardFotoUrl = null;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | INITIAL
+        |--------------------------------------------------------------------------
+        */
+
+        $dashboardInitial = strtoupper(substr(trim($dashboardNama), 0, 1));
+
+    @endphp
+
+
     <div class="admin-content">
 
 
-        {{-- HERO --}}
+        {{-- =====================================================
+             HERO
+        ====================================================== --}}
 
         <section class="admin-hero">
 
 
-            <div class="admin-hero-content">
+            <div class="admin-hero-layout">
 
 
-                <div class="admin-hero-label">
+                {{-- =================================================
+                     HERO LEFT
+                ================================================== --}}
 
-                    SAMPERIN · ADMINISTRATOR
+                <div class="admin-hero-content">
+
+
+                    <div class="admin-hero-label">
+
+                        SAMPERIN · ADMINISTRATOR
+
+                    </div>
+
+
+                    <h1>
+
+                        Halo,
+
+                        <span>
+
+                            {{ $dashboardNama }}
+
+                        </span>
+
+                    </h1>
+
+
+                    <p>
+
+                        Kelola data pegawai, administrasi
+                        kepegawaian, dan sistem internal
+                        Dinas Kebudayaan Provinsi Bali
+                        dari satu dashboard.
+
+                    </p>
+
 
                 </div>
 
 
-                <h1>
 
-                    Halo,
+                {{-- =================================================
+                     HERO RIGHT
+                ================================================== --}}
 
-                    <span>
-
-                        {{ session('user_info')->user_nama ?? (session('user')->user_nama ?? 'Administrator') }}
-
-                    </span>
-
-                </h1>
+                <div class="admin-hero-profile">
 
 
-                <p>
+                    {{-- FOTO --}}
 
-                    Kelola data pegawai, administrasi
-                    kepegawaian, dan sistem internal
-                    Dinas Kebudayaan Provinsi Bali
-                    dari satu dashboard.
+                    <div class="admin-hero-avatar">
 
-                </p>
+                        @if ($dashboardFotoUrl)
+                            <img src="{{ $dashboardFotoUrl }}" alt="{{ $dashboardNama }}">
+                        @else
+                            {{ $dashboardInitial }}
+                        @endif
+
+                    </div>
 
 
-                <div class="admin-hero-badge">
 
-                    <i class="bi bi-shield-check"></i>
+                    {{-- INFO --}}
 
-                    Administrator Aktif
+                    <div class="admin-hero-profile-info">
+
+
+                        <div class="admin-hero-badge">
+
+                            <i class="bi bi-shield-check"></i>
+
+                            Administrator Aktif
+
+                        </div>
+
+
+                        <div class="admin-hero-profile-name">
+
+                            {{ $dashboardNama }}
+
+                        </div>
+
+
+                        <div class="admin-hero-profile-nip">
+
+                            NIP. {{ $dashboardNip }}
+
+                        </div>
+
+
+                    </div>
+
 
                 </div>
 
@@ -808,12 +1326,17 @@
 
 
 
-        {{-- STATS --}}
+        {{-- =====================================================
+             STATS
+        ====================================================== --}}
 
         <section class="admin-stats">
 
 
+            {{-- TOTAL PEGAWAI --}}
+
             <div class="admin-stat">
+
 
                 <div class="admin-stat-icon stat-orange">
 
@@ -825,7 +1348,9 @@
                 <div>
 
                     <div class="admin-stat-label">
+
                         Total Pegawai
+
                     </div>
 
 
@@ -837,11 +1362,15 @@
 
                 </div>
 
+
             </div>
 
 
 
+            {{-- PEGAWAI AKTIF --}}
+
             <div class="admin-stat">
+
 
                 <div class="admin-stat-icon stat-green">
 
@@ -853,7 +1382,9 @@
                 <div>
 
                     <div class="admin-stat-label">
+
                         Pegawai Aktif
+
                     </div>
 
 
@@ -865,11 +1396,15 @@
 
                 </div>
 
+
             </div>
 
 
 
+            {{-- PEGAWAI NONAKTIF --}}
+
             <div class="admin-stat">
+
 
                 <div class="admin-stat-icon stat-red">
 
@@ -881,7 +1416,9 @@
                 <div>
 
                     <div class="admin-stat-label">
+
                         Pegawai Nonaktif
+
                     </div>
 
 
@@ -893,9 +1430,12 @@
 
                 </div>
 
+
             </div>
 
 
+
+            {{-- PERSENTASE --}}
 
             @php
 
@@ -909,6 +1449,7 @@
 
             <div class="admin-stat">
 
+
                 <div class="admin-stat-icon stat-blue">
 
                     <i class="bi bi-graph-up-arrow"></i>
@@ -919,7 +1460,9 @@
                 <div>
 
                     <div class="admin-stat-label">
+
                         Persentase Aktif
+
                     </div>
 
 
@@ -931,6 +1474,7 @@
 
                 </div>
 
+
             </div>
 
 
@@ -938,12 +1482,16 @@
 
 
 
-        {{-- CONTENT GRID --}}
+        {{-- =====================================================
+             CONTENT GRID
+        ====================================================== --}}
 
         <section class="admin-dashboard-grid">
 
 
-            {{-- PEGAWAI TERBARU --}}
+            {{-- =================================================
+                 PEGAWAI TERBARU
+            ================================================== --}}
 
             <div class="admin-panel">
 
@@ -970,8 +1518,8 @@
                     </div>
 
 
-                    @if (\Illuminate\Support\Facades\Route::has('kepeg.dashboard'))
-                        <a href="{{ route('kepeg.dashboard') }}" class="admin-panel-link">
+                    @if (\Illuminate\Support\Facades\Route::has('kepeg.pegawai.index'))
+                        <a href="{{ route('kepeg.pegawai.index') }}" class="admin-panel-link">
 
                             Lihat Semua
 
@@ -989,12 +1537,39 @@
 
 
                     @forelse($pegawaiTerbaru ?? []
-                        as $pegawai)
+                            as $pegawai)
                         @php
 
                             $nama = $pegawai->user_nama ?? 'Tanpa Nama';
 
                             $initial = strtoupper(substr(trim($nama), 0, 1));
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | FOTO PEGAWAI
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $pegawaiFotoUrl = null;
+
+                            try {
+                                $pegawaiFoto = $pegawai->foto()->first();
+
+                                if ($pegawaiFoto && !empty($pegawaiFoto->user_foto_file)) {
+                                    $fotoFile = $pegawaiFoto->user_foto_file;
+
+                                    if (
+                                        str_starts_with($fotoFile, 'http://') ||
+                                        str_starts_with($fotoFile, 'https://')
+                                    ) {
+                                        $pegawaiFotoUrl = $fotoFile;
+                                    } else {
+                                        $pegawaiFotoUrl = asset(ltrim($fotoFile, '/'));
+                                    }
+                                }
+                            } catch (\Throwable $e) {
+                                $pegawaiFotoUrl = null;
+                            }
 
                         @endphp
 
@@ -1002,14 +1577,26 @@
                         <div class="admin-employee">
 
 
+                            {{-- FOTO / INITIAL --}}
+
                             <div class="admin-employee-avatar">
 
-                                {{ $initial }}
+
+                                @if ($pegawaiFotoUrl)
+                                    <img src="{{ $pegawaiFotoUrl }}" alt="{{ $nama }}">
+                                @else
+                                    {{ $initial }}
+                                @endif
+
 
                             </div>
 
 
+
+                            {{-- INFO --}}
+
                             <div class="admin-employee-info">
+
 
                                 <strong>
 
@@ -1025,15 +1612,19 @@
 
                                 </span>
 
+
                             </div>
 
+
+
+                            {{-- STATUS --}}
 
                             @if ((int) ($pegawai->user_status ?? 0) === 1)
                                 <span
                                     class="
-                                    employee-status
-                                    employee-active
-                                ">
+                                        employee-status
+                                        employee-active
+                                    ">
 
                                     Aktif
 
@@ -1041,9 +1632,9 @@
                             @else
                                 <span
                                     class="
-                                    employee-status
-                                    employee-inactive
-                                ">
+                                        employee-status
+                                        employee-inactive
+                                    ">
 
                                     Nonaktif
 
@@ -1057,20 +1648,9 @@
                     @empty
 
 
-                        <div
-                            style="
-                            padding:40px 10px;
-                            text-align:center;
-                            color:#9aa2ae;
-                            font-size:10px;
-                        ">
+                        <div class="admin-empty">
 
-                            <i class="bi bi-people"
-                                style="
-                                display:block;
-                                font-size:29px;
-                                margin-bottom:9px;
-                            "></i>
+                            <i class="bi bi-people"></i>
 
                             Belum ada data pegawai.
 
@@ -1085,36 +1665,52 @@
 
 
 
-            {{-- RIGHT COLUMN --}}
+            {{-- =================================================
+                 RIGHT COLUMN
+            ================================================== --}}
 
             <div>
 
+
+                {{-- =================================================
+                     AKSES CEPAT
+                ================================================== --}}
 
                 <div class="admin-panel">
 
 
                     <div class="admin-panel-header">
 
+
                         <div>
 
                             <h2 class="admin-panel-title">
+
                                 Akses Cepat
+
                             </h2>
 
+
                             <p class="admin-panel-description">
+
                                 Administrasi SAMPERIN
+
                             </p>
 
                         </div>
 
+
                     </div>
+
 
 
                     <div class="admin-quick">
 
 
-                        @if (\Illuminate\Support\Facades\Route::has('kepeg.dashboard'))
-                            <a href="{{ route('kepeg.dashboard') }}" class="admin-quick-link">
+                        {{-- DATA PEGAWAI --}}
+
+                        @if (\Illuminate\Support\Facades\Route::has('kepeg.pegawai.index'))
+                            <a href="{{ route('kepeg.pegawai.index') }}" class="admin-quick-link">
 
                                 <div class="admin-quick-icon">
 
@@ -1126,11 +1722,16 @@
                                 <div class="admin-quick-text">
 
                                     <strong>
+
                                         Data Pegawai
+
                                     </strong>
 
+
                                     <span>
+
                                         Kelola data pegawai
+
                                     </span>
 
                                 </div>
@@ -1138,15 +1739,17 @@
 
                                 <i
                                     class="
-                                    bi
-                                    bi-chevron-right
-                                    admin-quick-arrow
-                                "></i>
+                                        bi
+                                        bi-chevron-right
+                                        admin-quick-arrow
+                                    "></i>
 
                             </a>
                         @endif
 
 
+
+                        {{-- IMPORT DATA --}}
 
                         @if (\Illuminate\Support\Facades\Route::has('kepeg.pegawai.import'))
                             <a href="{{ route('kepeg.pegawai.import') }}" class="admin-quick-link">
@@ -1161,11 +1764,16 @@
                                 <div class="admin-quick-text">
 
                                     <strong>
+
                                         Import Data
+
                                     </strong>
 
+
                                     <span>
+
                                         Import master kepegawaian
+
                                     </span>
 
                                 </div>
@@ -1173,46 +1781,97 @@
 
                                 <i
                                     class="
-                                    bi
-                                    bi-chevron-right
-                                    admin-quick-arrow
-                                "></i>
+                                        bi
+                                        bi-chevron-right
+                                        admin-quick-arrow
+                                    "></i>
 
                             </a>
                         @endif
 
 
 
-                        <a href="#" class="admin-quick-link">
+                        {{-- BERKAS --}}
 
-                            <div class="admin-quick-icon">
+                        @if (\Illuminate\Support\Facades\Route::has('kepeg.berkas.index'))
+                            <a href="{{ route('kepeg.berkas.index') }}" class="admin-quick-link">
 
-                                <i class="bi bi-folder2-open"></i>
+                                <div class="admin-quick-icon">
 
-                            </div>
+                                    <i class="bi bi-folder2-open"></i>
 
-
-                            <div class="admin-quick-text">
-
-                                <strong>
-                                    Berkas Pegawai
-                                </strong>
-
-                                <span>
-                                    Kelola berkas internal
-                                </span>
-
-                            </div>
+                                </div>
 
 
-                            <i
-                                class="
-                                bi
-                                bi-chevron-right
-                                admin-quick-arrow
-                            "></i>
+                                <div class="admin-quick-text">
 
-                        </a>
+                                    <strong>
+
+                                        Berkas Pegawai
+
+                                    </strong>
+
+
+                                    <span>
+
+                                        Kelola berkas internal
+
+                                    </span>
+
+                                </div>
+
+
+                                <i
+                                    class="
+                                        bi
+                                        bi-chevron-right
+                                        admin-quick-arrow
+                                    "></i>
+
+                            </a>
+                        @endif
+
+
+
+                        {{-- ROLE --}}
+
+                        @if (isset($isAdmin) && $isAdmin && \Illuminate\Support\Facades\Route::has('samperin.admin.roles.index'))
+                            <a href="{{ route('samperin.admin.roles.index') }}" class="admin-quick-link">
+
+                                <div class="admin-quick-icon">
+
+                                    <i class="bi bi-person-gear"></i>
+
+                                </div>
+
+
+                                <div class="admin-quick-text">
+
+                                    <strong>
+
+                                        Role & Hak Akses
+
+                                    </strong>
+
+
+                                    <span>
+
+                                        Atur akses pengguna
+
+                                    </span>
+
+                                </div>
+
+
+                                <i
+                                    class="
+                                        bi
+                                        bi-chevron-right
+                                        admin-quick-arrow
+                                    "></i>
+
+                            </a>
+                        @endif
 
 
                     </div>
@@ -1222,24 +1881,36 @@
 
 
 
+                {{-- =================================================
+                     STATUS SISTEM
+                ================================================== --}}
+
                 <div class="admin-panel" style="margin-top:19px;">
 
 
                     <div class="admin-panel-header">
 
+
                         <div>
 
                             <h2 class="admin-panel-title">
+
                                 Status Sistem
+
                             </h2>
 
+
                             <p class="admin-panel-description">
+
                                 Informasi SAMPERIN
+
                             </p>
 
                         </div>
 
+
                     </div>
+
 
 
                     <div class="admin-info">
@@ -1261,9 +1932,9 @@
 
                         <p>
 
-                            Dashboard administrator
-                            SAMPERIN siap digunakan
-                            untuk pengelolaan data internal.
+                            Dashboard SAMPERIN siap digunakan
+                            untuk pengelolaan data internal
+                            Dinas Kebudayaan Provinsi Bali.
 
                         </p>
 

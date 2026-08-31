@@ -11,86 +11,71 @@
         @yield('title', 'SAMPERIN')
     </title>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         * {
             box-sizing: border-box;
         }
 
-        html,
         body {
             margin: 0;
-            padding: 0;
+            background: #f5f6f8;
+            color: #182238;
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
         }
 
-        body {
-            background: #f5f7fa;
-            color: #172238;
-            font-family: "Plus Jakarta Sans", Arial, sans-serif;
-            font-size: 15px;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font-family: inherit;
-        }
-
-        .admin-main {
+        .dashboard-main {
             margin-left: 255px;
             min-height: 100vh;
         }
 
-        .admin-content {
-            padding: 30px 32px 42px;
+        .dashboard-header {
+            height: 76px;
+            background: #fff;
+            border-bottom: 1px solid #e8ebef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
         }
 
-        .admin-alert {
-            margin: 20px 32px 0;
-            padding: 14px 17px;
-            border-radius: 10px;
-            font-size: 12px;
+        .dashboard-header-title {
+            font-size: 17px;
+            font-weight: 800;
         }
 
-        .admin-alert-success {
-            background: #edf9f1;
-            border: 1px solid #cfeeda;
-            color: #287448;
+        .dashboard-header-breadcrumb {
+            margin-top: 3px;
+            font-size: 10px;
+            color: #9aa2ae;
         }
 
-        .admin-alert-error {
-            background: #fff1f1;
-            border: 1px solid #f1d0d0;
-            color: #a74747;
+        .dashboard-content {
+            padding: 28px 30px 40px;
         }
 
-        @media (max-width: 850px) {
+        @media(max-width:850px) {
 
-            .admin-main {
+            .dashboard-main {
                 margin-left: 72px;
             }
 
-            .admin-content {
-                padding: 24px 20px 35px;
+            .dashboard-header {
+                padding: 0 20px;
             }
 
-            .admin-alert {
-                margin-left: 20px;
-                margin-right: 20px;
+            .dashboard-content {
+                padding: 20px;
             }
 
         }
@@ -104,37 +89,38 @@
 
     @include('dashboard.partials.sidebar')
 
-    <main class="admin-main">
+    <main class="dashboard-main">
 
-        @include('dashboard.partials.header')
+        <header class="dashboard-header">
 
-        @if (session('success'))
-            <div class="admin-alert admin-alert-success">
+            <div>
 
-                <i class="bi bi-check-circle-fill"></i>
+                <div class="dashboard-header-title">
 
-                &nbsp;
+                    @yield('header-title', 'SAMPERIN')
 
-                {{ session('success') }}
+                </div>
 
-            </div>
-        @endif
+                <div class="dashboard-header-breadcrumb">
 
-        @if (session('error'))
-            <div class="admin-alert admin-alert-error">
+                    @yield('breadcrumb', 'Dashboard')
 
-                <i class="bi bi-exclamation-circle-fill"></i>
-
-                &nbsp;
-
-                {{ session('error') }}
+                </div>
 
             </div>
-        @endif
 
-        @yield('content')
+        </header>
+
+
+        <div class="dashboard-content">
+
+            @yield('content')
+
+        </div>
 
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     @yield('page-script')
 
