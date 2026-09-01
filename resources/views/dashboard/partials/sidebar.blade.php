@@ -1532,8 +1532,6 @@
 
         </a>
 
-        
-
         <a href="{{ route('master.pendidikan.index') }}"
             class="admin-nav-link {{ request()->routeIs('master.pendidikan.*') ? 'active' : '' }}">
 
@@ -1541,6 +1539,17 @@
 
             <span>
                 Pendidikan
+            </span>
+
+        </a>
+
+        <a href="{{ route('master.jenis-kerja.index') }}"
+            class="admin-nav-link {{ request()->routeIs('master.jenis-kerja.*') ? 'active' : '' }}">
+
+            <i class="bi bi-briefcase-fill"></i>
+
+            <span>
+                Jenis Kerja
             </span>
 
         </a>

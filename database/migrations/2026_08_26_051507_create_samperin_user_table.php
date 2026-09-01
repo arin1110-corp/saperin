@@ -44,7 +44,7 @@ return new class extends Migration {
             /*
              * NIP unik.
              */
-            $table->string('user_nip', 50)->unique();
+            $table->string('user_nip', 50)->nullable()->unique();
 
             /*
              * NIK unik.
@@ -147,7 +147,7 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->string('user_norek_bpd', 100)->nullable();
+            $table->string('user_norek_bpd', 100)->nullable()->unique();
 
             /*
             |--------------------------------------------------------------------------
@@ -167,7 +167,7 @@ return new class extends Migration {
             |
             */
 
-            $table->unsignedTinyInteger('user_kelasjabatan')->default(0);
+            $table->string('user_kelasjabatan', 100)->nullable();
 
             /*
             |--------------------------------------------------------------------------
@@ -178,7 +178,7 @@ return new class extends Migration {
             |
             */
 
-            $table->unsignedTinyInteger('user_jmltanggungan')->default(0);
+            $table->integer('user_jmltanggungan')->default(0);
 
             /*
             |--------------------------------------------------------------------------
@@ -186,9 +186,9 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->string('user_email', 150)->nullable();
+            $table->string('user_email', 150)->nullable()->unique();
 
-            $table->string('user_notelp', 50)->nullable();
+            $table->string('user_notelp', 50)->nullable()->unique();
 
             $table->string('user_alamat', 255)->nullable();
 
