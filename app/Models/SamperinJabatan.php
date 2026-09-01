@@ -12,7 +12,18 @@ class SamperinJabatan extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['jabatan_uid', 'jabatan_kode', 'jabatan_nama', 'jabatan_status'];
+    protected $fillable = ['jabatan_id', 'jabatan_kode', 'jabatan_uid', 'jabatan_nama', 'jabatan_status', 'jabatan_kategori'];
+
+    protected $casts = [
+        'jabatan_id' => 'integer',
+        'jabatan_status' => 'integer',
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELASI PEGAWAI
+    |--------------------------------------------------------------------------
+    */
 
     public function users()
     {

@@ -1437,18 +1437,6 @@
         </div>
 
 
-        <a href="{{ route('kepeg.dashboard') }}"
-            class="admin-nav-link {{ request()->routeIs('kepeg.dashboard') ? 'active' : '' }}">
-
-            <i class="bi bi-person-vcard"></i>
-
-            <span>
-                Dashboard Kepegawaian
-            </span>
-
-        </a>
-
-
         <a href="{{ route('kepeg.pegawai.index') }}"
             class="admin-nav-link {{ request()->routeIs('kepeg.pegawai.*') ? 'active' : '' }}">
 
@@ -1540,6 +1528,19 @@
 
             <span>
                 Eselon
+            </span>
+
+        </a>
+
+        
+
+        <a href="{{ route('master.pendidikan.index') }}"
+            class="admin-nav-link {{ request()->routeIs('master.pendidikan.*') ? 'active' : '' }}">
+
+            <i class="bi bi-mortarboard-fill"></i>
+
+            <span>
+                Pendidikan
             </span>
 
         </a>

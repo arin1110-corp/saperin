@@ -18,7 +18,9 @@ return new class extends Migration
             $table->string('pendidikan_kode', 20)
                 ->unique();
 
-            $table->string('pendidikan_nama', 100);
+            $table->string('pendidikan_jenjang', 100);
+
+            $table->string('pendidikan_jurusan', 100);
 
             $table->tinyInteger('pendidikan_status')
                 ->default(1);

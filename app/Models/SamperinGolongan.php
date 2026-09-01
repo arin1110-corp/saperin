@@ -12,10 +12,12 @@ class SamperinGolongan extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['golongan_uid', 'golongan_kode', 'golongan_nama', 'golongan_status'];
+    protected $fillable = ['golongan_uid', 'golongan_kode', 'golongan_nama', 'golongan_pangkat', 'golongan_status'];
 
-    public function users()
-    {
-        return $this->hasMany(SamperinUser::class, 'user_golongan_id', 'golongan_id');
-    }
+    protected $casts = [
+        'golongan_id' => 'integer',
+        'golongan_status' => 'integer',
+        'golongan_created_at' => 'datetime',
+        'golongan_updated_at' => 'datetime',
+    ];
 }

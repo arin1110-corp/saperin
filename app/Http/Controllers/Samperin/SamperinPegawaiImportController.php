@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Kepeg;
+namespace App\Http\Controllers\Samperin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

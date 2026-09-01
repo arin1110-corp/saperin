@@ -20,6 +20,9 @@ return new class extends Migration
 
             $table->string('golongan_nama', 100);
 
+            $table->string('golongan_pangkat', 100)
+                ->nullable();
+
             $table->tinyInteger('golongan_status')
                 ->default(1);
 

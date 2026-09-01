@@ -12,10 +12,12 @@ class SamperinPendidikan extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['pendidikan_uid', 'pendidikan_kode', 'pendidikan_nama', 'pendidikan_status'];
+    protected $fillable = ['pendidikan_uid', 'pendidikan_kode', 'pendidikan_jenjang', 'pendidikan_jurusan', 'pendidikan_status'];
 
-    public function users()
-    {
-        return $this->hasMany(SamperinUser::class, 'user_pendidikan_id', 'pendidikan_id');
-    }
+    protected $casts = [
+        'pendidikan_id' => 'integer',
+        'pendidikan_status' => 'integer',
+        'pendidikan_created_at' => 'datetime',
+        'pendidikan_updated_at' => 'datetime',
+    ];
 }

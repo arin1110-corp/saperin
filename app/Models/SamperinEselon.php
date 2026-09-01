@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SamperinEselon extends Model
 {
+    use HasFactory;
+
     protected $table = 'samperin_eselon';
 
     protected $primaryKey = 'eselon_id';
@@ -14,8 +17,10 @@ class SamperinEselon extends Model
 
     protected $fillable = ['eselon_uid', 'eselon_kode', 'eselon_nama', 'eselon_status'];
 
-    public function users()
-    {
-        return $this->hasMany(SamperinUser::class, 'user_eselon_id', 'eselon_id');
-    }
+    protected $casts = [
+        'eselon_id' => 'integer',
+        'eselon_status' => 'integer',
+        'eselon_created_at' => 'datetime',
+        'eselon_updated_at' => 'datetime',
+    ];
 }

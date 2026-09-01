@@ -20,9 +20,6 @@ return new class extends Migration
 
             $table->string('bidang_nama', 150);
 
-            $table->unsignedBigInteger('bidang_parent_id')
-                ->nullable();
-
             $table->tinyInteger('bidang_status')
                 ->default(1);
 
@@ -32,13 +29,6 @@ return new class extends Migration
             $table->dateTime('bidang_updated_at')
                 ->useCurrent()
                 ->useCurrentOnUpdate();
-
-
-            $table->foreign('bidang_parent_id')
-                ->references('bidang_id')
-                ->on('samperin_bidang')
-                ->nullOnDelete();
-
         });
     }
 

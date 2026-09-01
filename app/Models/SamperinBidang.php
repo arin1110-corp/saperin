@@ -12,17 +12,12 @@ class SamperinBidang extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['bidang_uid', 'bidang_kode', 'bidang_nama', 'bidang_parent_id', 'bidang_status'];
+    protected $fillable = ['bidang_uid', 'bidang_kode', 'bidang_nama', 'bidang_status'];
 
-    public function parent()
-    {
-        return $this->belongsTo(self::class, 'bidang_parent_id', 'bidang_id');
-    }
-
-    public function children()
-    {
-        return $this->hasMany(self::class, 'bidang_parent_id', 'bidang_id');
-    }
+    protected $casts = [
+        'bidang_id' => 'integer',
+        'bidang_status' => 'integer',
+    ];
 
     public function users()
     {
