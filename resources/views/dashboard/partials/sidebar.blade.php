@@ -1566,7 +1566,44 @@
 
         </a>
 
+        <div class="admin-nav-label">
 
+            PENGATURAN
+
+        </div>
+
+        <a href="{{ route('pengaturan.index') }}"
+            class="admin-nav-link {{ request()->routeIs('pengaturan.index') ? 'active' : '' }}">
+
+            <i class="bi bi-sliders"></i>
+
+            <span>
+                Pengaturan Sistem
+            </span>
+
+        </a>
+
+        <a href="{{ route('pengaturan.api') }}"
+            class="admin-nav-link {{ request()->routeIs('pengaturan.api') ? 'active' : '' }}">
+
+            <i class="bi bi-key-fill"></i>
+
+            <span>
+                API Key
+            </span>
+
+        </a>
+
+        <a href="{{ route('pengaturan.folder') }}"
+            class="admin-nav-link {{ request()->routeIs('pengaturan.folder') ? 'active' : '' }}">
+
+            <i class="bi bi-folder-fill"></i>
+
+            <span>
+                Folder Berkas
+            </span>
+
+        </a>
 
         {{-- =================================================
              AKUN

@@ -154,6 +154,7 @@ class SamperinUserController extends Controller
     */
 
         $pegawais = $query
+            ->with('foto')
             ->orderBy('user_nama')
             ->paginate(10)
             ->withQueryString();

@@ -15,6 +15,8 @@ use App\Http\Controllers\Samperin\SamperinPenggunaController;
 use App\Http\Controllers\Samperin\SamperinKepegController;
 use App\Http\Controllers\Samperin\SamperinUserController;
 use App\Http\Controllers\Samperin\SamperinPegawaiImportController;
+use App\Http\Controllers\Samperin\SamperinPengaturanController;
+use App\Http\Controllers\Samperin\SamperinFotoImportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -165,51 +167,43 @@ Route::middleware('samperin.auth')->group(function () {
         Route::prefix('pegawai')
             ->name('pegawai.')
             ->group(function () {
-
-                /*
+            /*
         |--------------------------------------------------------------------------
         | DAFTAR PEGAWAI
         |--------------------------------------------------------------------------
         */
 
-                Route::get('/', [SamperinUserController::class, 'index'])
-                    ->name('index');
+            Route::get('/', [SamperinUserController::class, 'index'])->name('index');
 
-                /*
+            /*
         |--------------------------------------------------------------------------
         | TAMBAH PEGAWAI
         |--------------------------------------------------------------------------
         */
 
-                Route::post('/', [SamperinUserController::class, 'store'])
-                    ->name('store');
+            Route::post('/', [SamperinUserController::class, 'store'])->name('store');
 
-                /*
+            /*
         |--------------------------------------------------------------------------
         | IMPORT PEGAWAI
         |--------------------------------------------------------------------------
         */
 
-                Route::get('/import', [SamperinUserController::class, 'import'])
-                    ->name('import');
+            Route::get('/import', [SamperinUserController::class, 'import'])->name('import');
 
-                /*
+            /*
         |--------------------------------------------------------------------------
         | PROSES IMPORT
         |--------------------------------------------------------------------------
         */
 
-                Route::post('/import', [SamperinUserController::class, 'importProcess'])
-                    ->name('import.process');
+            Route::post('/import', [SamperinUserController::class, 'importProcess'])->name('import.process');
 
-                /*
+            /*
         |--------------------------------------------------------------------------
         | DETAIL PEGAWAI
         |--------------------------------------------------------------------------
         */
-
-                Route::get('/{uid}', [SamperinUserController::class, 'show'])
-                    ->name('show');
 
             /*
         |--------------------------------------------------------------------------
@@ -217,8 +211,7 @@ Route::middleware('samperin.auth')->group(function () {
         |--------------------------------------------------------------------------
         */
 
-            Route::put('/{uid}', [SamperinUserController::class, 'update'])
-                ->name('update');
+            Route::put('/{uid}', [SamperinUserController::class, 'update'])->name('update');
 
             /*
         |--------------------------------------------------------------------------
@@ -226,19 +219,25 @@ Route::middleware('samperin.auth')->group(function () {
         |--------------------------------------------------------------------------
         */
 
-            Route::patch('/{uid}/status', [SamperinUserController::class, 'toggleStatus'])
-                    ->name('status');
+            Route::patch('/{uid}/status', [SamperinUserController::class, 'toggleStatus'])->name('status');
 
-                /*
+            /*
         |--------------------------------------------------------------------------
         | HAPUS PEGAWAI
         |--------------------------------------------------------------------------
         */
 
-                Route::delete('/{uid}', [SamperinUserController::class, 'destroy'])
-                    ->name('destroy');
-            });
+            Route::delete('/{uid}', [SamperinUserController::class, 'destroy'])->name('destroy');
 
+            /*
+        |--------------------------------------------------------------------------
+        | IMPORT FOTO PEGAWAI
+        |--------------------------------------------------------------------------
+        */
+            Route::get('/import-foto', [SamperinFotoImportController::class, 'index'])->name('import-foto');
+
+            Route::post('/import-foto', [SamperinFotoImportController::class, 'import'])->name('import-foto.process');
+            });
         /*
         |--------------------------------------------------------------------------
         | BERKAS PEGAWAI
@@ -422,11 +421,11 @@ Route::middleware('samperin.auth')->group(function () {
             ->group(function () {
                 Route::get('/', [SamperinJenisKerjaController::class, 'index'])->name('index');
 
-                Route::post('/', [SamperinJenisKerjaController::class, 'store'])->name('store');
+            Route::post('/', [SamperinJenisKerjaController::class, 'store'])->name('store');
 
-                Route::put('/{uid}', [SamperinJenisKerjaController::class, 'update'])->name('update');
+            Route::put('/{uid}', [SamperinJenisKerjaController::class, 'update'])->name('update');
 
-                Route::patch('/{uid}/status', [SamperinJenisKerjaController::class, 'toggleStatus'])->name('status');
+            Route::patch('/{uid}/status', [SamperinJenisKerjaController::class, 'toggleStatus'])->name('status');
 
                 Route::delete('/{uid}', [SamperinJenisKerjaController::class, 'destroy'])->name('destroy');
             });
@@ -440,6 +439,43 @@ Route::middleware('samperin.auth')->group(function () {
         Route::get('/status-pegawai', function () {
                 return view('dashboard.master.status-pegawai');
             })->name('status-pegawai.index');
+        });
+
+    /*
+    |--------------------------------------------------------------------------
+    | PENGATURAN
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('pengaturan')
+        ->name('pengaturan.')
+        ->group(function () {
+            // Pengaturan Sistem
+            Route::get('/', [SamperinPengaturanController::class, 'index'])->name('index');
+
+            Route::post('/store', [SamperinPengaturanController::class, 'pengaturanStore'])->name('store');
+
+            Route::put('/{uid}', [SamperinPengaturanController::class, 'pengaturanUpdate'])->name('update');
+
+            Route::delete('/{uid}', [SamperinPengaturanController::class, 'pengaturanDelete'])->name('delete');
+
+            // Setting API
+            Route::get('/api', [SamperinPengaturanController::class, 'api'])->name('api');
+
+            Route::post('/api/store', [SamperinPengaturanController::class, 'apiStore'])->name('api.store');
+
+            Route::put('/api/{uid}', [SamperinPengaturanController::class, 'apiUpdate'])->name('api.update');
+
+            Route::delete('/api/{uid}', [SamperinPengaturanController::class, 'apiDelete'])->name('api.delete');
+
+            // Setting Folder
+            Route::get('/folder', [SamperinPengaturanController::class, 'folder'])->name('folder');
+
+            Route::post('/folder/store', [SamperinPengaturanController::class, 'folderStore'])->name('folder.store');
+
+            Route::put('/folder/{uid}', [SamperinPengaturanController::class, 'folderUpdate'])->name('folder.update');
+
+            Route::delete('/folder/{uid}', [SamperinPengaturanController::class, 'folderDelete'])->name('folder.delete');
         });
 
     /*
