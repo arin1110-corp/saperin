@@ -14,8 +14,8 @@
         }
 
         /* =========================================================
-           HEADER
-        ========================================================= */
+                                   HEADER
+                                ========================================================= */
 
         .pegawai-header {
             display: flex;
@@ -87,8 +87,60 @@
         }
 
         /* =========================================================
-           STATISTIK
-        ========================================================= */
+                                   IMPORT FOTO
+                                ========================================================= */
+        .col-foto {
+            width: 70px;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .pegawai-thumbnail {
+            width: 46px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 7px;
+            display: block;
+        }
+
+        .pegawai-thumbnail-empty {
+            width: 46px;
+            height: 56px;
+            border-radius: 7px;
+            background: #eef1f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a5adb8;
+            font-size: 20px;
+        }
+
+        .foto-preview {
+            width: 100px;
+            height: 125px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+            margin: 20px 24px 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .foto-preview-empty {
+            width: 100px;
+            height: 125px;
+            border-radius: 8px;
+            background: #f1f3f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 24px 10px;
+            color: #9aa2ae;
+            font-size: 28px;
+        }
+
+        /* =========================================================
+                                   STATISTIK
+                                ========================================================= */
 
         .pegawai-stat-grid {
             display: grid;
@@ -134,8 +186,8 @@
         }
 
         /* =========================================================
-           PANEL
-        ========================================================= */
+                                   PANEL
+                                ========================================================= */
 
         .pegawai-panel {
             background: #fff;
@@ -205,8 +257,8 @@
 
 
         /* =========================================================
-           STATISTIK DISTRIBUSI
-        ========================================================= */
+                                   STATISTIK DISTRIBUSI
+                                ========================================================= */
 
         .pegawai-distribution-panel {
             background: #fff;
@@ -354,8 +406,8 @@
         }
 
         /* =========================================================
-           TABLE
-        ========================================================= */
+                                   TABLE
+                                ========================================================= */
 
         .pegawai-table-wrapper {
             width: 100%;
@@ -450,8 +502,8 @@
         }
 
         /* =========================================================
-           ACTION
-        ========================================================= */
+                                   ACTION
+                                ========================================================= */
 
         .pegawai-actions {
             display: flex;
@@ -493,8 +545,8 @@
         }
 
         /* =========================================================
-           EMPTY
-        ========================================================= */
+                                   EMPTY
+                                ========================================================= */
 
         .pegawai-empty {
             padding: 55px 20px;
@@ -527,8 +579,8 @@
         }
 
         /* =========================================================
-           PAGINATION
-        ========================================================= */
+                                   PAGINATION
+                                ========================================================= */
 
         .pegawai-pagination {
             padding: 15px 18px;
@@ -588,8 +640,8 @@
         }
 
         /* =========================================================
-           MODAL
-        ========================================================= */
+                                   MODAL
+                                ========================================================= */
 
         .pegawai-modal .modal-content {
             border: 0;
@@ -633,8 +685,8 @@
         }
 
         /* =========================================================
-           FORM
-        ========================================================= */
+                                   FORM
+                                ========================================================= */
 
         .pegawai-form-label {
             display: block;
@@ -661,10 +713,10 @@
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | FIX COMBO BOX
-        |--------------------------------------------------------------------------
-        */
+                                |--------------------------------------------------------------------------
+                                | FIX COMBO BOX
+                                |--------------------------------------------------------------------------
+                                */
 
         select.pegawai-form-control {
             height: 42px;
@@ -879,6 +931,14 @@
 
                 </a>
 
+                <a href="{{ route('kepeg.pegawai.import-foto') }}" class="pegawai-import-button">
+
+                    <i class="bi bi-upload"></i>
+
+                    Import Foto
+
+                </a>
+
             </div>
 
         </div>
@@ -1028,14 +1088,12 @@
                 <div class="pegawai-distribution-list">
 
                     @forelse ($statJenisKerja ?? [] as $stat)
-
                         <a href="{{ route('kepeg.pegawai.index', [
                             'status' => 1,
                             'jenis_kerja' => $stat->jenis_kerja_id,
                             'tab' => 'jenis-kerja',
                         ]) }}"
-                            class="pegawai-distribution-card"
-                            style="text-decoration: none; color: inherit;">
+                            class="pegawai-distribution-card" style="text-decoration: none; color: inherit;">
 
                             <div class="pegawai-distribution-name">
                                 {{ $stat->jenis_kerja_nama }}
@@ -1066,7 +1124,6 @@
                         <div class="pegawai-distribution-empty">
                             Belum ada data jenis kerja aktif.
                         </div>
-
                     @endforelse
 
                 </div>
@@ -1084,14 +1141,12 @@
                 <div class="pegawai-distribution-list">
 
                     @forelse ($statBidang ?? [] as $stat)
-
                         <a href="{{ route('kepeg.pegawai.index', [
                             'status' => 1,
                             'bidang' => $stat->bidang_id,
                             'tab' => 'bidang',
                         ]) }}"
-                            class="pegawai-distribution-card"
-                            style="text-decoration: none; color: inherit;">
+                            class="pegawai-distribution-card" style="text-decoration: none; color: inherit;">
 
                             <div class="pegawai-distribution-name">
                                 {{ $stat->bidang_nama }}
@@ -1122,7 +1177,6 @@
                         <div class="pegawai-distribution-empty">
                             Belum ada data bidang aktif.
                         </div>
-
                     @endforelse
 
                 </div>
@@ -1144,20 +1198,16 @@
 
                 <div class="pegawai-distribution-list">
 
-                    @foreach (($statLokasi ?? []) as $stat)
-
+                    @foreach ($statLokasi ?? [] as $stat)
                         @if (
-                            !str_starts_with(strtolower(trim($stat->user_lokasikerja)), 'kabupaten ')
-                            && !str_starts_with(strtolower(trim($stat->user_lokasikerja)), 'kota ')
-                        )
-
+                            !str_starts_with(strtolower(trim($stat->user_lokasikerja)), 'kabupaten ') &&
+                                !str_starts_with(strtolower(trim($stat->user_lokasikerja)), 'kota '))
                             <a href="{{ route('kepeg.pegawai.index', [
                                 'status' => 1,
                                 'lokasi_kerja' => $stat->user_lokasikerja,
                                 'tab' => 'lokasi',
                             ]) }}"
-                                class="pegawai-distribution-card"
-                                style="text-decoration:none;color:inherit;">
+                                class="pegawai-distribution-card" style="text-decoration:none;color:inherit;">
 
                                 <div class="pegawai-distribution-name">
                                     {{ $stat->user_lokasikerja }}
@@ -1182,9 +1232,7 @@
                                 </div>
 
                             </a>
-
                         @endif
-
                     @endforeach
 
                 </div>
@@ -1197,20 +1245,15 @@
 
                 <div class="pegawai-distribution-list">
 
-                    @foreach (($statLokasi ?? []) as $stat)
-
-                        @if (
-                            str_starts_with(strtolower(trim($stat->user_lokasikerja)), 'kabupaten ')
-                            || str_starts_with(strtolower(trim($stat->user_lokasikerja)), 'kota ')
-                        )
-
+                    @foreach ($statLokasi ?? [] as $stat)
+                        @if (str_starts_with(strtolower(trim($stat->user_lokasikerja)), 'kabupaten ') ||
+                                str_starts_with(strtolower(trim($stat->user_lokasikerja)), 'kota '))
                             <a href="{{ route('kepeg.pegawai.index', [
                                 'status' => 1,
                                 'lokasi_kerja' => $stat->user_lokasikerja,
                                 'tab' => 'lokasi',
                             ]) }}"
-                                class="pegawai-distribution-card"
-                                style="text-decoration:none;color:inherit;">
+                                class="pegawai-distribution-card" style="text-decoration:none;color:inherit;">
 
                                 <div class="pegawai-distribution-name">
                                     {{ $stat->user_lokasikerja }}
@@ -1235,9 +1278,7 @@
                                 </div>
 
                             </a>
-
                         @endif
-
                     @endforeach
 
                 </div>
@@ -1300,6 +1341,7 @@
                     <thead>
 
                         <tr>
+                            <th class="col-foto"></th>
 
                             <th>
                                 PEGAWAI
@@ -1338,6 +1380,18 @@
 
                         @forelse ($pegawais as $pegawai)
                             <tr>
+
+                                {{-- FOTO --}}
+                                <td class="col-foto">
+                                    @if ($pegawai->foto?->thumbnail_url)
+                                        <img src="{{ $pegawai->foto->thumbnail_url }}"
+                                            alt="Foto {{ $pegawai->user_nama }}" class="pegawai-thumbnail">
+                                    @else
+                                        <div class="pegawai-thumbnail-empty">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                    @endif
+                                </td>
 
                                 <td>
 
@@ -2120,9 +2174,74 @@
                                 Lokasi Kerja
                             </label>
 
-                            <input type="text" name="user_lokasikerja" class="pegawai-form-control"
-                                value="{{ old('user_lokasikerja') }}"
-                                placeholder="Contoh: Dinas Kebudayaan Provinsi Bali">
+                            <select name="user_lokasikerja" class="pegawai-form-control">
+                                <option value="">-- Pilih Lokasi Kerja --</option>
+
+                                <option value="Kantor Dinas Kebudayaan Provinsi Bali"
+                                    {{ old('user_lokasikerja') == 'Kantor Dinas Kebudayaan Provinsi Bali' ? 'selected' : '' }}>
+                                    Kantor Dinas Kebudayaan Provinsi Bali
+                                </option>
+
+                                <option value="UPTD Museum Bali"
+                                    {{ old('user_lokasikerja') == 'UPTD Museum Bali' ? 'selected' : '' }}>
+                                    Kantor UPTD Museum Bali
+                                </option>
+
+                                <option value="UPTD Taman Budaya Provinsi Bali"
+                                    {{ old('user_lokasikerja') == 'UPTD Taman Budaya Provinsi Bali' ? 'selected' : '' }}>
+                                    Kantor UPTD Taman Budaya Provinsi Bali
+                                </option>
+
+                                <option value="UPTD Monumen Perjuangan Rakyat Bali"
+                                    {{ old('user_lokasikerja') == 'UPTD Monumen Perjuangan Rakyat Bali' ? 'selected' : '' }}>
+                                    Kantor UPTD Monumen Perjuangan Rakyat Bali
+                                </option>
+
+                                <option value="Kota Denpasar"
+                                    {{ old('user_lokasikerja') == 'Kota Denpasar' ? 'selected' : '' }}>
+                                    Kota Denpasar
+                                </option>
+
+                                <option value="Kabupaten Badung"
+                                    {{ old('user_lokasikerja') == 'Kabupaten Badung' ? 'selected' : '' }}>
+                                    Kabupaten Badung
+                                </option>
+
+                                <option value="Kabupaten Bangli"
+                                    {{ old('user_lokasikerja') == 'Kabupaten Bangli' ? 'selected' : '' }}>
+                                    Kabupaten Bangli
+                                </option>
+
+                                <option value="Kabupaten Buleleng"
+                                    {{ old('user_lokasikerja') == 'Kabupaten Buleleng' ? 'selected' : '' }}>
+                                    Kabupaten Buleleng
+                                </option>
+
+                                <option value="Kabupaten Gianyar"
+                                    {{ old('user_lokasikerja') == 'Kabupaten Gianyar' ? 'selected' : '' }}>
+                                    Kabupaten Gianyar
+                                </option>
+
+                                <option value="Kabupaten Jembrana"
+                                    {{ old('user_lokasikerja') == 'Kabupaten Jembrana' ? 'selected' : '' }}>
+                                    Kabupaten Jembrana
+                                </option>
+
+                                <option value="Kabupaten Karangasem"
+                                    {{ old('user_lokasikerja') == 'Kabupaten Karangasem' ? 'selected' : '' }}>
+                                    Kabupaten Karangasem
+                                </option>
+
+                                <option value="Kabupaten Klungkung"
+                                    {{ old('user_lokasikerja') == 'Kabupaten Klungkung' ? 'selected' : '' }}>
+                                    Kabupaten Klungkung
+                                </option>
+
+                                <option value="Kabupaten Tabanan"
+                                    {{ old('user_lokasikerja') == 'Kabupaten Tabanan' ? 'selected' : '' }}>
+                                    Kabupaten Tabanan
+                                </option>
+                            </select>
 
                         </div>
 
@@ -2250,6 +2369,15 @@
                             </button>
 
                         </div>
+
+                        @if ($pegawai->foto?->thumbnail_url)
+                            <img src="{{ $pegawai->foto->thumbnail_url }}" alt="Foto {{ $pegawai->user_nama }}"
+                                class="foto-preview">
+                        @else
+                            <div class="foto-preview-empty">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        @endif
 
 
                         <div class="modal-body">
@@ -2719,8 +2847,74 @@
                                     Lokasi Kerja
                                 </label>
 
-                                <input type="text" name="user_lokasikerja" class="pegawai-form-control"
-                                    value="{{ $pegawai->user_lokasikerja }}">
+                                <select name="user_lokasikerja" class="pegawai-form-control">
+                                    <option value="">-- Pilih Lokasi Kerja --</option>
+
+                                    <option value="Kantor Dinas Kebudayaan Provinsi Bali"
+                                        {{ $pegawai->user_lokasikerja == 'Kantor Dinas Kebudayaan Provinsi Bali' ? 'selected' : '' }}>
+                                        Kantor Dinas Kebudayaan Provinsi Bali
+                                    </option>
+
+                                    <option value="Kantor UPTD Taman Budaya"
+                                        {{ $pegawai->user_lokasikerja == 'Kantor UPTD Taman Budaya' ? 'selected' : '' }}>
+                                        Kantor UPTD Taman Budaya Provinsi Bali
+                                    </option>
+
+                                    <option value="Kantor UPTD Museum Bali"
+                                        {{ $pegawai->user_lokasikerja == 'Kantor UPTD Museum Bali' ? 'selected' : '' }}>
+                                        Kantor UPTD Museum Bali
+                                    </option>
+
+                                    <option value="Kantor UPTD Monumen Perjuangan Rakyat Bali"
+                                        {{ $pegawai->user_lokasikerja == 'Kantor UPTD Monumen Perjuangan Rakyat Bali' ? 'selected' : '' }}>
+                                        Kantor UPTD Monumen Perjuangan Rakyat Bali
+                                    </option>
+
+                                    <option value="Kota Denpasar"
+                                        {{ $pegawai->user_lokasikerja == 'Kota Denpasar' ? 'selected' : '' }}>
+                                        Kota Denpasar
+                                    </option>
+
+                                    <option value="Kabupaten Badung"
+                                        {{ $pegawai->user_lokasikerja == 'Kabupaten Badung' ? 'selected' : '' }}>
+                                        Kabupaten Badung
+                                    </option>
+
+                                    <option value="Kabupaten Bangli"
+                                        {{ $pegawai->user_lokasikerja == 'Kabupaten Bangli' ? 'selected' : '' }}>
+                                        Kabupaten Bangli
+                                    </option>
+
+                                    <option value="Kabupaten Buleleng"
+                                        {{ $pegawai->user_lokasikerja == 'Kabupaten Buleleng' ? 'selected' : '' }}>
+                                        Kabupaten Buleleng
+                                    </option>
+
+                                    <option value="Kabupaten Gianyar"
+                                        {{ $pegawai->user_lokasikerja == 'Kabupaten Gianyar' ? 'selected' : '' }}>
+                                        Kabupaten Gianyar
+                                    </option>
+
+                                    <option value="Kabupaten Jembrana"
+                                        {{ $pegawai->user_lokasikerja == 'Kabupaten Jembrana' ? 'selected' : '' }}>
+                                        Kabupaten Jembrana
+                                    </option>
+
+                                    <option value="Kabupaten Karangasem"
+                                        {{ $pegawai->user_lokasikerja == 'Kabupaten Karangasem' ? 'selected' : '' }}>
+                                        Kabupaten Karangasem
+                                    </option>
+
+                                    <option value="Kabupaten Klungkung"
+                                        {{ $pegawai->user_lokasikerja == 'Kabupaten Klungkung' ? 'selected' : '' }}>
+                                        Kabupaten Klungkung
+                                    </option>
+
+                                    <option value="Kabupaten Tabanan"
+                                        {{ $pegawai->user_lokasikerja == 'Kabupaten Tabanan' ? 'selected' : '' }}>
+                                        Kabupaten Tabanan
+                                    </option>
+                                </select>
 
                             </div>
 
