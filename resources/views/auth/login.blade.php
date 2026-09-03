@@ -7,10 +7,11 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Masuk - SAMPERIN</title>
+    <title>SAMPERIN</title>
 
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="{{ asset('assets/images/logo-samperin.png') }}">
 
 
     <script>
@@ -526,10 +527,19 @@
 
 
                 {{-- BRAND --}}
-
                 <div>
 
                     <div class="samperin-brand">
+
+                        <span class="samperin-s">
+                            <img src="{{ asset('assets/images/logo-samperin.png') }}"
+                                alt="Logo SAMPERIN"
+                                class="
+                                inline-block
+                                h-[100px]
+                                w-[100px]
+                                object-contain
+                        </span>
 
                         <span class="samperin-normal">
                             SAMPER
@@ -1034,8 +1044,8 @@
                         p-3
                     ">
 
-                        <img src="{{ asset('assets/images/lambang-pemprov.png') }}"
-                            alt="Lambang Pemerintah Provinsi Bali"
+                        <img src="{{ asset('assets/images/logo-samperin.png') }}"
+                            alt="Logo SAMPERIN"
                             class="
                             h-full
                             w-full

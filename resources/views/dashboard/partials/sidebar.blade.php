@@ -1260,7 +1260,7 @@
 
         <div class="admin-brand-logo">
 
-            <img src="{{ asset('assets/images/lambang-pemprov.png') }}" alt="Pemprov Bali">
+            <img src="{{ asset('assets/images/logo-samperin.png') }}" alt="Logo SAMPERIN">
 
         </div>
 
