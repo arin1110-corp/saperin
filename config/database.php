@@ -64,6 +64,22 @@ return [
             ]) : [],
         ],
 
+        'sadarin' => [
+            'driver' => 'mysql',
+            'host' => env('SADARIN_DB_HOST', '127.0.0.1'),
+            'port' => env('SADARIN_DB_PORT', '3306'),
+            'database' => env('SADARIN_DB_DATABASE', 'sadarin'),
+            'username' => env('SADARIN_DB_USERNAME', 'root'),
+            'password' => env('SADARIN_DB_PASSWORD', ''),
+            'unix_socket' => env('SADARIN_DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

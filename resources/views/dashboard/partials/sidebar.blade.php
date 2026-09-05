@@ -11,10 +11,6 @@
     |--------------------------------------------------------------------------
     | ROLE AKTIF
     |--------------------------------------------------------------------------
-    |
-    | Sumber utama adalah session yang dibuat oleh
-    | SamperinLoginController dan SamperinAdminController.
-    |
     */
 
     $activeRoleUid = session('samperin_role_uid');
@@ -94,6 +90,23 @@
     if ($sidebarUser && !empty($sidebarUser->user_nama)) {
         $sidebarInitial = strtoupper(substr(trim($sidebarUser->user_nama), 0, 1));
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | PEMBERKASAN DINAMIS
+    |--------------------------------------------------------------------------
+    |
+    | Data ini dikirim dari View Composer.
+    |
+    | Struktur:
+    |
+    | Kategori
+    |   └── Jenis Berkas
+    |         └── Permintaan
+    |
+    */
+
+    $sidebarKategoriBerkas = $kategoriBerkas ?? collect();
 @endphp
 
 
@@ -573,6 +586,179 @@
 
 
     /* =====================================================
+       PEMBERKASAN DINAMIS
+    ===================================================== */
+
+    .samperin-berkas-group {
+        margin-bottom: 3px;
+    }
+
+
+    .samperin-berkas-category {
+        width: 100%;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 10px;
+
+        padding:
+            11px 12px;
+
+        margin-bottom: 2px;
+
+        border: 0;
+
+        border-radius: 9px;
+
+        background: transparent;
+
+        color:
+            rgba(255, 255, 255, .57);
+
+        font-size: 15px;
+
+        font-weight: 500;
+
+        text-align: left;
+
+        cursor: pointer;
+
+        transition:
+            background .15s ease,
+            color .15s ease;
+    }
+
+
+    .samperin-berkas-category:hover {
+        color: #fff;
+
+        background:
+            rgba(255, 255, 255, .06);
+    }
+
+
+    .samperin-berkas-category-left {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+
+        min-width: 0;
+
+        flex: 1;
+    }
+
+
+    .samperin-berkas-category-left>i {
+        width: 20px;
+
+        text-align: center;
+
+        font-size: 17px;
+
+        flex-shrink: 0;
+    }
+
+
+    .samperin-berkas-category-name {
+        overflow: hidden;
+
+        white-space: nowrap;
+
+        text-overflow: ellipsis;
+    }
+
+
+    .samperin-berkas-category-arrow {
+        color:
+            rgba(255, 255, 255, .32);
+
+        font-size: 12px;
+
+        transition:
+            transform .18s ease;
+
+        flex-shrink: 0;
+    }
+
+
+    .samperin-berkas-category-arrow.open {
+        transform:
+            rotate(180deg);
+    }
+
+
+    .samperin-berkas-items {
+        margin:
+            0 0 5px 32px;
+
+        padding-left: 10px;
+
+        border-left:
+            1px solid rgba(255, 255, 255, .08);
+    }
+
+
+    .samperin-berkas-link {
+        display: block;
+
+        padding:
+            8px 9px;
+
+        margin-bottom: 2px;
+
+        border-radius: 7px;
+
+        color:
+            rgba(255, 255, 255, .43);
+
+        font-size: 12px;
+
+        line-height: 1.35;
+
+        text-decoration: none;
+
+        transition:
+            background .15s ease,
+            color .15s ease;
+    }
+
+
+    .samperin-berkas-link:hover {
+        color: #fff;
+
+        background:
+            rgba(255, 255, 255, .06);
+    }
+
+
+    .samperin-berkas-link.active {
+        color: #fff;
+
+        background:
+            rgba(223, 131, 57, .18);
+
+        font-weight: 600;
+    }
+
+
+    .samperin-berkas-empty {
+        padding:
+            8px 9px;
+
+        color:
+            rgba(255, 255, 255, .25);
+
+        font-size: 11px;
+    }
+
+
+    /* =====================================================
        FOOTER / LOGOUT
     ===================================================== */
 
@@ -653,6 +839,7 @@
         display: none;
 
         align-items: center;
+
         justify-content: center;
 
         padding: 20px;
@@ -690,6 +877,7 @@
 
 
     @keyframes samperinModalIn {
+
         from {
             opacity: 0;
 
@@ -703,6 +891,7 @@
             transform:
                 translateY(0) scale(1);
         }
+
     }
 
 
@@ -744,6 +933,7 @@
         display: flex;
 
         align-items: center;
+
         justify-content: center;
 
         overflow: hidden;
@@ -807,6 +997,7 @@
         display: flex;
 
         align-items: center;
+
         justify-content: center;
 
         font-size: 20px;
@@ -936,6 +1127,7 @@
         display: flex;
 
         align-items: center;
+
         justify-content: center;
 
         font-size: 19px;
@@ -996,6 +1188,7 @@
         display: flex;
 
         align-items: center;
+
         justify-content: center;
 
         font-size: 12px;
@@ -1180,6 +1373,45 @@
 
 
         /* =================================================
+           PEMBERKASAN
+        ================================================= */
+
+        .samperin-berkas-category {
+            padding:
+                10px 10px;
+
+            font-size: 12px;
+        }
+
+
+        .samperin-berkas-category-left {
+            gap: 10px;
+        }
+
+
+        .samperin-berkas-category-left>i {
+            width: 19px;
+
+            font-size: 15px;
+        }
+
+
+        .samperin-berkas-items {
+            margin-left: 29px;
+
+            padding-left: 8px;
+        }
+
+
+        .samperin-berkas-link {
+            padding:
+                7px 8px;
+
+            font-size: 10px;
+        }
+
+
+        /* =================================================
            LOGOUT
         ================================================= */
 
@@ -1330,6 +1562,7 @@
 
                 </div>
 
+
                 <div class="admin-role-hint">
 
                     Ganti Role
@@ -1424,16 +1657,12 @@
 
         </a>
 
-
-
         {{-- =================================================
-             KEPEGAWAIAN
-        ================================================== --}}
+     KEPEGAWAIAN
+================================================== --}}
 
         <div class="admin-nav-label">
-
             KEPEGAWAIAN
-
         </div>
 
 
@@ -1449,13 +1678,13 @@
         </a>
 
 
-        <a href="{{ route('kepeg.pegawai.import') }}"
-            class="admin-nav-link {{ request()->routeIs('kepeg.pegawai.import') ? 'active' : '' }}">
+        <a href="{{ route('admin.import.berkas') }}"
+            class="admin-nav-link {{ request()->routeIs('admin.import.berkas') ? 'active' : '' }}">
 
-            <i class="bi bi-database-add"></i>
+            <i class="bi bi-file-earmark-arrow-up-fill"></i>
 
             <span>
-                Import Data
+                Import Berkas
             </span>
 
         </a>
@@ -1471,6 +1700,159 @@
             </span>
 
         </a>
+
+
+        <a href="{{ route('admin.permintaan.berkas.index') }}"
+            class="admin-nav-link {{ request()->routeIs('permintaan.berkas.*') ? 'active' : '' }}">
+
+            <i class="bi bi-file-earmark-plus-fill"></i>
+
+            <span>
+                Permintaan Berkas
+            </span>
+
+        </a>
+
+
+
+        {{-- =================================================
+             PEMBERKASAN DINAMIS
+        ================================================== --}}
+
+        @if ($sidebarKategoriBerkas->isNotEmpty())
+
+            <div class="admin-nav-label">
+
+                PEMBERKASAN
+
+            </div>
+
+
+            @foreach ($sidebarKategoriBerkas as $kategori)
+                @php
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | CEK APAKAH ADA PERMINTAAN
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $kategoriPermintaan = $kategori->jenisBerkas->flatMap(function ($jenis) {
+                        return $jenis->permintaan;
+                    });
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | KATEGORI AKTIF
+                    |--------------------------------------------------------------------------
+                    |
+                    | Karena route tidak diubah, kita cek
+                    | query parameter permintaanUid.
+                    |
+                    */
+
+                    $kategoriAktif = request()->get('permintaanUid');
+
+                    $kategoriAktif = $kategoriPermintaan->contains(function ($permintaan) use ($kategoriAktif) {
+                        return $kategoriAktif && $kategoriAktif === $permintaan->permintaan_uid;
+                    });
+
+                @endphp
+
+
+                <div class="samperin-berkas-group" data-kategori="{{ $kategori->kategori_uid }}">
+
+
+                    {{-- =================================================
+                         KATEGORI
+                    ================================================== --}}
+
+                    <button type="button" class="samperin-berkas-category"
+                        onclick="toggleSamperinBerkasKategori(this)">
+
+                        <span class="samperin-berkas-category-left">
+
+                            <i class="bi bi-folder2"></i>
+
+
+                            <span class="samperin-berkas-category-name">
+
+                                {{ $kategori->kategori_nama }}
+
+                            </span>
+
+                        </span>
+
+
+                        <i
+                            class="
+                                bi
+                                bi-chevron-down
+                                samperin-berkas-category-arrow
+                                {{ $kategoriAktif ? 'open' : '' }}
+                            ">
+                        </i>
+
+                    </button>
+
+
+                    {{-- =================================================
+                         PERMINTAAN
+                    ================================================== --}}
+
+                    <div class="samperin-berkas-items" style="{{ $kategoriAktif ? '' : 'display:none;' }}">
+
+
+                        @foreach ($kategori->jenisBerkas as $jenis)
+                            @foreach ($jenis->permintaan as $permintaan)
+                                @php
+
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | URL
+                                    |--------------------------------------------------------------------------
+                                    |
+                                    | Route TIDAK DIUBAH.
+                                    |
+                                    | Kita tetap menggunakan:
+                                    | kepeg.berkas.index
+                                    |
+                                    | permintaanUid dikirim sebagai query parameter.
+                                    |
+                                    */
+
+                                    $permintaanUrl =
+                                        route('admin.rekap.berkas.index') .
+                                        '?permintaanUid=' .
+                                        urlencode($permintaan->permintaan_uid);
+
+                                @endphp
+
+
+                                <a href="{{ $permintaanUrl }}" class="samperin-berkas-link"
+                                    onclick="closeSamperinSidebar()">
+
+                                    {{ $permintaan->permintaan_judul }}
+
+                                </a>
+                            @endforeach
+                        @endforeach
+
+
+                        @if ($kategoriPermintaan->isEmpty())
+                            <div class="samperin-berkas-empty">
+
+                                Belum ada permintaan.
+
+                            </div>
+                        @endif
+
+                    </div>
+
+                </div>
+            @endforeach
+
+        @endif
 
 
 
@@ -1532,6 +1914,7 @@
 
         </a>
 
+
         <a href="{{ route('master.pendidikan.index') }}"
             class="admin-nav-link {{ request()->routeIs('master.pendidikan.*') ? 'active' : '' }}">
 
@@ -1542,6 +1925,7 @@
             </span>
 
         </a>
+
 
         <a href="{{ route('master.jenis-kerja.index') }}"
             class="admin-nav-link {{ request()->routeIs('master.jenis-kerja.*') ? 'active' : '' }}">
@@ -1566,11 +1950,18 @@
 
         </a>
 
+
+
+        {{-- =================================================
+             PENGATURAN
+        ================================================== --}}
+
         <div class="admin-nav-label">
 
             PENGATURAN
 
         </div>
+
 
         <a href="{{ route('pengaturan.api') }}"
             class="admin-nav-link {{ request()->routeIs('pengaturan.api') ? 'active' : '' }}">
@@ -1583,6 +1974,7 @@
 
         </a>
 
+
         <a href="{{ route('pengaturan.folder') }}"
             class="admin-nav-link {{ request()->routeIs('pengaturan.folder') ? 'active' : '' }}">
 
@@ -1593,6 +1985,8 @@
             </span>
 
         </a>
+
+
 
         {{-- =================================================
              AKUN
@@ -1749,26 +2143,33 @@
 
                 @forelse ($availableRoles as $role)
                     @php
+
                         $isActive = $activeRoleUid && $activeRoleUid === $role->role_uid;
+
                     @endphp
+
 
                     <form method="POST" action="{{ route('samperin.role.switch') }}">
 
                         @csrf
 
+
                         <input type="hidden" name="role_uid" value="{{ $role->role_uid }}">
+
 
                         <button type="submit"
                             class="
-                samperin-role-item
-                {{ $isActive ? 'active' : 'inactive' }}
-            ">
+                                samperin-role-item
+                                {{ $isActive ? 'active' : 'inactive' }}
+                            ">
+
 
                             <div class="samperin-role-icon">
 
                                 <i class="bi bi-person-badge-fill"></i>
 
                             </div>
+
 
                             <div class="samperin-role-item-text">
 
@@ -1778,6 +2179,7 @@
 
                                 </div>
 
+
                                 <div class="samperin-role-item-slug">
 
                                     {{ $role->role_slug }}
@@ -1785,6 +2187,7 @@
                                 </div>
 
                             </div>
+
 
                             @if ($isActive)
                                 <div class="samperin-role-item-arrow">
@@ -1795,11 +2198,13 @@
                             @else
                                 <i
                                     class="
-                        bi
-                        bi-chevron-right
-                        samperin-role-item-arrow
-                    "></i>
+                                        bi
+                                        bi-chevron-right
+                                        samperin-role-item-arrow
+                                    ">
+                                </i>
                             @endif
+
 
                         </button>
 
@@ -1809,13 +2214,13 @@
 
                     <div
                         style="
-            padding:25px;
-            text-align:center;
-            color:#8d96a3;
-            font-size:13px;
-            background:#f5f6f8;
-            border-radius:12px;
-        ">
+                            padding:25px;
+                            text-align:center;
+                            color:#8d96a3;
+                            font-size:13px;
+                            background:#f5f6f8;
+                            border-radius:12px;
+                        ">
 
                         Belum ada role yang tersedia.
 
@@ -1972,7 +2377,7 @@
 
             const clickedLink =
                 event.target.closest(
-                    '.admin-nav-link'
+                    '.admin-nav-link, .samperin-berkas-link'
                 );
 
             if (
@@ -1988,6 +2393,73 @@
 
         }
     );
+
+
+    /* =====================================================
+       DROPDOWN PEMBERKASAN
+    ===================================================== */
+
+    function toggleSamperinBerkasKategori(button) {
+
+        if (!button) {
+            return;
+        }
+
+        const group =
+            button.closest(
+                '.samperin-berkas-group'
+            );
+
+        if (!group) {
+            return;
+        }
+
+        const items =
+            group.querySelector(
+                '.samperin-berkas-items'
+            );
+
+        const arrow =
+            group.querySelector(
+                '.samperin-berkas-category-arrow'
+            );
+
+        if (!items) {
+            return;
+        }
+
+        const isOpen =
+            items.style.display !== 'none';
+
+
+        if (isOpen) {
+
+            items.style.display =
+                'none';
+
+            if (arrow) {
+
+                arrow.classList.remove(
+                    'open'
+                );
+
+            }
+
+        } else {
+
+            items.style.display =
+                'block';
+
+            if (arrow) {
+
+                arrow.classList.add(
+                    'open'
+                );
+
+            }
+
+        }
+    }
 
 
     /* =====================================================

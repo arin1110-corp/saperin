@@ -14,9 +14,12 @@ use App\Http\Controllers\Samperin\SamperinPendidikanController;
 use App\Http\Controllers\Samperin\SamperinPenggunaController;
 use App\Http\Controllers\Samperin\SamperinKepegController;
 use App\Http\Controllers\Samperin\SamperinUserController;
+use App\Http\Controllers\Samperin\SamperinBerkasImportController;
 use App\Http\Controllers\Samperin\SamperinPegawaiImportController;
 use App\Http\Controllers\Samperin\SamperinPengaturanController;
 use App\Http\Controllers\Samperin\SamperinFotoImportController;
+use App\Http\Controllers\Samperin\SamperinRekapBerkasController;
+use App\Http\Controllers\Samperin\SamperinPermintaanBerkasController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,7 +97,7 @@ Route::middleware('samperin.auth')->group(function () {
             ->name('roles.')
             ->middleware('samperin.role:admin')
             ->group(function () {
-            Route::get('/', [SamperinRoleController::class, 'index'])->name('index');
+                Route::get('/', [SamperinRoleController::class, 'index'])->name('index');
 
             Route::post('/', [SamperinRoleController::class, 'store'])->name('store');
 
@@ -102,7 +105,7 @@ Route::middleware('samperin.auth')->group(function () {
 
             Route::patch('/{role_uid}/status', [SamperinRoleController::class, 'toggleStatus'])->name('status');
 
-            Route::delete('/{role_uid}', [SamperinRoleController::class, 'destroy'])->name('destroy');
+                Route::delete('/{role_uid}', [SamperinRoleController::class, 'destroy'])->name('destroy');
             });
 
         /*
@@ -115,7 +118,7 @@ Route::middleware('samperin.auth')->group(function () {
             ->name('users.')
             ->middleware('samperin.role:admin')
             ->group(function () {
-            Route::get('/', [SamperinPenggunaController::class, 'index'])->name('index');
+                Route::get('/', [SamperinPenggunaController::class, 'index'])->name('index');
 
             Route::post('/', [SamperinPenggunaController::class, 'store'])->name('store');
 
@@ -131,7 +134,7 @@ Route::middleware('samperin.auth')->group(function () {
 
             Route::post('/import/sql', [SamperinPenggunaController::class, 'importSql'])->name('import.sql');
 
-            Route::post('/import/excel', [SamperinPenggunaController::class, 'importExcel'])->name('import.excel');
+                Route::post('/import/excel', [SamperinPenggunaController::class, 'importExcel'])->name('import.excel');
             });
 
         /*
@@ -167,13 +170,13 @@ Route::middleware('samperin.auth')->group(function () {
         Route::prefix('pegawai')
             ->name('pegawai.')
             ->group(function () {
-            /*
+                /*
         |--------------------------------------------------------------------------
         | DAFTAR PEGAWAI
         |--------------------------------------------------------------------------
         */
 
-            Route::get('/', [SamperinUserController::class, 'index'])->name('index');
+                Route::get('/', [SamperinUserController::class, 'index'])->name('index');
 
             /*
         |--------------------------------------------------------------------------
@@ -236,7 +239,7 @@ Route::middleware('samperin.auth')->group(function () {
         */
             Route::get('/import-foto', [SamperinFotoImportController::class, 'index'])->name('import-foto');
 
-            Route::post('/import-foto', [SamperinFotoImportController::class, 'import'])->name('import-foto.process');
+                Route::post('/import-foto', [SamperinFotoImportController::class, 'import'])->name('import-foto.process');
             });
         /*
         |--------------------------------------------------------------------------
@@ -516,5 +519,63 @@ Route::middleware('samperin.auth')->group(function () {
         Route::get('/pengaturan', function () {
             return view('dashboard.akun.pengaturan');
         })->name('pengaturan');
+        });
+
+    /*
+        |--------------------------------------------------------------------------
+        | IMPORT BERKAS PEGAWAI
+        |--------------------------------------------------------------------------
+        */
+    Route::prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::get('/import/berkas', [SamperinBerkasImportController::class, 'index'])->name('import.berkas');
+
+            Route::post('/import/berkas/preview', [SamperinBerkasImportController::class, 'preview'])->name('import.berkas.preview');
+
+            Route::post('/import/berkas/import', [SamperinBerkasImportController::class, 'import'])->name('import.berkas.process');
+
+            /*
+        |--------------------------------------------------------------------------
+        | REKAP PEMBERKASAN
+        |--------------------------------------------------------------------------
+        */
+
+            Route::get('/rekap-berkas', [SamperinRekapBerkasController::class, 'index'])->name('rekap.berkas.index');
+
+            /*
+        |--------------------------------------------------------------------------
+        | UPLOAD BERKAS BARU
+        |--------------------------------------------------------------------------
+        |
+        | Digunakan ketika pegawai belum mempunyai record
+        | samperin_pengumpulan_berkas.
+        |
+        */
+
+            Route::post('/rekap-berkas/{permintaanUid}/upload/{userUid}', [SamperinRekapBerkasController::class, 'store'])->name('rekap.berkas.upload');
+
+            /*
+        |--------------------------------------------------------------------------
+        | EDIT / GANTI BERKAS
+        |--------------------------------------------------------------------------
+        |
+        | Digunakan ketika record sudah ada.
+        |
+        */
+
+            Route::post('/rekap-berkas/edit/{uid}', [SamperinRekapBerkasController::class, 'update'])->name('rekap.berkas.update');
+
+            /*
+        |--------------------------------------------------------------------------
+        | PERMINTAAN BERKAS
+        |--------------------------------------------------------------------------
+        */
+
+            Route::get('/permintaan-berkas', [SamperinPermintaanBerkasController::class, 'index'])->name('permintaan.berkas.index');
+
+            Route::get('/permintaan-berkas/create', [SamperinPermintaanBerkasController::class, 'create'])->name('permintaan.berkas.create');
+
+            Route::post('/permintaan-berkas', [SamperinPermintaanBerkasController::class, 'store'])->name('permintaan.berkas.store');
         });
 });
