@@ -836,33 +836,208 @@
            FOOTER
         ========================= */
 
+        /* =========================================================
+   FOOTER
+========================================================= */
+
         .samperin-footer {
+            position: relative;
+            width: 100%;
             background: #fff;
-            border-top: 1px solid #e1e9f2;
-            padding: 17px 0;
-            margin-top: auto;
+            border-top: 1px solid #dfe8f2;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .samperin-footer-accent {
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg,
+                    #1677ff 0%,
+                    #1677ff 72%,
+                    #f28c28 88%,
+                    #f28c28 100%);
         }
 
         .samperin-footer-inner {
-            width: min(1430px, calc(100% - 48px));
+            width: min(1450px, calc(100% - 56px));
+            min-height: 112px;
             margin: 0 auto;
+            padding: 20px 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 30px;
+            gap: 40px;
         }
+
+        /* =========================================================
+   BRAND
+========================================================= */
 
         .samperin-footer-brand {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 0;
         }
 
         .samperin-footer-logo {
-            width: 50px;
-            height: 57px;
-            object-fit: contain;
+            width: 205px;
+            height: auto;
+            display: block;
         }
+
+        .samperin-footer-tagline {
+            margin-top: 6px;
+            color: #7a8da8;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: .1px;
+        }
+
+        /* =========================================================
+   RIGHT
+========================================================= */
+
+        .samperin-footer-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 25px;
+        }
+
+        .samperin-footer-identity {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-right: 25px;
+            border-right: 1px solid #e2e9f1;
+        }
+
+        .samperin-berakhlak-logo {
+            width: 155px;
+            height: auto;
+            display: block;
+        }
+
+        /* =========================================================
+   COPYRIGHT
+========================================================= */
+
+        .samperin-footer-copy {
+            min-width: 265px;
+            text-align: right;
+        }
+
+        .samperin-footer-agency {
+            color: #385579;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .samperin-footer-meta {
+            margin-top: 4px;
+            color: #8091a9;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .samperin-footer-divider {
+            margin: 0 5px;
+            color: #b8c5d5;
+        }
+
+        .samperin-footer-created {
+            margin-top: 3px;
+            color: #8091a9;
+            font-size: 11px;
+        }
+
+        .samperin-footer-created a {
+            color: #1677ff;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .samperin-footer-created a:hover {
+            text-decoration: underline;
+        }
+
+
+        /* =========================================================
+   MOBILE
+========================================================= */
+
+        @media (max-width: 767px) {
+
+            .samperin-footer {
+                margin-top: 20px;
+            }
+
+            .samperin-footer-accent {
+                height: 2px;
+            }
+
+            .samperin-footer-inner {
+                width: calc(100% - 24px);
+                min-height: 0;
+                padding: 18px 0;
+                flex-direction: column;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .samperin-footer-brand {
+                align-items: center;
+                text-align: center;
+            }
+
+            .samperin-footer-logo {
+                width: 175px;
+            }
+
+            .samperin-footer-tagline {
+                font-size: 9px;
+                margin-top: 5px;
+            }
+
+            .samperin-footer-right {
+                width: 100%;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .samperin-footer-identity {
+                padding-right: 0;
+                padding-bottom: 12px;
+                border-right: 0;
+                border-bottom: 1px solid #e2e9f1;
+            }
+
+            .samperin-berakhlak-logo {
+                width: 135px;
+            }
+
+            .samperin-footer-copy {
+                min-width: 0;
+                width: 100%;
+                text-align: center;
+            }
+
+            .samperin-footer-agency {
+                font-size: 10.5px;
+            }
+
+            .samperin-footer-meta,
+            .samperin-footer-created {
+                font-size: 10px;
+            }
+        }
+
+        /* =========================================================
+   HEADER ROLE
+========================================================= */
 
         .samperin-header-role {
             display: inline-flex;
@@ -927,13 +1102,6 @@
             font-size: 21px;
             font-weight: 900;
             color: #df1616;
-        }
-
-        .samperin-berakhlak-small {
-            font-size: 8px;
-            line-height: 1.2;
-            color: #111;
-            font-weight: 700;
         }
 
         .samperin-footer-copy {
@@ -1390,45 +1558,64 @@
         </main>
 
         <footer class="samperin-footer">
+
+            <div class="samperin-footer-accent"></div>
+
             <div class="samperin-footer-inner">
 
+                {{-- BRAND --}}
                 <div class="samperin-footer-brand">
-                    <img src="{{ asset('images/logo-samperin.png') }}" class="samperin-footer-logo" alt="SAMPERIN"
-                        onerror="this.style.display='none'">
 
-                    <div>
-                        <div class="samperin-footer-name">
-                            SAMPERIN
-                        </div>
+                    <img src="{{ asset('assets/images/logo-samperin-full.png') }}" class="samperin-footer-logo"
+                        alt="SAMPERIN" onerror="this.style.display='none'">
 
-                        <div class="samperin-footer-text">
-                            Sistem Administrasi Manajemen Pegawai<br>
-                            Dinas Kebudayaan Provinsi Bali
-                        </div>
-                    </div>
                 </div>
 
+
+                {{-- RIGHT --}}
                 <div class="samperin-footer-right">
 
-                    <div>
-                        <div class="samperin-berakhlak">
-                            BerAKHLAK
-                        </div>
+                    <div class="samperin-footer-identity">
 
-                        <div class="samperin-berakhlak-small">
-                            Berorientasi Pelayanan Akuntabel Kompeten<br>
-                            Harmonis Loyal Adaptif Kolaboratif
-                        </div>
+                        <img src="{{ asset('assets/images/asn-berakhlak.png') }}" class="samperin-berakhlak-logo"
+                            alt="ASN BerAKHLAK">
+
                     </div>
 
+
                     <div class="samperin-footer-copy">
-                        © {{ date('Y') }} Dinas Kebudayaan Provinsi Bali<br>
-                        SAMPERIN v1.0.0
+
+                        <div class="samperin-footer-agency">
+                            © {{ date('Y') }} Dinas Kebudayaan Provinsi Bali
+                        </div>
+
+                        <div class="samperin-footer-meta">
+
+                            <span>
+                                {{ config('app.version') }}
+                            </span>
+
+                            <span class="samperin-footer-divider">•</span>
+
+                            <span>
+                                Build {{ config('app.build') }}
+                            </span>
+
+                        </div>
+
+                        <div class="samperin-footer-created">
+                            Created by
+                            <a href="https://arinl.site" target="_blank" rel="noopener">
+                                ARIN
+                            </a>
+                        </div>
+
                     </div>
 
                 </div>
 
             </div>
+
         </footer>
 
     </div>
