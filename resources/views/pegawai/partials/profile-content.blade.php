@@ -31,7 +31,7 @@
     $bidang = $user?->bidang?->bidang_nama ?? '-';
     $golongan = $user?->golongan?->golongan_nama ?? '-';
     $eselon = $user?->eselon?->eselon_nama ?? '-';
-    $pendidikan = $user?->pendidikan?->pendidikan_nama ?? '-';
+    $pendidikan = $user?->pendidikan?->pendidikan_jenjang . ' - ' . $user?->pendidikan?->pendidikan_jurusan ?? '-';
     $jenisKerja = $user?->jenisKerja?->jenis_kerja_nama ?? '-';
 
     $tanggalTmt = $user?->user_tmt ? \Carbon\Carbon::parse($user->user_tmt)->translatedFormat('d F Y') : '-';
@@ -1426,158 +1426,116 @@
         </section>
 
 
-        {{-- =====================================================
-             DOKUMEN
-        ====================================================== --}}
+        {{-- =========================================================
+         PERMINTAAN BERKAS
+    ========================================================== --}}
 
-        <section class="samperin-data-card full">
+        <aside class="samperin-request-card">
 
-            <div class="samperin-data-card-header">
+            <div class="samperin-request-title">
 
-                <div class="samperin-data-card-title">
-
+                <div class="samperin-request-icon">
                     <i class="bi bi-file-earmark-text"></i>
-
-                    Dokumen Pegawai
-
                 </div>
 
-            </div>
+                <div>
 
-            <div class="samperin-data-card-body">
-
-                <div class="samperin-info-row">
-
-                    <div class="samperin-info-label">
-                        Total Permintaan
+                    <div class="samperin-request-heading">
+                        Permintaan Berkas
                     </div>
 
-                    <div>:</div>
-
-                    <div class="samperin-info-value">
-                        {{ $permintaanAktif?->count() ?? 0 }}
-                        permintaan aktif
+                    <div class="samperin-request-description">
+                        Lengkapi berkas yang diminta oleh kepegawaian.
                     </div>
 
                 </div>
 
             </div>
 
-        </section>
+
+            @if ($permintaanAktif && $permintaanAktif->isNotEmpty())
+
+                <div class="samperin-request-list">
+
+                    @foreach ($permintaanAktif as $permintaan)
+                        @php
+                            $jenisPermintaan =
+                                $permintaan->jenisBerkas?->jenis_berkas_nama ??
+                                ($permintaan->permintaan_judul ?? 'Permintaan Berkas');
+
+                            $tombolPermintaan = trim((string) $permintaan->permintaan_tombol);
+
+                            if ($tombolPermintaan === '') {
+                                $tombolPermintaan = 'Upload ' . $jenisPermintaan;
+                            }
+                        @endphp
+
+                        <a href="{{ route('pegawai.berkas') }}" class="samperin-request-item">
+
+                            <i class="bi bi-file-earmark-text samperin-request-item-icon"></i>
+
+                            <span class="samperin-request-item-text">
+                                {{ $tombolPermintaan }}
+                            </span>
+
+                            <i class="bi bi-chevron-right samperin-request-item-arrow"></i>
+
+                        </a>
+                    @endforeach
+
+                </div>
+            @else
+                <div class="samperin-no-request">
+
+                    <i class="bi bi-check2-circle"></i>
+
+                    Tidak ada permintaan berkas aktif saat ini.
+
+                </div>
+
+            @endif
+
+        </aside>
 
     </div>
 
 
     {{-- =========================================================
-         PERMINTAAN BERKAS
-    ========================================================== --}}
-
-    <aside class="samperin-request-card">
-
-        <div class="samperin-request-title">
-
-            <div class="samperin-request-icon">
-                <i class="bi bi-file-earmark-text"></i>
-            </div>
-
-            <div>
-
-                <div class="samperin-request-heading">
-                    Permintaan Berkas
-                </div>
-
-                <div class="samperin-request-description">
-                    Lengkapi berkas yang diminta oleh kepegawaian.
-                </div>
-
-            </div>
-
-        </div>
-
-
-        @if ($permintaanAktif && $permintaanAktif->isNotEmpty())
-
-            <div class="samperin-request-list">
-
-                @foreach ($permintaanAktif as $permintaan)
-                    @php
-                        $jenisPermintaan =
-                            $permintaan->jenisBerkas?->jenis_berkas_nama ??
-                            ($permintaan->permintaan_judul ?? 'Permintaan Berkas');
-
-                        $tombolPermintaan = trim((string) $permintaan->permintaan_tombol);
-
-                        if ($tombolPermintaan === '') {
-                            $tombolPermintaan = 'Upload ' . $jenisPermintaan;
-                        }
-                    @endphp
-
-                    <a href="{{ route('pegawai.berkas') }}" class="samperin-request-item">
-
-                        <i class="bi bi-file-earmark-text samperin-request-item-icon"></i>
-
-                        <span class="samperin-request-item-text">
-                            {{ $tombolPermintaan }}
-                        </span>
-
-                        <i class="bi bi-chevron-right samperin-request-item-arrow"></i>
-
-                    </a>
-                @endforeach
-
-            </div>
-        @else
-            <div class="samperin-no-request">
-
-                <i class="bi bi-check2-circle"></i>
-
-                Tidak ada permintaan berkas aktif saat ini.
-
-            </div>
-
-        @endif
-
-    </aside>
-
-</div>
-
-
-{{-- =========================================================
      MODAL GANTI FOTO
 ========================================================== --}}
 
-<div class="modal fade" id="modalGantiFoto" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalGantiFoto" tabindex="-1" aria-hidden="true">
 
-    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered">
 
-        <div class="modal-content border-0 shadow">
+            <div class="modal-content border-0 shadow">
 
-            <div class="modal-header">
+                <div class="modal-header">
 
-                <h5 class="modal-title">
-                    Ganti Foto Profil
-                </h5>
+                    <h5 class="modal-title">
+                        Ganti Foto Profil
+                    </h5>
 
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 
-            </div>
+                </div>
 
-            <div class="modal-body">
+                <div class="modal-body">
 
-                <div class="text-center py-3">
+                    <div class="text-center py-3">
 
-                    @if ($fotoUrl)
-                        <img src="{{ $fotoUrl }}"
-                            style="
+                        @if ($fotoUrl)
+                            <img src="{{ $fotoUrl }}"
+                                style="
                                 width:120px;
                                 height:140px;
                                 object-fit:cover;
                                 border-radius:10px;
                             "
-                            alt="Foto Profil">
-                    @else
-                        <div class="mx-auto d-flex align-items-center justify-content-center"
-                            style="
+                                alt="Foto Profil">
+                        @else
+                            <div class="mx-auto d-flex align-items-center justify-content-center"
+                                style="
                                 width:120px;
                                 height:140px;
                                 background:#edf3f8;
@@ -1585,13 +1543,15 @@
                                 font-size:40px;
                                 color:#8294a9;
                             ">
-                            <i class="bi bi-person"></i>
+                                <i class="bi bi-person"></i>
+                            </div>
+                        @endif
+
+                        <div class="mt-3 text-muted small">
+
+                            Fitur perubahan foto akan dihubungkan ke ArinDrive.
+
                         </div>
-                    @endif
-
-                    <div class="mt-3 text-muted small">
-
-                        Fitur perubahan foto akan dihubungkan ke ArinDrive.
 
                     </div>
 
@@ -1603,37 +1563,37 @@
 
     </div>
 
-</div>
 
-
-{{-- =========================================================
+    {{-- =========================================================
      MODAL EDIT PROFIL
 ========================================================== --}}
 
-<div class="modal fade" id="modalEditProfil" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalEditProfil" tabindex="-1" aria-hidden="true">
 
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
 
-        <div class="modal-content border-0 shadow">
+            <div class="modal-content border-0 shadow">
 
-            <div class="modal-header">
+                <div class="modal-header">
 
-                <h5 class="modal-title samperin-modal-title">
-                    Edit Data Profil
-                </h5>
+                    <h5 class="modal-title samperin-modal-title">
+                        Edit Data Profil
+                    </h5>
 
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 
-            </div>
+                </div>
 
-            <div class="modal-body">
+                <div class="modal-body">
 
-                <div class="alert alert-info mb-0">
+                    <div class="alert alert-info mb-0">
 
-                    <i class="bi bi-info-circle me-1"></i>
+                        <i class="bi bi-info-circle me-1"></i>
 
-                    Form perubahan data profil akan kita hubungkan
-                    dengan controller update pegawai setelah UI ini selesai.
+                        Form perubahan data profil akan kita hubungkan
+                        dengan controller update pegawai setelah UI ini selesai.
+
+                    </div>
 
                 </div>
 
@@ -1642,5 +1602,3 @@
         </div>
 
     </div>
-
-</div>
