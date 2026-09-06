@@ -90,11 +90,9 @@
         .samperin-brand {
             display: flex;
             align-items: center;
-            min-width: 360px;
         }
 
         .samperin-brand-logo {
-            width: 256px;
             height: 62px;
             object-fit: contain;
             margin-right: 10px;
@@ -866,6 +864,47 @@
             object-fit: contain;
         }
 
+        .samperin-header-role {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+
+            height: 38px;
+            padding: 0 13px;
+            margin-left: 14px;
+
+            border: 1px solid #dce5ef;
+            border-radius: 10px;
+
+            background: #fff;
+            color: #182238;
+
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+
+            cursor: pointer;
+            white-space: nowrap;
+
+            transition: all .2s ease;
+        }
+
+        .samperin-header-role:hover {
+            border-color: var(--samperin-blue);
+            background: var(--samperin-blue-soft);
+        }
+
+        .samperin-header-role i:first-child {
+            color: var(--samperin-blue);
+            font-size: 17px;
+        }
+
+        .samperin-header-role i:last-child {
+            color: #8090a5;
+            font-size: 10px;
+        }
+
         .samperin-footer-name {
             font-size: 15px;
             font-weight: 800;
@@ -902,6 +941,198 @@
             font-size: 11px;
             text-align: right;
             line-height: 1.6;
+        }
+
+        /* =========================
+   ROLE MODAL
+========================= */
+
+        .samperin-role-modal-dialog {
+            max-width: 430px;
+            padding: 12px;
+        }
+
+        .samperin-role-modal {
+            border: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 18px 50px rgba(20, 45, 80, .18);
+        }
+
+        .samperin-role-modal-header {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #e7edf4;
+            background: #fff;
+        }
+
+        .samperin-role-modal-title {
+            color: var(--samperin-navy);
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .samperin-role-modal-subtitle {
+            margin-top: 5px;
+            color: #71849e;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .samperin-role-modal-body {
+            padding: 15px;
+            background: #fbfdff;
+        }
+
+        .samperin-role-form {
+            margin: 0 0 9px;
+        }
+
+        .samperin-role-form:last-child {
+            margin-bottom: 0;
+        }
+
+        .samperin-role-option {
+            width: 100%;
+            min-height: 68px;
+
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 10px 12px;
+
+            border: 1px solid #dfe8f2;
+            border-radius: 12px;
+
+            background: #fff;
+            color: var(--samperin-navy);
+
+            text-align: left;
+
+            transition:
+                border-color .18s ease,
+                background .18s ease,
+                box-shadow .18s ease,
+                transform .18s ease;
+        }
+
+        .samperin-role-option:not(:disabled) {
+            cursor: pointer;
+        }
+
+        .samperin-role-option:not(:disabled):hover {
+            border-color: #a9cef7;
+            background: #f5faff;
+            box-shadow: 0 4px 12px rgba(22, 119, 255, .07);
+            transform: translateY(-1px);
+        }
+
+        .samperin-role-option.active {
+            border-color: #9cc8f8;
+            background: #edf6ff;
+            box-shadow: none;
+        }
+
+        .samperin-role-option:disabled {
+            opacity: 1;
+            cursor: default;
+        }
+
+        .samperin-role-option-icon {
+            width: 43px;
+            height: 43px;
+            flex: 0 0 43px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 11px;
+
+            background: #edf5ff;
+            color: var(--samperin-blue);
+
+            font-size: 19px;
+        }
+
+        .samperin-role-option.active .samperin-role-option-icon {
+            background: #dceeff;
+            color: var(--samperin-blue);
+        }
+
+        .samperin-role-option-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .samperin-role-option-name {
+            color: var(--samperin-navy);
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .samperin-role-option-status {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            margin-top: 4px;
+
+            color: var(--samperin-blue);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .samperin-role-option-status i {
+            font-size: 11px;
+        }
+
+        .samperin-role-option-check {
+            color: var(--samperin-blue);
+            font-size: 18px;
+        }
+
+        .samperin-role-option-arrow {
+            color: #9aabc0;
+            font-size: 15px;
+        }
+
+        .samperin-role-empty {
+            padding: 28px 15px;
+            text-align: center;
+        }
+
+        .samperin-role-empty-icon {
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: #edf3f8;
+            color: #8496aa;
+
+            font-size: 22px;
+        }
+
+        .samperin-role-empty-title {
+            color: var(--samperin-navy);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .samperin-role-empty-text {
+            margin-top: 4px;
+            color: #7b8da3;
+            font-size: 12px;
         }
 
         /* =========================
@@ -953,6 +1184,13 @@
             .samperin-brand-logo {
                 width: 146px;
                 height: 51px;
+            }
+
+            .samperin-header-role {
+                height: 36px;
+                padding: 0 10px;
+                margin-left: 8px;
+                font-size: 12px;
             }
 
             .samperin-brand-name {
@@ -1110,6 +1348,30 @@
             .samperin-footer-copy {
                 text-align: left;
             }
+
+            .samperin-role-modal-dialog {
+                margin: 10px auto;
+                padding: 8px;
+            }
+
+            .samperin-role-modal-header {
+                padding: 17px 16px 14px;
+            }
+
+            .samperin-role-modal-body {
+                padding: 12px;
+            }
+
+            .samperin-role-option {
+                min-height: 62px;
+            }
+
+            .samperin-role-option-icon {
+                width: 39px;
+                height: 39px;
+                flex-basis: 39px;
+                font-size: 17px;
+            }
         }
     </style>
 
@@ -1121,6 +1383,7 @@
     <div class="samperin-page">
 
         @include('pegawai.partials.header')
+        @include('pegawai.partials.role-modal')
 
         <main class="samperin-main">
             @yield('content')
@@ -1175,5 +1438,7 @@
     @stack('scripts')
 
 </body>
+
+</html>
 
 </html>

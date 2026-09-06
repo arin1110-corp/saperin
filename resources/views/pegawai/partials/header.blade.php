@@ -19,8 +19,13 @@
 
             <img src="{{ asset('assets/images/logo-samperin-full.png') }}" class="samperin-brand-logo" alt="SAMPERIN"
                 onerror="this.style.display='none'">
-
         </a>
+        <button type="button" class="samperin-header-role" data-bs-toggle="modal" data-bs-target="#modalPilihRole">
+
+            <i class="bi bi-person-circle"></i>
+
+            <span>{{ session('samperin_role_nama', 'Pegawai') }}</span>
+        </button>
 
         @include('pegawai.partials.nav')
 
@@ -53,7 +58,7 @@
                         </div>
 
                         <div class="samperin-user-role">
-                            Pegawai
+                            {{ session('samperin_role_nama', 'Pegawai') }}
                         </div>
 
                     </div>
