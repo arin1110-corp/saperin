@@ -17,22 +17,8 @@
 
         <a href="{{ route('pegawai.index') }}" class="samperin-brand">
 
-            <img src="{{ asset('images/logo-samperin.png') }}" class="samperin-brand-logo" alt="SAMPERIN"
+            <img src="{{ asset('assets/images/logo-samperin-full.png') }}" class="samperin-brand-logo" alt="SAMPERIN"
                 onerror="this.style.display='none'">
-
-            <div>
-                <div class="samperin-brand-name">
-                    SAMPERIN
-                </div>
-
-                <div class="samperin-brand-subtitle">
-                    Sistem Administrasi Manajemen Pegawai
-                </div>
-
-                <div class="samperin-brand-office">
-                    Dinas Kebudayaan Provinsi Bali
-                </div>
-            </div>
 
         </a>
 

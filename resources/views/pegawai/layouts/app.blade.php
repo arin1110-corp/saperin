@@ -11,6 +11,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link type="favicon" href="{{ asset('assets/images/logo-samperin.png') }}" rel="shortcut icon">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -93,7 +94,7 @@
         }
 
         .samperin-brand-logo {
-            width: 56px;
+            width: 256px;
             height: 62px;
             object-fit: contain;
             margin-right: 10px;
