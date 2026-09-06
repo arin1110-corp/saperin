@@ -109,26 +109,42 @@
         font-size: 14px;
     }
 
-    .samperin-page-edit {
-        flex-shrink: 0;
-        height: 40px;
-        padding: 0 17px;
-        border: 1px solid #d6e4f5;
-        border-radius: 8px;
-        background: #fff;
-        color: #126cff;
-        font-size: 13px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-        transition: .15s ease;
+
+    /* =========================================================
+       TOMBOL EDIT MOBILE
+    ========================================================= */
+
+    .samperin-profile-edit-action {
+        margin: 0 0 14px;
     }
 
-    .samperin-page-edit:hover {
-        background: #edf5ff;
-        color: #075ed8;
+    .samperin-profile-edit-btn {
+        width: 100%;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 16px;
+        border: 1px solid #b9d9ff;
+        border-radius: 12px;
+        background: #eef7ff;
+        color: #1677ff;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+    .samperin-profile-edit-btn:hover {
+        background: #e2f1ff;
+        border-color: #1677ff;
+        color: #1677ff;
+    }
+
+    .samperin-profile-edit-btn i {
+        font-size: 16px;
     }
 
 
@@ -566,19 +582,6 @@
             margin-top: 4px;
         }
 
-        .samperin-page-edit {
-            width: 38px;
-            height: 36px;
-            padding: 0;
-            border-radius: 8px;
-            font-size: 0;
-        }
-
-        .samperin-page-edit i {
-            font-size: 15px;
-            margin: 0 !important;
-        }
-
 
         /* HERO */
 
@@ -586,6 +589,8 @@
             border-radius: 10px;
             margin-bottom: 14px;
         }
+
+        /* HERO PHOTO */
 
         .samperin-profile-hero-content {
             min-height: 0;
@@ -598,7 +603,11 @@
         }
 
         .samperin-profile-photo-wrap {
-            width: 130px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .samperin-profile-photo,
@@ -610,6 +619,7 @@
         .samperin-photo-button {
             width: 120px;
             height: 33px;
+            margin-top: -1px;
             font-size: 11px;
         }
 
@@ -779,12 +789,6 @@
             </p>
         </div>
 
-        {{-- SATU-SATUNYA TOMBOL EDIT --}}
-        <button type="button" class="samperin-page-edit" data-bs-toggle="modal" data-bs-target="#modalEditProfil">
-            <i class="bi bi-pencil"></i>
-            <span>Edit Data</span>
-        </button>
-
     </div>
 
 
@@ -879,7 +883,13 @@
     {{-- =========================================================
          SEMUA DATA DALAM CARD
     ========================================================== --}}
-
+    <div class="samperin-profile-edit-action">
+        <button href="#" class="samperin-profile-edit-btn" data-bs-toggle="modal"
+            data-bs-target="#modalEditProfil">
+            <i class="bi bi-pencil-square"></i>
+            <span>Edit Data Profil</span>
+        </button>
+    </div>
     <div class="samperin-data-grid">
 
 
