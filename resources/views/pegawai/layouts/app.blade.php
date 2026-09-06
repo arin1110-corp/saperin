@@ -951,7 +951,7 @@
             }
 
             .samperin-brand-logo {
-                width: 46px;
+                width: 146px;
                 height: 51px;
             }
 
