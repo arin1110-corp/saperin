@@ -25,7 +25,23 @@
     |--------------------------------------------------------------------------
     */
 
-    $availableRoles = $roles ?? collect();
+    $availableRoles = collect($roles ?? []);
+
+    if ($availableRoles->isEmpty() && $sidebarUser) {
+        try {
+            if (method_exists($sidebarUser, 'roles')) {
+                $availableRoles = $sidebarUser->roles()->where('role_status', true)->orderBy('role_nama')->get();
+            }
+        } catch (\Throwable $e) {
+            $availableRoles = collect();
+        }
+    }
+
+    $activeRoleSlug = strtolower(trim((string) $activeRoleSlug));
+
+    $isAdministrator = $activeRoleSlug === 'admin';
+    $isKepegawaian = $activeRoleSlug === 'kepeg';
+    $isAdministratorOrKepegawaian = $isAdministrator || $isKepegawaian;
 
     /*
     |--------------------------------------------------------------------------
@@ -1610,52 +1626,53 @@
         </a>
 
 
-
-        {{-- =================================================
+        @if ($isAdministrator)
+            {{-- =================================================
              ADMINISTRASI
         ================================================== --}}
 
-        <div class="admin-nav-label">
+            <div class="admin-nav-label">
 
-            ADMINISTRASI
+                ADMINISTRASI
 
-        </div>
-
-
-        <a href="{{ route('samperin.admin.roles.index') }}"
-            class="admin-nav-link {{ request()->routeIs('samperin.admin.roles.*') ? 'active' : '' }}">
-
-            <i class="bi bi-person-gear"></i>
-
-            <span>
-                Manajemen Role
-            </span>
-
-        </a>
+            </div>
 
 
-        <a href="{{ route('samperin.admin.users.index') }}"
-            class="admin-nav-link {{ request()->routeIs('samperin.admin.users.*') ? 'active' : '' }}">
+            <a href="{{ route('samperin.admin.roles.index') }}"
+                class="admin-nav-link {{ request()->routeIs('samperin.admin.roles.*') ? 'active' : '' }}">
 
-            <i class="bi bi-people-fill"></i>
+                <i class="bi bi-person-gear"></i>
 
-            <span>
-                Pengguna
-            </span>
+                <span>
+                    Manajemen Role
+                </span>
 
-        </a>
+            </a>
 
 
-        <a href="{{ route('samperin.admin.activity.index') }}"
-            class="admin-nav-link {{ request()->routeIs('samperin.admin.activity.*') ? 'active' : '' }}">
+            <a href="{{ route('samperin.admin.users.index') }}"
+                class="admin-nav-link {{ request()->routeIs('samperin.admin.users.*') ? 'active' : '' }}">
 
-            <i class="bi bi-clock-history"></i>
+                <i class="bi bi-people-fill"></i>
 
-            <span>
-                Log Aktivitas
-            </span>
+                <span>
+                    Pengguna
+                </span>
 
-        </a>
+            </a>
+
+
+            <a href="{{ route('samperin.admin.activity.index') }}"
+                class="admin-nav-link {{ request()->routeIs('samperin.admin.activity.*') ? 'active' : '' }}">
+
+                <i class="bi bi-clock-history"></i>
+
+                <span>
+                    Log Aktivitas
+                </span>
+
+            </a>
+        @endif
 
         {{-- =================================================
      KEPEGAWAIAN
@@ -1677,42 +1694,29 @@
 
         </a>
 
+        @if ($isAdministrator)
+            <a href="{{ route('admin.import.berkas') }}"
+                class="admin-nav-link {{ request()->routeIs('admin.import.berkas') ? 'active' : '' }}">
 
-        <a href="{{ route('admin.import.berkas') }}"
-            class="admin-nav-link {{ request()->routeIs('admin.import.berkas') ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-arrow-up-fill"></i>
 
-            <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                <span>
+                    Import Berkas
+                </span>
 
-            <span>
-                Import Berkas
-            </span>
+            </a>
 
-        </a>
+            <a href="{{ route('admin.permintaan.berkas.index') }}"
+                class="admin-nav-link {{ request()->routeIs('permintaan.berkas.*') ? 'active' : '' }}">
 
+                <i class="bi bi-file-earmark-plus-fill"></i>
 
-        <a href="{{ route('kepeg.berkas.index') }}"
-            class="admin-nav-link {{ request()->routeIs('kepeg.berkas.*') ? 'active' : '' }}">
+                <span>
+                    Permintaan Berkas
+                </span>
 
-            <i class="bi bi-folder2-open"></i>
-
-            <span>
-                Berkas Pegawai
-            </span>
-
-        </a>
-
-
-        <a href="{{ route('admin.permintaan.berkas.index') }}"
-            class="admin-nav-link {{ request()->routeIs('permintaan.berkas.*') ? 'active' : '' }}">
-
-            <i class="bi bi-file-earmark-plus-fill"></i>
-
-            <span>
-                Permintaan Berkas
-            </span>
-
-        </a>
-
+            </a>
+        @endif
 
 
         {{-- =================================================
@@ -1951,88 +1955,43 @@
         </a>
 
 
-
-        {{-- =================================================
+        @if ($isAdministrator)
+            {{-- =================================================
              PENGATURAN
         ================================================== --}}
 
-        <div class="admin-nav-label">
+            <div class="admin-nav-label">
 
-            PENGATURAN
+                PENGATURAN
 
-        </div>
-
-
-        <a href="{{ route('pengaturan.api') }}"
-            class="admin-nav-link {{ request()->routeIs('pengaturan.api') ? 'active' : '' }}">
-
-            <i class="bi bi-key-fill"></i>
-
-            <span>
-                API Key
-            </span>
-
-        </a>
+            </div>
 
 
-        <a href="{{ route('pengaturan.folder') }}"
-            class="admin-nav-link {{ request()->routeIs('pengaturan.folder') ? 'active' : '' }}">
+            <a href="{{ route('pengaturan.api') }}"
+                class="admin-nav-link {{ request()->routeIs('pengaturan.api') ? 'active' : '' }}">
 
-            <i class="bi bi-folder-fill"></i>
+                <i class="bi bi-key-fill"></i>
 
-            <span>
-                Folder Berkas
-            </span>
+                <span>
+                    API Key
+                </span>
 
-        </a>
-
-
-
-        {{-- =================================================
-             AKUN
-        ================================================== --}}
-
-        <div class="admin-nav-label">
-
-            AKUN
-
-        </div>
+            </a>
 
 
-        <a href="{{ route('akun.profil') }}"
-            class="admin-nav-link {{ request()->routeIs('akun.profil') ? 'active' : '' }}">
+            <a href="{{ route('pengaturan.folder') }}"
+                class="admin-nav-link {{ request()->routeIs('pengaturan.folder') ? 'active' : '' }}">
 
-            <i class="bi bi-person-circle"></i>
+                <i class="bi bi-folder-fill"></i>
 
-            <span>
-                Profil Saya
-            </span>
+                <span>
+                    Folder Berkas
+                </span>
 
-        </a>
+            </a>
 
-
-        <a href="{{ route('akun.berkas') }}"
-            class="admin-nav-link {{ request()->routeIs('akun.berkas') ? 'active' : '' }}">
-
-            <i class="bi bi-folder2-open"></i>
-
-            <span>
-                Berkas Saya
-            </span>
-
-        </a>
-
-
-        <a href="{{ route('akun.pengaturan') }}"
-            class="admin-nav-link {{ request()->routeIs('akun.pengaturan') ? 'active' : '' }}">
-
-            <i class="bi bi-sliders"></i>
-
-            <span>
-                Pengaturan Akun
-            </span>
-
-        </a>
+            
+        @endif
 
 
     </nav>

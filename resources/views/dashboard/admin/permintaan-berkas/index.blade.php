@@ -4,11 +4,42 @@
 
 @section('content')
 
+    @php
+        /*
+        |--------------------------------------------------------------------------
+        | DATA UNTUK MODAL / JAVASCRIPT
+        |--------------------------------------------------------------------------
+        */
+
+        $folderData = ($folders ?? collect())
+            ->map(function ($folder) {
+                return [
+                    'id' => $folder->folder_id,
+                    'nama' => $folder->folder_nama,
+                    'jenis_kerja_id' => $folder->folder_jenis_kerja_id,
+                ];
+            })
+            ->values()
+            ->all();
+
+        $jenisKerjaData = ($jenisKerja ?? collect())
+            ->map(function ($jenis) {
+                return [
+                    'id' => $jenis->jenis_kerja_id,
+                    'nama' => $jenis->jenis_kerja_nama,
+                ];
+            })
+            ->values()
+            ->all();
+    @endphp
+
+
     <div class="permintaan-index-page">
 
         {{-- =========================================================
-         HEADER
-    ========================================================== --}}
+             HEADER
+        ========================================================== --}}
+
         <div class="page-header">
 
             <div class="page-header-left">
@@ -18,14 +49,19 @@
                 </div>
 
                 <div>
-                    <h4>Permintaan Berkas</h4>
+
+                    <h4>
+                        Permintaan Berkas
+                    </h4>
 
                     <p>
                         Daftar permintaan pengumpulan berkas pegawai
                     </p>
+
                 </div>
 
             </div>
+
 
             <a href="{{ route('admin.permintaan.berkas.create') }}" class="btn-permintaan-baru">
 
@@ -41,8 +77,9 @@
 
 
         {{-- =========================================================
-         SUCCESS
-    ========================================================== --}}
+             SUCCESS
+        ========================================================== --}}
+
         @if (session('success'))
             <div class="alert alert-success border-0 rounded-3 mb-4">
 
@@ -55,8 +92,9 @@
 
 
         {{-- =========================================================
-         ERROR
-    ========================================================== --}}
+             ERROR
+        ========================================================== --}}
+
         @if (session('error'))
             <div class="alert alert-danger border-0 rounded-3 mb-4">
 
@@ -69,11 +107,44 @@
 
 
         {{-- =========================================================
-         SUMMARY
-    ========================================================== --}}
+             VALIDATION ERROR
+        ========================================================== --}}
+
+        @if ($errors->any())
+
+            <div class="alert alert-danger border-0 rounded-3 mb-4">
+
+                <div class="fw-semibold mb-2">
+
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+                    Terdapat kesalahan pada data.
+
+                </div>
+
+                <ul class="mb-0 ps-4">
+
+                    @foreach ($errors->all() as $error)
+                        <li>
+                            {{ $error }}
+                        </li>
+                    @endforeach
+
+                </ul>
+
+            </div>
+
+        @endif
+
+
+        {{-- =========================================================
+             SUMMARY
+        ========================================================== --}}
+
         <div class="summary-grid">
 
             {{-- TOTAL --}}
+
             <div class="summary-card">
 
                 <div class="summary-icon orange">
@@ -85,15 +156,11 @@
                 <div>
 
                     <div class="summary-value">
-
                         {{ $permintaan->total() }}
-
                     </div>
 
                     <div class="summary-label">
-
                         Total Permintaan
-
                     </div>
 
                 </div>
@@ -102,6 +169,7 @@
 
 
             {{-- AKTIF --}}
+
             <div class="summary-card">
 
                 <div class="summary-icon green">
@@ -121,9 +189,7 @@
                     </div>
 
                     <div class="summary-label">
-
                         Aktif · Halaman Ini
-
                     </div>
 
                 </div>
@@ -132,6 +198,7 @@
 
 
             {{-- KEDALUWARSA --}}
+
             <div class="summary-card">
 
                 <div class="summary-icon red">
@@ -151,9 +218,7 @@
                     </div>
 
                     <div class="summary-label">
-
                         Kedaluwarsa · Halaman Ini
-
                     </div>
 
                 </div>
@@ -164,11 +229,13 @@
 
 
         {{-- =========================================================
-         LIST
-    ========================================================== --}}
+             LIST
+        ========================================================== --}}
+
         <div class="permintaan-card">
 
             {{-- CARD HEADER --}}
+
             <div class="permintaan-card-header">
 
                 <div>
@@ -187,13 +254,15 @@
 
 
             {{-- CARD BODY --}}
+
             <div class="permintaan-card-body p-0">
 
                 @if ($permintaan->isEmpty())
 
                     {{-- =================================================
-                     EMPTY
-                ================================================== --}}
+                         EMPTY
+                    ================================================== --}}
+
                     <div class="empty-state">
 
                         <div class="empty-icon">
@@ -221,8 +290,9 @@
                     </div>
                 @else
                     {{-- =================================================
-                     TABLE
-                ================================================== --}}
+                         TABLE
+                    ================================================== --}}
+
                     <div class="table-responsive">
 
                         <table class="table permintaan-table align-middle mb-0">
@@ -259,7 +329,7 @@
                                         Status
                                     </th>
 
-                                    <th width="130">
+                                    <th width="170">
                                         Aksi
                                     </th>
 
@@ -296,9 +366,8 @@
 
                                     <tr>
 
-                                        {{-- =================================================
-                                         NOMOR
-                                    ================================================== --}}
+                                        {{-- NOMOR --}}
+
                                         <td>
 
                                             <span class="row-number">
@@ -310,9 +379,8 @@
                                         </td>
 
 
-                                        {{-- =================================================
-                                         PERMINTAAN
-                                    ================================================== --}}
+                                        {{-- PERMINTAAN --}}
+
                                         <td>
 
                                             <div class="request-title">
@@ -333,9 +401,8 @@
                                         </td>
 
 
-                                        {{-- =================================================
-                                         JENIS BERKAS
-                                    ================================================== --}}
+                                        {{-- JENIS BERKAS --}}
+
                                         <td>
 
                                             <div class="jenis-wrapper">
@@ -360,9 +427,8 @@
                                         </td>
 
 
-                                        {{-- =================================================
-                                         PERIODE
-                                    ================================================== --}}
+                                        {{-- PERIODE --}}
+
                                         <td>
 
                                             @if ($item->permintaan_tahun)
@@ -385,18 +451,15 @@
 
                                             @if (!$item->permintaan_tahun && !$item->permintaan_periode)
                                                 <span class="text-muted">
-
                                                     -
-
                                                 </span>
                                             @endif
 
                                         </td>
 
 
-                                        {{-- =================================================
-                                         TARGET
-                                    ================================================== --}}
+                                        {{-- TARGET --}}
+
                                         <td>
 
                                             <div class="target-count">
@@ -438,9 +501,8 @@
                                         </td>
 
 
-                                        {{-- =================================================
-                                         DEADLINE
-                                    ================================================== --}}
+                                        {{-- DEADLINE --}}
+
                                         <td>
 
                                             @if ($item->permintaan_expired)
@@ -460,18 +522,15 @@
                                                 </div>
                                             @else
                                                 <span class="text-muted">
-
                                                     Tidak ditentukan
-
                                                 </span>
                                             @endif
 
                                         </td>
 
 
-                                        {{-- =================================================
-                                         STATUS
-                                    ================================================== --}}
+                                        {{-- STATUS --}}
+
                                         <td>
 
                                             @if ($expired)
@@ -495,21 +554,37 @@
                                         </td>
 
 
-                                        {{-- =================================================
-                                         AKSI
-                                    ================================================== --}}
+                                        {{-- AKSI --}}
+
                                         <td>
 
-                                            <a href="{{ route('admin.rekap.berkas.index', [
-                                                'permintaanUid' => $item->permintaan_uid,
-                                            ]) }}"
-                                                class="btn-lihat">
+                                            <div class="action-group">
 
-                                                <i class="bi bi-eye-fill"></i>
+                                                {{-- EDIT --}}
 
-                                                Lihat Rekap
+                                                <button type="button" class="btn-action btn-edit" data-bs-toggle="modal"
+                                                    data-bs-target="#modalEditPermintaan{{ $item->permintaan_id }}"
+                                                    title="Edit Permintaan">
 
-                                            </a>
+                                                    <i class="bi bi-pencil-square"></i>
+
+                                                </button>
+
+
+                                                {{-- REKAP --}}
+
+                                                <a href="{{ route('admin.rekap.berkas.index', [
+                                                    'permintaanUid' => $item->permintaan_uid,
+                                                ]) }}"
+                                                    class="btn-lihat">
+
+                                                    <i class="bi bi-bar-chart-fill"></i>
+
+                                                    Lihat Rekap
+
+                                                </a>
+
+                                            </div>
 
                                         </td>
 
@@ -524,8 +599,9 @@
 
 
                     {{-- =================================================
-                     PAGINATION
-                ================================================== --}}
+                         PAGINATION
+                    ================================================== --}}
+
                     @if ($permintaan->hasPages())
                         <div class="pagination-wrapper">
 
@@ -571,6 +647,938 @@
 
     </div>
 
+
+    {{-- =============================================================
+         MODAL EDIT
+    ============================================================= --}}
+
+    @foreach ($permintaan as $item)
+        <div class="modal fade" id="modalEditPermintaan{{ $item->permintaan_id }}" tabindex="-1"
+            aria-labelledby="modalEditPermintaanLabel{{ $item->permintaan_id }}" aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+
+                <div class="modal-content modal-edit-permintaan">
+
+                    {{-- MODAL HEADER --}}
+
+                    <div class="modal-header">
+
+                        <div class="modal-title-wrapper">
+
+                            <div class="modal-edit-icon">
+
+                                <i class="bi bi-pencil-square"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h5 class="modal-title" id="modalEditPermintaanLabel{{ $item->permintaan_id }}">
+
+                                    Edit Permintaan Berkas
+
+                                </h5>
+
+                                <p>
+
+                                    Perbarui informasi dan target permintaan berkas
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        </button>
+
+                    </div>
+
+
+                    {{-- FORM --}}
+
+                    <form method="POST"
+                        action="{{ route('admin.permintaan.berkas.update', [
+                            'permintaanUid' => $item->permintaan_uid,
+                        ]) }}"
+                        class="form-edit-permintaan">
+
+                        @csrf
+
+                        @method('PUT')
+
+
+                        <div class="modal-body">
+
+                            {{-- =================================================
+                                 INFORMASI PERMINTAAN
+                            ================================================== --}}
+
+                            <div class="edit-section">
+
+                                <div class="edit-section-title">
+
+                                    <i class="bi bi-file-earmark-text"></i>
+
+                                    Informasi Permintaan
+
+                                </div>
+
+
+                                <div class="row g-3">
+
+                                    {{-- JENIS BERKAS --}}
+
+                                    <div class="col-md-6">
+
+                                        <label class="edit-label">
+
+                                            Jenis Berkas
+
+                                            <span>*</span>
+
+                                        </label>
+
+
+                                        <select name="permintaan_jenis_berkas_id" class="form-select edit-input" required>
+
+                                            <option value="">
+                                                -- Pilih Jenis Berkas --
+                                            </option>
+
+
+                                            @foreach ($jenisBerkas ?? collect() as $jenis)
+                                                <option value="{{ $jenis->jenis_berkas_id }}"
+                                                    @selected((int) $item->permintaan_jenis_berkas_id === (int) $jenis->jenis_berkas_id)>
+
+                                                    {{ $jenis->jenis_berkas_nama }}
+
+                                                </option>
+                                            @endforeach
+
+                                        </select>
+
+                                    </div>
+
+
+                                    {{-- TAHUN --}}
+
+                                    <div class="col-md-3">
+
+                                        <label class="edit-label">
+
+                                            Tahun
+
+                                            <span>*</span>
+
+                                        </label>
+
+
+                                        <input type="number" name="permintaan_tahun" class="form-control edit-input"
+                                            value="{{ $item->permintaan_tahun }}" min="2000" max="2100"
+                                            required>
+
+                                    </div>
+
+
+                                    {{-- PERIODE --}}
+
+                                    <div class="col-md-3">
+
+                                        <label class="edit-label">
+
+                                            Periode
+
+                                        </label>
+
+
+                                        <input type="text" name="permintaan_periode" class="form-control edit-input"
+                                            value="{{ $item->permintaan_periode }}" maxlength="100"
+                                            placeholder="Contoh: TW I">
+
+                                    </div>
+
+
+                                    {{-- JUDUL --}}
+
+                                    <div class="col-md-8">
+
+                                        <label class="edit-label">
+
+                                            Judul Permintaan
+
+                                            <span>*</span>
+
+                                        </label>
+
+
+                                        <input type="text" name="permintaan_judul" class="form-control edit-input"
+                                            value="{{ $item->permintaan_judul }}" maxlength="255" required>
+
+                                    </div>
+
+
+                                    {{-- TOMBOL --}}
+
+                                    <div class="col-md-4">
+
+                                        <label class="edit-label">
+
+                                            Nama Tombol
+
+                                            <span>*</span>
+
+                                        </label>
+
+
+                                        <input type="text" name="permintaan_tombol" class="form-control edit-input"
+                                            value="{{ $item->permintaan_tombol }}" maxlength="100" required>
+
+                                    </div>
+
+
+                                    {{-- MULAI --}}
+
+                                    <div class="col-md-6">
+
+                                        <label class="edit-label">
+
+                                            Mulai Pengumpulan
+
+                                            <span>*</span>
+
+                                        </label>
+
+
+                                        <input type="datetime-local" name="permintaan_mulai"
+                                            class="form-control edit-input"
+                                            value="{{ $item->permintaan_mulai?->format('Y-m-d\TH:i') }}" required>
+
+                                    </div>
+
+
+                                    {{-- DEADLINE --}}
+
+                                    <div class="col-md-6">
+
+                                        <label class="edit-label">
+
+                                            Deadline
+
+                                            <span>*</span>
+
+                                        </label>
+
+
+                                        <input type="datetime-local" name="permintaan_expired"
+                                            class="form-control edit-input"
+                                            value="{{ $item->permintaan_expired?->format('Y-m-d\TH:i') }}" required>
+
+                                    </div>
+
+
+                                    {{-- KETERANGAN --}}
+
+                                    <div class="col-12">
+
+                                        <label class="edit-label">
+
+                                            Keterangan
+
+                                        </label>
+
+
+                                        <textarea name="permintaan_keterangan" class="form-control edit-input" rows="3"
+                                            placeholder="Keterangan tambahan...">{{ $item->permintaan_keterangan }}</textarea>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- =================================================
+                                 TARGET JENIS KERJA
+                            ================================================== --}}
+
+                            <div class="edit-section">
+
+                                <div class="target-header">
+
+                                    <div>
+
+                                        <div class="edit-section-title mb-1">
+
+                                            <i class="bi bi-people-fill"></i>
+
+                                            Target Jenis Kerja
+
+                                        </div>
+
+                                        <div class="edit-section-description">
+
+                                            Tentukan jenis kerja dan folder Drive
+                                            untuk masing-masing target.
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <button type="button" class="btn-tambah-target"
+                                        onclick="tambahTargetEdit({{ $item->permintaan_id }})">
+
+                                        <i class="bi bi-plus-lg"></i>
+
+                                        Tambah Target
+
+                                    </button>
+
+                                </div>
+
+
+                                <div class="target-edit-list" id="targetEditList{{ $item->permintaan_id }}">
+
+                                    @forelse ($item->target->where('target_status', true)
+                                            as $target)
+                                        <div class="target-edit-row">
+
+                                            {{-- JENIS KERJA --}}
+
+                                            <div class="target-edit-field">
+
+                                                <label class="edit-label">
+
+                                                    Jenis Kerja
+
+                                                    <span>*</span>
+
+                                                </label>
+
+
+                                                <select name="jenis_kerja[]"
+                                                    class="form-select edit-input target-jenis-kerja" required>
+
+                                                    <option value="">
+                                                        -- Pilih Jenis Kerja --
+                                                    </option>
+
+
+                                                    @foreach ($jenisKerja ?? collect() as $jenis)
+                                                        <option value="{{ $jenis->jenis_kerja_id }}"
+                                                            @selected((int) $target->target_jenis_kerja_id === (int) $jenis->jenis_kerja_id)>
+
+                                                            {{ $jenis->jenis_kerja_nama }}
+
+                                                        </option>
+                                                    @endforeach
+
+                                                </select>
+
+                                            </div>
+
+
+                                            {{-- FOLDER --}}
+
+                                            <div class="target-edit-field">
+
+                                                <label class="edit-label">
+
+                                                    Folder Drive
+
+                                                    <span>*</span>
+
+                                                </label>
+
+
+                                                <select name="folder_id[]" class="form-select edit-input target-folder"
+                                                    required>
+
+                                                    <option value="">
+                                                        -- Pilih Folder Drive --
+                                                    </option>
+
+
+                                                    @foreach ($folders ?? collect() as $folder)
+                                                        <option value="{{ $folder->folder_id }}"
+                                                            @selected((int) $target->target_folder_id === (int) $folder->folder_id)>
+
+                                                            {{ $folder->folder_nama }}
+
+                                                        </option>
+                                                    @endforeach
+
+                                                </select>
+
+                                            </div>
+
+
+                                            {{-- HAPUS --}}
+
+                                            <button type="button" class="btn-hapus-target"
+                                                onclick="hapusTargetEdit(this)" title="Hapus Target">
+
+                                                <i class="bi bi-trash3"></i>
+
+                                            </button>
+
+                                        </div>
+
+                                    @empty
+
+                                        <div class="target-empty">
+
+                                            <i class="bi bi-people"></i>
+
+                                            <span>
+                                                Belum ada target jenis kerja.
+                                            </span>
+
+                                        </div>
+                                    @endforelse
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- =================================================
+                             FOOTER
+                        ================================================== --}}
+
+                        <div class="modal-footer">
+
+                            <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">
+
+                                Batal
+
+                            </button>
+
+
+                            <button type="submit" class="btn-modal-save">
+
+                                <i class="bi bi-check-lg"></i>
+
+                                Simpan Perubahan
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+    @endforeach
+
+
+    {{-- =============================================================
+         JAVASCRIPT
+    ============================================================= --}}
+
+    <script>
+        /*
+            |--------------------------------------------------------------------------
+            | DATA DARI LARAVEL
+            |--------------------------------------------------------------------------
+            */
+
+        const samperinJenisKerja = @json($jenisKerjaData);
+
+        const samperinFolders = @json($folderData);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TAMBAH TARGET EDIT
+        |--------------------------------------------------------------------------
+        */
+
+        function tambahTargetEdit(permintaanId) {
+
+            const container = document.getElementById(
+                'targetEditList' + permintaanId
+            );
+
+            if (!container) {
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS EMPTY STATE
+            |--------------------------------------------------------------------------
+            */
+
+            const emptyState =
+                container.querySelector('.target-empty');
+
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | BUAT ROW
+            |--------------------------------------------------------------------------
+            */
+
+            const row = document.createElement('div');
+
+            row.className = 'target-edit-row';
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | OPTIONS JENIS KERJA
+            |--------------------------------------------------------------------------
+            */
+
+            let jenisKerjaOptions = `
+                <option value="">
+                    -- Pilih Jenis Kerja --
+                </option>
+            `;
+
+
+            samperinJenisKerja.forEach(function(jenis) {
+
+                jenisKerjaOptions += `
+                    <option value="${jenis.id}">
+                        ${escapeHtml(jenis.nama)}
+                    </option>
+                `;
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | OPTIONS FOLDER
+            |--------------------------------------------------------------------------
+            */
+
+            let folderOptions = `
+                <option value="">
+                    -- Pilih Folder Drive --
+                </option>
+            `;
+
+
+            samperinFolders.forEach(function(folder) {
+
+                folderOptions += `
+                    <option value="${folder.id}">
+                        ${escapeHtml(folder.nama)}
+                    </option>
+                `;
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | HTML ROW
+            |--------------------------------------------------------------------------
+            */
+
+            row.innerHTML = `
+
+                <div class="target-edit-field">
+
+                    <label class="edit-label">
+
+                        Jenis Kerja
+
+                        <span>*</span>
+
+                    </label>
+
+                    <select
+                        name="jenis_kerja[]"
+                        class="form-select edit-input target-jenis-kerja"
+                        required>
+
+                        ${jenisKerjaOptions}
+
+                    </select>
+
+                </div>
+
+
+                <div class="target-edit-field">
+
+                    <label class="edit-label">
+
+                        Folder Drive
+
+                        <span>*</span>
+
+                    </label>
+
+                    <select
+                        name="folder_id[]"
+                        class="form-select edit-input target-folder"
+                        required>
+
+                        ${folderOptions}
+
+                    </select>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-hapus-target"
+                    onclick="hapusTargetEdit(this)"
+                    title="Hapus Target">
+
+                    <i class="bi bi-trash3"></i>
+
+                </button>
+
+            `;
+
+
+            container.appendChild(row);
+
+
+            updateNomorTargetEdit(container);
+
+            updateDuplicateJenisKerja(container);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HAPUS TARGET
+        |--------------------------------------------------------------------------
+        */
+
+        function hapusTargetEdit(button) {
+
+            const row =
+                button.closest('.target-edit-row');
+
+            if (!row) {
+                return;
+            }
+
+
+            const container =
+                row.parentElement;
+
+
+            const rows =
+                container.querySelectorAll(
+                    '.target-edit-row'
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | MINIMAL SATU TARGET
+            |--------------------------------------------------------------------------
+            */
+
+            if (rows.length <= 1) {
+
+                alert(
+                    'Minimal harus ada satu jenis kerja sebagai target.'
+                );
+
+                return;
+            }
+
+
+            row.remove();
+
+
+            updateNomorTargetEdit(container);
+
+            updateDuplicateJenisKerja(container);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | NOMOR TARGET
+        |--------------------------------------------------------------------------
+        */
+
+        function updateNomorTargetEdit(container) {
+
+            const rows =
+                container.querySelectorAll(
+                    '.target-edit-row'
+                );
+
+
+            rows.forEach(function(row, index) {
+
+                let number =
+                    row.querySelector('.target-row-number');
+
+
+                /*
+                | Tidak digunakan pada desain grid sekarang.
+                | Tetap disediakan jika nanti ditambahkan nomor.
+                */
+
+                if (number) {
+                    number.textContent = index + 1;
+                }
+
+            });
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEGAH JENIS KERJA DUPLIKAT
+        |--------------------------------------------------------------------------
+        */
+
+        function updateDuplicateJenisKerja(container) {
+
+            const selects =
+                container.querySelectorAll(
+                    '.target-jenis-kerja'
+                );
+
+
+            const selectedValues = [];
+
+
+            selects.forEach(function(select) {
+
+                if (select.value) {
+
+                    selectedValues.push(
+                        String(select.value)
+                    );
+
+                }
+
+            });
+
+
+            selects.forEach(function(select) {
+
+                const currentValue =
+                    String(select.value || '');
+
+
+                Array.from(select.options)
+                    .forEach(function(option) {
+
+                        if (!option.value) {
+                            return;
+                        }
+
+
+                        const value =
+                            String(option.value);
+
+
+                        option.disabled =
+                            selectedValues.includes(value) &&
+                            value !== currentValue;
+
+                    });
+
+            });
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | EVENT JENIS KERJA
+        |--------------------------------------------------------------------------
+        */
+
+        document.addEventListener(
+            'change',
+            function(event) {
+
+                if (
+                    !event.target.classList.contains(
+                        'target-jenis-kerja'
+                    )
+                ) {
+                    return;
+                }
+
+
+                const container =
+                    event.target.closest(
+                        '.target-edit-list'
+                    );
+
+
+                if (!container) {
+                    return;
+                }
+
+
+                const selectedValue =
+                    event.target.value;
+
+
+                if (!selectedValue) {
+                    updateDuplicateJenisKerja(container);
+                    return;
+                }
+
+
+                const allSelects =
+                    container.querySelectorAll(
+                        '.target-jenis-kerja'
+                    );
+
+
+                let duplicate = false;
+
+
+                allSelects.forEach(function(select) {
+
+                    if (
+                        select !== event.target &&
+                        select.value === selectedValue
+                    ) {
+
+                        duplicate = true;
+
+                    }
+
+                });
+
+
+                if (duplicate) {
+
+                    alert(
+                        'Jenis kerja tersebut sudah dipilih pada target lain.'
+                    );
+
+
+                    event.target.value = '';
+
+                }
+
+
+                updateDuplicateJenisKerja(container);
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ESCAPE HTML
+        |--------------------------------------------------------------------------
+        */
+
+        function escapeHtml(value) {
+
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INIT SEMUA MODAL
+        |--------------------------------------------------------------------------
+        */
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            function() {
+
+                document
+                    .querySelectorAll('.target-edit-list')
+                    .forEach(function(container) {
+
+                        updateNomorTargetEdit(container);
+
+                        updateDuplicateJenisKerja(
+                            container
+                        );
+
+                    });
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SUBMIT BUTTON
+                |--------------------------------------------------------------------------
+                */
+
+                document
+                    .querySelectorAll('.form-edit-permintaan')
+                    .forEach(function(form) {
+
+                        form.addEventListener(
+                            'submit',
+                            function() {
+
+                                const button =
+                                    form.querySelector(
+                                        '.btn-modal-save'
+                                    );
+
+
+                                if (!button) {
+                                    return;
+                                }
+
+
+                                button.disabled = true;
+
+
+                                button.innerHTML = `
+                                    <span
+                                        class="spinner-border spinner-border-sm"
+                                        role="status"
+                                        aria-hidden="true">
+                                    </span>
+
+                                    Menyimpan...
+                                `;
+
+                            }
+                        );
+
+                    });
+
+            }
+        );
+    </script>
+
+
+    {{-- =============================================================
+         STYLE
+    ============================================================= --}}
 
     <style>
         /* =========================================================
@@ -770,7 +1778,7 @@
             ========================================================== */
 
         .permintaan-table {
-            min-width: 1100px;
+            min-width: 1150px;
         }
 
 
@@ -996,6 +2004,43 @@
                ACTION
             ========================================================== */
 
+        .action-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border: 1px solid #e3e7ed;
+            background: #fff;
+            cursor: pointer;
+            transition: .2s ease;
+            flex-shrink: 0;
+        }
+
+
+        .btn-edit {
+            color: #182238;
+        }
+
+
+        .btn-edit:hover {
+            color: #f28c28;
+            border-color: #f28c28;
+            background: rgba(242, 140, 40, .06);
+        }
+
+
         .btn-lihat {
             min-height: 36px;
             padding: 0 11px;
@@ -1142,6 +2187,307 @@
 
 
         /* =========================================================
+               EDIT MODAL
+            ========================================================== */
+
+        .modal-edit-permintaan {
+            border: 0;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(24, 34, 56, .18);
+        }
+
+
+        .modal-edit-permintaan .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #edf0f4;
+            background: #fff;
+        }
+
+
+        .modal-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+
+        .modal-edit-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background: rgba(242, 140, 40, .12);
+            color: #f28c28;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+
+        .modal-title {
+            color: #182238;
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+
+        .modal-title-wrapper p {
+            margin: 3px 0 0;
+            color: #8a93a2;
+            font-size: 12px;
+        }
+
+
+        .modal-edit-permintaan .modal-body {
+            padding: 24px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+
+        .edit-section {
+            padding: 18px;
+            border: 1px solid #e9edf3;
+            border-radius: 14px;
+            background: #fff;
+            margin-bottom: 18px;
+        }
+
+
+        .edit-section:last-child {
+            margin-bottom: 0;
+        }
+
+
+        .edit-section-title {
+            color: #182238;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 16px;
+        }
+
+
+        .edit-section-title i {
+            color: #f28c28;
+        }
+
+
+        .edit-section-description {
+            color: #8a93a2;
+            font-size: 12px;
+        }
+
+
+        .edit-label {
+            display: block;
+            color: #4b5563;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+
+        .edit-label span {
+            color: #dc2626;
+        }
+
+
+        .edit-input {
+            border-color: #e1e6ed;
+            border-radius: 9px;
+            font-size: 13px;
+            min-height: 40px;
+            box-shadow: none !important;
+        }
+
+
+        .edit-input:focus {
+            border-color: #f28c28;
+            box-shadow: 0 0 0 .2rem rgba(242, 140, 40, .08) !important;
+        }
+
+
+        textarea.edit-input {
+            min-height: auto;
+        }
+
+
+        /* =========================================================
+               TARGET HEADER
+            ========================================================== */
+
+        .target-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 16px;
+        }
+
+
+        .btn-tambah-target {
+            min-height: 36px;
+            padding: 0 12px;
+            border-radius: 8px;
+            border: 1px solid #f28c28;
+            background: rgba(242, 140, 40, .08);
+            color: #f28c28;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+
+        .btn-tambah-target:hover {
+            background: #f28c28;
+            color: #fff;
+        }
+
+
+        /* =========================================================
+               TARGET ROW
+            ========================================================== */
+
+        .target-edit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+
+        .target-edit-row {
+            display: grid;
+            grid-template-columns:
+                minmax(200px, .8fr) minmax(300px, 1.5fr) 38px;
+
+            align-items: end;
+            gap: 10px;
+
+            padding: 12px;
+
+            background: #f8fafc;
+            border: 1px solid #e9edf3;
+            border-radius: 10px;
+        }
+
+
+        .target-edit-field {
+            min-width: 0;
+        }
+
+
+        .target-edit-field .form-select {
+            width: 100%;
+        }
+
+
+        .target-edit-row select {
+            min-height: 40px;
+        }
+
+
+        .btn-hapus-target {
+            width: 38px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid #fee2e2;
+            background: #fff5f5;
+            color: #dc2626;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+
+        .btn-hapus-target:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: #fff;
+        }
+
+
+        .target-empty {
+            min-height: 80px;
+            border: 1px dashed #dce1e8;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #8a93a2;
+            font-size: 12px;
+        }
+
+
+        /* =========================================================
+               MODAL FOOTER
+            ========================================================== */
+
+        .modal-edit-permintaan .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #edf0f4;
+            background: #fafbfc;
+        }
+
+
+        .btn-modal-cancel {
+            min-height: 40px;
+            padding: 0 15px;
+            border-radius: 9px;
+            border: 1px solid #e1e5eb;
+            background: #fff;
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+
+        .btn-modal-cancel:hover {
+            background: #f8fafc;
+        }
+
+
+        .btn-modal-save {
+            min-height: 40px;
+            padding: 0 16px;
+            border-radius: 9px;
+            border: 1px solid #f28c28;
+            background: #f28c28;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+
+        .btn-modal-save:hover {
+            background: #dc7818;
+            border-color: #dc7818;
+            color: #fff;
+        }
+
+
+        .btn-modal-save:disabled {
+            opacity: .7;
+            cursor: not-allowed;
+        }
+
+
+        /* =========================================================
                RESPONSIVE
             ========================================================== */
 
@@ -1202,6 +2548,33 @@
 
             .pagination-container .pagination {
                 flex-wrap: nowrap;
+            }
+
+
+            .modal-edit-permintaan .modal-body {
+                padding: 16px;
+            }
+
+
+            .target-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+
+            .btn-tambah-target {
+                width: 100%;
+                justify-content: center;
+            }
+
+
+            .target-edit-row {
+                grid-template-columns: 1fr;
+            }
+
+
+            .btn-hapus-target {
+                width: 100%;
             }
 
         }

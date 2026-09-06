@@ -149,38 +149,58 @@ class SamperinAdminController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        /*
+|--------------------------------------------------------------------------
+| ADMINISTRATOR
+|--------------------------------------------------------------------------
+*/
+
         if (in_array($slug, ['administrator', 'admin', 'admin-full'], true)) {
             return redirect()
                 ->route('samperin.dashboard')
-                ->with('success', 'Role berhasil diganti menjadi ' . $role->role_nama);
+                ->with(
+                    'success',
+                    'Role berhasil diganti menjadi ' . $role->role_nama
+                );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | KEPEGAWAIAN
-        |--------------------------------------------------------------------------
-        */
 
-        if (in_array($slug, ['kepegawaian'], true)) {
-            if (Route::has('kepeg.dashboard')) {
-                return redirect()
-                    ->route('kepeg.dashboard')
-                    ->with('success', 'Role berhasil diganti menjadi ' . $role->role_nama);
-            }
+        /*
+|--------------------------------------------------------------------------
+| KEPEGAWAIAN
+|--------------------------------------------------------------------------
+|
+| Tetap menggunakan dashboard utama.
+| Perbedaan menu diatur melalui sidebar berdasarkan role aktif.
+|
+*/
+
+        if ($slug === 'kepeg') {
+            return redirect()
+                ->route('samperin.dashboard')
+                ->with(
+                    'success',
+                    'Role berhasil diganti menjadi ' . $role->role_nama
+                );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | PEGAWAI
-        |--------------------------------------------------------------------------
-        */
 
-        if (in_array($slug, ['pegawai'], true)) {
-            if (Route::has('samperin.dashboard')) {
-                return redirect()
-                    ->route('samperin.dashboard')
-                    ->with('success', 'Role berhasil diganti menjadi ' . $role->role_nama);
-            }
+        /*
+|--------------------------------------------------------------------------
+| PEGAWAI
+|--------------------------------------------------------------------------
+|
+| Masuk ke halaman khusus pegawai.
+|
+*/
+
+        if ($slug === 'pegawai') {
+            return redirect()
+                ->route('pegawai.index')
+                ->with(
+                    'success',
+                    'Role berhasil diganti menjadi ' . $role->role_nama
+                );
         }
 
         /*

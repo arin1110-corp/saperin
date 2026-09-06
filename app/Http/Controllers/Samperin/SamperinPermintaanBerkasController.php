@@ -34,8 +34,14 @@ class SamperinPermintaanBerkasController extends Controller
             ->orderBy('permintaan_judul')
             ->paginate(10)
             ->withQueryString();
+        $jenisBerkas = SamperinJenisBerkas::query()->where('jenis_berkas_status', true)->orderBy('jenis_berkas_nama')->get();
 
-        return view('dashboard.admin.permintaan-berkas.index', compact('permintaan'));
+        $jenisKerja = SamperinJenisKerja::query()->where('jenis_kerja_status', true)->orderBy('jenis_kerja_nama')->get();
+
+        $folders = SamperinFolder::query()->where('folder_status', true)->orderBy('folder_nama')->get();
+
+
+        return view('dashboard.admin.permintaan-berkas.index', compact('permintaan', 'jenisBerkas', 'jenisKerja', 'folders'));
     }
     /**
      * Form membuat permintaan berkas.
