@@ -470,23 +470,65 @@
             border-color: #efcaca;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | PAGINATION
-        |--------------------------------------------------------------------------
-        */
+        /* =========================================================
+                                   PAGINATION
+                                ========================================================= */
 
         .user-pagination {
-            padding: 14px 18px;
+            padding: 15px 18px;
             border-top: 1px solid #edf0f4;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 15px;
         }
 
         .user-pagination-info {
-            color: #929aa6;
+            color: #8993a3;
             font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .user-pagination-nav {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .user-pagination-nav a,
+        .user-pagination-nav span {
+            min-width: 34px;
+            height: 34px;
+            padding: 0 11px;
+            border: 1px solid #dfe4eb;
+            border-radius: 8px;
+            background: #fff;
+            color: #667085;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 11px;
+        }
+
+        .user-pagination-nav a:hover {
+            background: #fff8f2;
+            border-color: #df8339;
+            color: #c86520;
+        }
+
+        .user-pagination-nav .active {
+            border-color: #df8339;
+            background: linear-gradient(135deg, #df8339, #c35e1d);
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .user-pagination-nav .disabled {
+            color: #c2c8d0;
+            background: #f8f9fb;
         }
 
         /*
@@ -1534,35 +1576,81 @@
         PAGINATION
         ===================================================== --}}
 
+            {{-- PAGINATION --}}
+
             @if ($users->hasPages())
+
                 <div class="user-pagination">
 
                     <div class="user-pagination-info">
 
                         Menampilkan
 
-                        {{ $users->firstItem() }}
+                        <strong>
+                            {{ $users->firstItem() }}
+                        </strong>
 
                         -
 
-                        {{ $users->lastItem() }}
+                        <strong>
+                            {{ $users->lastItem() }}
+                        </strong>
 
                         dari
 
-                        {{ $users->total() }}
+                        <strong>
+                            {{ $users->total() }}
+                        </strong>
 
-                        pengguna
+                        data
 
                     </div>
 
 
-                    <div>
+                    <div class="user-pagination-nav">
 
-                        {{ $users->links() }}
+                        @if ($users->onFirstPage())
+                            <span class="disabled">
+                                <i class="bi bi-chevron-left me-1"></i>
+                                Sebelumnya
+                            </span>
+                        @else
+                            <a href="{{ $users->previousPageUrl() }}">
+                                <i class="bi bi-chevron-left me-1"></i>
+                                Sebelumnya
+                            </a>
+                        @endif
+
+
+                        @foreach ($users->getUrlRange(max(1, $users->currentPage() - 2), min($users->lastPage(), $users->currentPage() + 2)) as $page => $url)
+                            @if ($page == $users->currentPage())
+                                <span class="active">
+                                    {{ $page }}
+                                </span>
+                            @else
+                                <a href="{{ $url }}">
+                                    {{ $page }}
+                                </a>
+                            @endif
+                        @endforeach
+
+
+                        @if ($users->hasMorePages())
+                            <a href="{{ $users->nextPageUrl() }}">
+                                Selanjutnya
+                                <i class="bi bi-chevron-right ms-1"></i>
+                            </a>
+                        @else
+                            <span class="disabled">
+                                Selanjutnya
+                                <i class="bi bi-chevron-right ms-1"></i>
+                            </span>
+                        @endif
 
                     </div>
 
                 </div>
+
             @endif
 
         </div>
