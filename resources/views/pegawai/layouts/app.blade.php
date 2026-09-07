@@ -896,6 +896,242 @@
         }
 
         /* =========================================================
+        UPLOAD MODAL BERKAS
+========================================================= */
+        /* =========================================================
+   MODAL UPLOAD PEGAWAI
+========================================================= */
+
+        .samperin-upload-modal {
+            border: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(16, 27, 77, .18);
+        }
+
+        .samperin-upload-modal .modal-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid #edf1f7;
+        }
+
+        .samperin-upload-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .samperin-upload-icon {
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 10px;
+
+            background: #1677ff;
+            color: #fff;
+
+            font-size: 20px;
+        }
+
+        .samperin-upload-header h5 {
+            margin: 0;
+
+            color: #101b4d;
+
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .samperin-upload-header p {
+            margin: 3px 0 0;
+
+            color: #7b879c;
+
+            font-size: 12px;
+        }
+
+        .samperin-upload-modal .modal-body {
+            padding: 22px;
+        }
+
+        .samperin-upload-request {
+            padding: 14px 16px;
+
+            border: 1px solid #b9d4ff;
+            border-left: 4px solid #1677ff;
+
+            border-radius: 10px;
+
+            background: #f5f9ff;
+
+            margin-bottom: 20px;
+        }
+
+        .samperin-upload-request-label {
+            margin-bottom: 4px;
+
+            color: #7b879c;
+
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .samperin-upload-request-title {
+            color: #10204a;
+
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .samperin-upload-request-deadline {
+            margin-top: 5px;
+
+            color: #e05a47;
+
+            font-size: 11px;
+            font-style: italic;
+            font-weight: 600;
+        }
+
+        .samperin-upload-field label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #39445c;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .samperin-upload-field label span {
+            color: #e05a47;
+        }
+
+        .samperin-file-box {
+            position: relative;
+
+            min-height: 100px;
+
+            display: flex;
+            align-items: center;
+
+            padding: 16px;
+
+            border: 1.5px dashed #b8cbea;
+            border-radius: 12px;
+
+            background: #f8fbff;
+
+            cursor: pointer;
+        }
+
+        .samperin-file-box:hover {
+            border-color: #1677ff;
+            background: #f2f7ff;
+        }
+
+        .samperin-file-box input[type="file"] {
+            position: absolute;
+
+            inset: 0;
+
+            width: 100%;
+            height: 100%;
+
+            opacity: 0;
+
+            cursor: pointer;
+        }
+
+        .samperin-file-icon {
+            width: 40px;
+            height: 40px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex: 0 0 40px;
+
+            border-radius: 9px;
+
+            background: #e7f0ff;
+            color: #1677ff;
+
+            font-size: 19px;
+        }
+
+        .samperin-file-text {
+            margin-left: 12px;
+
+            display: flex;
+            flex-direction: column;
+
+            min-width: 0;
+        }
+
+        .samperin-file-text strong {
+            color: #24314d;
+
+            font-size: 13px;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .samperin-file-text small {
+            margin-top: 3px;
+
+            color: #8b96a9;
+
+            font-size: 11px;
+        }
+
+        .samperin-upload-modal .modal-footer {
+            padding: 15px 22px;
+
+            border-top: 1px solid #edf1f7;
+        }
+
+        .samperin-upload-cancel,
+        .samperin-upload-submit {
+            min-height: 40px;
+
+            padding: 0 16px;
+
+            border-radius: 9px;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .samperin-upload-cancel {
+            border: 1px solid #dce3ed;
+
+            background: #fff;
+
+            color: #657187;
+        }
+
+        .samperin-upload-submit {
+            border: 0;
+
+            background: #1677ff;
+
+            color: #fff;
+        }
+
+        .samperin-upload-submit:hover {
+            background: #0d5fd3;
+        }
+
+        /* =========================================================
    RIGHT
 ========================================================= */
 

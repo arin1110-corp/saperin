@@ -134,6 +134,14 @@ Route::middleware('samperin.auth')->group(function () {
             */
 
             Route::get('/berkas', [SamperinPegawaiController::class, 'berkas'])->name('berkas');
+
+        /*
+|--------------------------------------------------------------------------
+| UPLOAD BERKAS PEGAWAI
+|--------------------------------------------------------------------------
+*/
+
+        Route::post('/akun/berkas/upload/{permintaanUid}', [SamperinPegawaiController::class, 'upload'])->name('berkas.upload');
         });
 
     /*
@@ -226,13 +234,13 @@ Route::middleware('samperin.auth')->group(function () {
         Route::prefix('pegawai')
             ->name('pegawai.')
             ->group(function () {
-            /*
+                /*
                     |--------------------------------------------------------------------------
                     | DAFTAR PEGAWAI
                     |--------------------------------------------------------------------------
                     */
 
-            Route::get('/', [SamperinUserController::class, 'index'])->name('index');
+                Route::get('/', [SamperinUserController::class, 'index'])->name('index');
 
             /*
                     |--------------------------------------------------------------------------
@@ -315,7 +323,7 @@ Route::middleware('samperin.auth')->group(function () {
         Route::prefix('bidang')
             ->name('bidang.')
             ->group(function () {
-            Route::get('/', [SamperinBidangController::class, 'index'])->name('index');
+                Route::get('/', [SamperinBidangController::class, 'index'])->name('index');
 
             Route::post('/', [SamperinBidangController::class, 'store'])->name('store');
 
@@ -327,7 +335,7 @@ Route::middleware('samperin.auth')->group(function () {
 
             Route::patch('/{uid}/status', [SamperinBidangController::class, 'toggleStatus'])->name('status');
 
-            Route::delete('/{uid}', [SamperinBidangController::class, 'destroy'])->name('destroy');
+                Route::delete('/{uid}', [SamperinBidangController::class, 'destroy'])->name('destroy');
             });
 
         /*
@@ -339,7 +347,7 @@ Route::middleware('samperin.auth')->group(function () {
         Route::prefix('jabatan')
             ->name('jabatan.')
             ->group(function () {
-            Route::get('/', [SamperinJabatanController::class, 'index'])->name('index');
+                Route::get('/', [SamperinJabatanController::class, 'index'])->name('index');
 
             Route::post('/', [SamperinJabatanController::class, 'store'])->name('store');
 
@@ -351,7 +359,7 @@ Route::middleware('samperin.auth')->group(function () {
 
             Route::patch('/{uid}/status', [SamperinJabatanController::class, 'toggleStatus'])->name('status');
 
-            Route::delete('/{uid}', [SamperinJabatanController::class, 'destroy'])->name('destroy');
+                Route::delete('/{uid}', [SamperinJabatanController::class, 'destroy'])->name('destroy');
             });
 
         /*

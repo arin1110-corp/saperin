@@ -115,3 +115,112 @@
     </div>
 
 </div>
+{{-- =========================================================
+     MODAL UPLOAD BERKAS PEGAWAI
+========================================================= --}}
+
+<div class="modal fade" id="samperinUploadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content samperin-upload-modal">
+
+            <div class="modal-header">
+
+                <div class="samperin-upload-header">
+
+                    <div class="samperin-upload-icon">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                    </div>
+
+                    <div>
+                        <h5>
+                            Upload Berkas
+                        </h5>
+
+                        <p>
+                            Lengkapi berkas yang diminta oleh kepegawaian.
+                        </p>
+                    </div>
+
+                </div>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+            </div>
+
+
+            <form method="POST" id="samperinUploadForm" enctype="multipart/form-data">
+
+                @csrf
+
+                <div class="modal-body">
+
+                    <div class="samperin-upload-request">
+
+                        <div class="samperin-upload-request-label">
+                            Permintaan
+                        </div>
+
+                        <div class="samperin-upload-request-title" id="samperinUploadJudul">
+                            -
+                        </div>
+
+                        <div class="samperin-upload-request-deadline" id="samperinUploadDeadline">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="samperin-upload-field">
+
+                        <label for="samperinUploadFile">
+                            Pilih Berkas
+                            <span>*</span>
+                        </label>
+
+                        <div class="samperin-file-box">
+
+                            <input type="file" name="file" id="samperinUploadFile" required>
+
+                            <div class="samperin-file-icon">
+                                <i class="bi bi-file-earmark-arrow-up"></i>
+                            </div>
+
+                            <div class="samperin-file-text">
+
+                                <strong id="samperinFileName">
+                                    Pilih file untuk diupload
+                                </strong>
+
+                                <small>
+                                    Maksimal 50 MB
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button type="button" class="samperin-upload-cancel" data-bs-dismiss="modal">
+                        Batal
+                    </button>
+
+                    <button type="submit" class="samperin-upload-submit">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        Upload Berkas
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>

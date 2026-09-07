@@ -454,40 +454,138 @@
     .samperin-request-list {
         display: flex;
         flex-direction: column;
+        gap: 10px;
+
+        max-height: 180px;
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        padding-right: 4px;
     }
 
+    .samperin-request-list::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .samperin-request-list::-webkit-scrollbar-track {
+        background: #edf2f8;
+        border-radius: 10px;
+    }
+
+    .samperin-request-list::-webkit-scrollbar-thumb {
+        background: #1677ff;
+        border-radius: 10px;
+    }
+
+
+    /* ITEM */
     .samperin-request-item {
-        min-height: 48px;
-        padding: 0 16px;
-        border-bottom: 1px solid #edf2f7;
+        min-height: 62px;
+
         display: flex;
         align-items: center;
-        gap: 10px;
-        text-decoration: none;
-        color: #27416d;
-        font-size: 12px;
-    }
+        gap: 12px;
 
-    .samperin-request-item:last-child {
-        border-bottom: 0;
+        padding: 9px 14px 9px 12px;
+
+        border: 1px solid #a9ccff;
+        border-left: 5px solid #1677ff;
+        border-radius: 10px;
+
+        background: #f5f9ff;
+
+        text-decoration: none;
+
+        transition: all .18s ease;
     }
 
     .samperin-request-item:hover {
-        background: #f8fbff;
-        color: #126cff;
+        background: #eaf3ff;
+        border-color: #1677ff;
+        transform: translateX(2px);
+        box-shadow: 0 4px 12px rgba(22, 119, 255, .12);
     }
 
+
+    /* ICON */
     .samperin-request-item-icon {
-        color: #126cff;
+        width: 34px;
+        height: 34px;
+
+        flex: 0 0 34px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 8px;
+
+        background: #1677ff;
+        color: #fff;
+
+        font-size: 16px;
     }
 
-    .samperin-request-item-text {
+
+    /* CONTENT */
+    .samperin-request-item-content {
         flex: 1;
+        min-width: 0;
+
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
     }
 
-    .samperin-request-item-arrow {
-        color: #9aabc0;
+
+    /* JUDUL */
+    .samperin-request-item-text {
+        display: block;
+
+        color: #10204a;
+
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.25;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    /* DEADLINE */
+    .samperin-request-item-deadline {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+
+        color: #e05a47;
+
         font-size: 11px;
+        font-style: italic;
+        font-weight: 600;
+
+        line-height: 1.2;
+    }
+
+    .samperin-request-item-deadline i {
+        font-size: 11px;
+    }
+
+
+    /* ARROW */
+    .samperin-request-item-arrow {
+        flex: 0 0 auto;
+
+        color: #1677ff;
+        font-size: 14px;
+
+        transition: transform .18s ease;
+    }
+
+    .samperin-request-item:hover .samperin-request-item-arrow {
+        transform: translateX(3px);
     }
 
     .samperin-no-request {
@@ -1469,28 +1567,63 @@
 
                     @foreach ($permintaanAktif as $permintaan)
                         @php
-                            $jenisPermintaan =
-                                $permintaan->jenisBerkas?->jenis_berkas_nama ??
-                                ($permintaan->permintaan_judul ?? 'Permintaan Berkas');
+                            $jenisNama = trim((string) ($permintaan->jenisBerkas?->jenis_berkas_nama ?? 'Berkas'));
 
-                            $tombolPermintaan = trim((string) $permintaan->permintaan_tombol);
+                            $tahun = $permintaan->permintaan_tahun;
 
-                            if ($tombolPermintaan === '') {
-                                $tombolPermintaan = 'Upload ' . $jenisPermintaan;
+                            /*
+                |--------------------------------------------------------------------------
+                | JUDUL TOMBOL
+                |--------------------------------------------------------------------------
+                | Contoh:
+                | Upload Coretax 2026
+                | Upload Evaluasi Kinerja 2026
+                |--------------------------------------------------------------------------
+                */
+
+                            $judulPermintaan = 'Upload ' . $jenisNama;
+
+                            if ($tahun) {
+                                $judulPermintaan .= ' ' . $tahun;
                             }
+
+                            /*
+                |--------------------------------------------------------------------------
+                | DEADLINE
+                |--------------------------------------------------------------------------
+                */
+
+                            $deadline = $permintaan->permintaan_expired;
                         @endphp
 
-                        <a href="{{ route('pegawai.berkas') }}" class="samperin-request-item">
+                        <button type="button" class="samperin-request-item" data-bs-toggle="modal"
+                            data-bs-target="#samperinUploadModal"
+                            data-permintaan-uid="{{ $permintaan->permintaan_uid }}"
+                            data-permintaan-id="{{ $permintaan->permintaan_id }}"
+                            data-judul="{{ $judulPermintaan }}"
+                            data-deadline="{{ $deadline ? $deadline->translatedFormat('d F Y H:i') : '-' }}">
+                            <span class="samperin-request-item-icon">
+                                <i class="bi bi-file-earmark-arrow-up"></i>
+                            </span>
 
-                            <i class="bi bi-file-earmark-text samperin-request-item-icon"></i>
+                            <span class="samperin-request-item-content">
 
-                            <span class="samperin-request-item-text">
-                                {{ $tombolPermintaan }}
+                                <span class="samperin-request-item-text">
+                                    {{ $judulPermintaan }}
+                                </span>
+
+                                @if ($deadline)
+                                    <span class="samperin-request-item-deadline">
+                                        <i class="bi bi-calendar3"></i>
+                                        Batas waktu:
+                                        {{ $deadline->translatedFormat('d F Y') }}
+                                    </span>
+                                @endif
+
                             </span>
 
                             <i class="bi bi-chevron-right samperin-request-item-arrow"></i>
-
-                        </a>
+                        </button>
                     @endforeach
 
                 </div>
@@ -1612,3 +1745,117 @@
         </div>
 
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const modal = document.getElementById(
+                'samperinUploadModal'
+            );
+
+            const form = document.getElementById(
+                'samperinUploadForm'
+            );
+
+            const judul = document.getElementById(
+                'samperinUploadJudul'
+            );
+
+            const deadline = document.getElementById(
+                'samperinUploadDeadline'
+            );
+
+            const fileInput = document.getElementById(
+                'samperinUploadFile'
+            );
+
+            const fileName = document.getElementById(
+                'samperinFileName'
+            );
+
+
+            if (!modal || !form) {
+                return;
+            }
+
+
+            modal.addEventListener(
+                'show.bs.modal',
+                function(event) {
+
+                    const button = event.relatedTarget;
+
+                    if (!button) {
+                        return;
+                    }
+
+                    const permintaanUid =
+                        button.getAttribute(
+                            'data-permintaan-uid'
+                        );
+
+                    const namaPermintaan =
+                        button.getAttribute(
+                            'data-judul'
+                        );
+
+                    const deadlineText =
+                        button.getAttribute(
+                            'data-deadline'
+                        );
+
+
+                    judul.textContent =
+                        namaPermintaan || '-';
+
+                    deadline.textContent =
+                        deadlineText ?
+                        'Batas waktu: ' + deadlineText :
+                        'Batas waktu: -';
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ACTION UPLOAD
+                    |--------------------------------------------------------------------------
+                    */
+
+                    form.action =
+                        "{{ route('pegawai.berkas.upload', ['permintaanUid' => '__UID__']) }}"
+                        .replace('__UID__', permintaanUid);
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | RESET FILE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    fileInput.value = '';
+
+                    fileName.textContent =
+                        'Pilih file untuk diupload';
+
+                }
+            );
+
+
+            fileInput.addEventListener(
+                'change',
+                function() {
+
+                    if (
+                        this.files &&
+                        this.files.length > 0
+                    ) {
+                        fileName.textContent =
+                            this.files[0].name;
+                    } else {
+                        fileName.textContent =
+                            'Pilih file untuk diupload';
+                    }
+
+                }
+            );
+
+        });
+    </script>

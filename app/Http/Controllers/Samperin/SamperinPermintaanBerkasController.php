@@ -40,7 +40,6 @@ class SamperinPermintaanBerkasController extends Controller
 
         $folders = SamperinFolder::query()->where('folder_status', true)->orderBy('folder_nama')->get();
 
-
         return view('dashboard.admin.permintaan-berkas.index', compact('permintaan', 'jenisBerkas', 'jenisKerja', 'folders'));
     }
     /**
@@ -202,5 +201,193 @@ class SamperinPermintaanBerkasController extends Controller
         });
 
         return redirect()->route('rekap.berkas')->with('success', 'Permintaan berkas berhasil dibuat.');
+    }
+    public function update(Request $request, $permintaanUid)
+    {
+        $validated = $request->validate([
+            'permintaan_jenis_berkas_id' => ['required', 'integer', 'exists:samperin_jenis_berkas,jenis_berkas_id'],
+
+            'permintaan_tahun' => ['required', 'integer', 'min:2000', 'max:2100'],
+
+            'permintaan_periode' => ['nullable', 'string', 'max:100'],
+
+            'permintaan_judul' => ['required', 'string', 'max:255'],
+
+            'permintaan_tombol' => ['required', 'string', 'max:100'],
+
+            'permintaan_mulai' => ['required', 'date'],
+
+            'permintaan_expired' => ['required', 'date', 'after_or_equal:permintaan_mulai'],
+
+            'permintaan_keterangan' => ['nullable', 'string'],
+
+            /*
+        |--------------------------------------------------------------------------
+        | TARGET
+        |--------------------------------------------------------------------------
+        */
+
+            'jenis_kerja' => ['required', 'array', 'min:1'],
+
+            'jenis_kerja.*' => ['required', 'integer', 'distinct', 'exists:samperin_jenis_kerja,jenis_kerja_id'],
+
+            'folder_id' => ['required', 'array', 'min:1'],
+
+            'folder_id.*' => ['required', 'integer', 'distinct', 'exists:samperin_folder,folder_id'],
+        ]);
+
+        /*
+    |--------------------------------------------------------------------------
+    | CEK JUMLAH TARGET
+    |--------------------------------------------------------------------------
+    */
+
+        if (count($validated['jenis_kerja']) !== count($validated['folder_id'])) {
+            throw ValidationException::withMessages([
+                'jenis_kerja' => 'Jenis kerja dan folder Drive harus memiliki jumlah yang sama.',
+            ]);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | CARI PERMINTAAN
+    |--------------------------------------------------------------------------
+    */
+
+        $permintaan = SamperinPermintaanBerkas::where('permintaan_uid', $permintaanUid)->firstOrFail();
+
+        /*
+    |--------------------------------------------------------------------------
+    | VALIDASI JENIS KERJA AKTIF
+    |--------------------------------------------------------------------------
+    */
+
+        $jenisKerjaIds = collect($validated['jenis_kerja'])->map(fn($id) => (int) $id)->values();
+
+        $jenisKerjaAktif = SamperinJenisKerja::whereIn('jenis_kerja_id', $jenisKerjaIds)->where('jenis_kerja_status', true)->pluck('jenis_kerja_id')->map(fn($id) => (int) $id)->values();
+
+        if ($jenisKerjaAktif->count() !== $jenisKerjaIds->count()) {
+            throw ValidationException::withMessages([
+                'jenis_kerja' => 'Terdapat jenis kerja yang sudah tidak aktif.',
+            ]);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | AMBIL FOLDER
+    |--------------------------------------------------------------------------
+    */
+
+        $folderIds = collect($validated['folder_id'])->map(fn($id) => (int) $id)->values();
+
+        $folders = SamperinFolder::whereIn('folder_id', $folderIds)->where('folder_status', true)->where('folder_jenis', 'berkas')->get()->keyBy('folder_id');
+
+        if ($folders->count() !== $folderIds->count()) {
+            throw ValidationException::withMessages([
+                'folder_id' => 'Terdapat folder Drive yang tidak aktif atau bukan folder berkas.',
+            ]);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | PASTIKAN FOLDER SESUAI JENIS KERJA
+    |--------------------------------------------------------------------------
+    */
+
+        foreach ($validated['jenis_kerja'] as $index => $jenisKerjaId) {
+            $jenisKerjaId = (int) $jenisKerjaId;
+            $folderId = (int) $validated['folder_id'][$index];
+
+            $folder = $folders->get($folderId);
+
+            if (!$folder) {
+                throw ValidationException::withMessages([
+                    "folder_id.$index" => 'Folder Drive tidak ditemukan.',
+                ]);
+            }
+
+            if ((int) $folder->folder_jenis_kerja_id !== $jenisKerjaId) {
+                throw ValidationException::withMessages([
+                    "folder_id.$index" => 'Folder Drive tidak sesuai dengan jenis kerja yang dipilih.',
+                ]);
+            }
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | SIMPAN
+    |--------------------------------------------------------------------------
+    */
+
+        DB::transaction(function () use ($permintaan, $validated) {
+            /*
+        |--------------------------------------------------------------------------
+        | UPDATE HEADER
+        |--------------------------------------------------------------------------
+        | JANGAN update permintaan_status.
+        | Status tetap seperti yang ada di database.
+        |--------------------------------------------------------------------------
+        */
+
+            $permintaan->update([
+                'permintaan_jenis_berkas_id' => $validated['permintaan_jenis_berkas_id'],
+                'permintaan_tahun' => $validated['permintaan_tahun'],
+                'permintaan_periode' => $validated['permintaan_periode'] ?? null,
+                'permintaan_judul' => $validated['permintaan_judul'],
+                'permintaan_tombol' => $validated['permintaan_tombol'],
+                'permintaan_keterangan' => $validated['permintaan_keterangan'] ?? null,
+                'permintaan_mulai' => $validated['permintaan_mulai'],
+                'permintaan_expired' => $validated['permintaan_expired'],
+                'permintaan_updated_at' => now(),
+            ]);
+
+            /*
+        |--------------------------------------------------------------------------
+        | TARGET LAMA
+        |--------------------------------------------------------------------------
+        | Nonaktifkan seluruh target lama terlebih dahulu.
+        |--------------------------------------------------------------------------
+        */
+
+            SamperinPermintaanTarget::where('target_permintaan_id', $permintaan->permintaan_id)->update([
+                'target_status' => false,
+                'target_updated_at' => now(),
+            ]);
+
+            /*
+        |--------------------------------------------------------------------------
+        | SIMPAN TARGET BARU / AKTIFKAN KEMBALI
+        |--------------------------------------------------------------------------
+        */
+
+            foreach ($validated['jenis_kerja'] as $index => $jenisKerjaId) {
+                $jenisKerjaId = (int) $jenisKerjaId;
+                $folderId = (int) $validated['folder_id'][$index];
+
+                $target = SamperinPermintaanTarget::where('target_permintaan_id', $permintaan->permintaan_id)->where('target_jenis_kerja_id', $jenisKerjaId)->first();
+
+                if ($target) {
+                    $target->update([
+                        'target_folder_id' => $folderId,
+                        'target_tipe' => 'JENIS_KERJA',
+                        'target_status' => true,
+                        'target_updated_at' => now(),
+                    ]);
+                } else {
+                    SamperinPermintaanTarget::create([
+                        'target_uid' => (string) Str::uuid(),
+                        'target_permintaan_id' => $permintaan->permintaan_id,
+                        'target_tipe' => 'JENIS_KERJA',
+                        'target_jenis_kerja_id' => $jenisKerjaId,
+                        'target_folder_id' => $folderId,
+                        'target_status' => true,
+                        'target_created_at' => now(),
+                        'target_updated_at' => now(),
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->route('admin.permintaan.berkas.index')->with('success', 'Permintaan berkas berhasil diperbarui.');
     }
 }
