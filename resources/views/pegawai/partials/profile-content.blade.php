@@ -1567,7 +1567,7 @@
 
                     @foreach ($permintaanAktif as $permintaan)
                         @php
-                            $jenisNama = trim((string) ($permintaan->jenisBerkas?->jenis_berkas_nama ?? 'Berkas'));
+                            $jenisNama = trim((string) ($permintaan->permintaan_judul ?? 'Berkas'));
 
                             $tahun = $permintaan->permintaan_tahun;
 
@@ -1584,7 +1584,7 @@
                             $judulPermintaan = 'Upload ' . $jenisNama;
 
                             if ($tahun) {
-                                $judulPermintaan .= ' ' . $tahun;
+                                $judulPermintaan;
                             }
 
                             /*

@@ -1539,6 +1539,33 @@
             font-size: 12px;
         }
 
+        .samperin-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+
+            margin: 0 0 18px;
+
+            padding: 13px 16px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+        }
+
+        .samperin-alert>i {
+            margin-top: 2px;
+            font-size: 17px;
+        }
+
+        .samperin-alert ul {
+            padding-left: 18px;
+        }
+
+        .samperin-alert li {
+            margin-bottom: 2px;
+        }
+
         /* =========================
            MOBILE
         ========================= */
@@ -1790,6 +1817,40 @@
         @include('pegawai.partials.role-modal')
 
         <main class="samperin-main">
+            {{-- ALERT SUCCESS --}}
+            @if (session('success'))
+                <div class="alert alert-success samperin-alert" role="alert">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            {{-- ALERT ERROR --}}
+            @if (session('error'))
+                <div class="alert alert-danger samperin-alert" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
+            {{-- VALIDATION ERROR --}}
+            @if ($errors->any())
+                <div class="alert alert-danger samperin-alert" role="alert">
+
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+                    <div>
+                        <strong>Terdapat kesalahan pada data.</strong>
+
+                        <ul class="mb-0 mt-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                </div>
+            @endif
             @yield('content')
         </main>
 
