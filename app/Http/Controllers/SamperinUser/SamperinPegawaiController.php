@@ -606,89 +606,56 @@ class SamperinPegawaiController extends Controller
 */
 
         if ($existing) {
-
             $existing->update([
-                'pengumpulan_berkas_file' =>
-                $upload['url'],
+                'pengumpulan_berkas_file' => $upload['url'],
 
-                'pengumpulan_berkas_nama' =>
-                $request->file('file')
-                    ->getClientOriginalName(),
+                'pengumpulan_berkas_nama' => $request->file('file')->getClientOriginalName(),
 
-                'pengumpulan_berkas_mime' =>
-                $request->file('file')
-                    ->getMimeType(),
+                'pengumpulan_berkas_mime' => $request->file('file')->getMimeType(),
 
-                'pengumpulan_berkas_size' =>
-                $request->file('file')
-                    ->getSize(),
+                'pengumpulan_berkas_size' => $request->file('file')->getSize(),
 
-                'pengumpulan_berkas_tanggal' =>
-                now(),
+                'pengumpulan_berkas_tanggal' => now(),
 
-                'pengumpulan_berkas_status' =>
-                'terkirim',
+                'pengumpulan_berkas_status' => 'terkirim',
 
-                'pengumpulan_berkas_keterangan' =>
-                'Berkas diganti oleh pegawai.',
+                'pengumpulan_berkas_keterangan' => 'Berkas diganti oleh pegawai.',
 
-                'pengumpulan_berkas_sumber' =>
-                'PEGAWAI',
+                'pengumpulan_berkas_sumber' => 'PEGAWAI',
 
-                'pengumpulan_berkas_sumber_id' =>
-                $user->user_uid,
+                'pengumpulan_berkas_sumber_id' => null,
 
-                'pengumpulan_berkas_updated_at' =>
-                now(),
+                'pengumpulan_berkas_updated_at' => now(),
             ]);
         } else {
-
             SamperinPengumpulanBerkas::create([
+                'pengumpulan_berkas_uid' => (string) Str::uuid(),
 
-                'pengumpulan_berkas_uid' =>
-                (string) Str::uuid(),
+                'pengumpulan_berkas_user_uid' => $user->user_uid,
 
-                'pengumpulan_berkas_user_uid' =>
-                $user->user_uid,
+                'pengumpulan_berkas_permintaan_id' => $permintaan->permintaan_id,
 
-                'pengumpulan_berkas_permintaan_id' =>
-                $permintaan->permintaan_id,
+                'pengumpulan_berkas_file' => $upload['url'],
 
-                'pengumpulan_berkas_file' =>
-                $upload['url'],
+                'pengumpulan_berkas_nama' => $request->file('file')->getClientOriginalName(),
 
-                'pengumpulan_berkas_nama' =>
-                $request->file('file')
-                    ->getClientOriginalName(),
+                'pengumpulan_berkas_mime' => $request->file('file')->getMimeType(),
 
-                'pengumpulan_berkas_mime' =>
-                $request->file('file')
-                    ->getMimeType(),
+                'pengumpulan_berkas_size' => $request->file('file')->getSize(),
 
-                'pengumpulan_berkas_size' =>
-                $request->file('file')
-                    ->getSize(),
+                'pengumpulan_berkas_tanggal' => now(),
 
-                'pengumpulan_berkas_tanggal' =>
-                now(),
+                'pengumpulan_berkas_status' => 'terkirim',
 
-                'pengumpulan_berkas_status' =>
-                'terkirim',
+                'pengumpulan_berkas_keterangan' => 'Berkas dikirim oleh pegawai.',
 
-                'pengumpulan_berkas_keterangan' =>
-                'Berkas dikirim oleh pegawai.',
+                'pengumpulan_berkas_sumber' => 'PEGAWAI',
 
-                'pengumpulan_berkas_sumber' =>
-                'PEGAWAI',
+                'pengumpulan_berkas_sumber_id' => null,
 
-                'pengumpulan_berkas_sumber_id' =>
-                $user->user_uid,
+                'pengumpulan_berkas_created_at' => now(),
 
-                'pengumpulan_berkas_created_at' =>
-                now(),
-
-                'pengumpulan_berkas_updated_at' =>
-                now(),
+                'pengumpulan_berkas_updated_at' => now(),
             ]);
         }
 
@@ -698,7 +665,7 @@ class SamperinPegawaiController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        return redirect()->route('akun.berkas')->with('success', 'Berkas berhasil dikirim.');
+        return redirect()->route('pegawai.index')->with('success', 'Berkas berhasil dikirim.');
     }
     /*
 |--------------------------------------------------------------------------
@@ -706,29 +673,84 @@ class SamperinPegawaiController extends Controller
 |--------------------------------------------------------------------------
 */
 
-    private function uploadToDrive(
-        $file,
-        SamperinUser $user,
-        SamperinPermintaanBerkas $permintaan,
-        SamperinFolder $folder
-    ): array {
+    private function uploadToDrive($file, SamperinUser $user, SamperinPermintaanBerkas $permintaan, SamperinFolder $folder): array
+    {
         /*
     |--------------------------------------------------------------------------
     | API ARINDRIVE
     |--------------------------------------------------------------------------
     */
 
-        $api = SamperinApi::query()
-            ->where('api_kode', 'ARINDRIVE')
-            ->where('api_status', true)
-            ->first();
+        $api = SamperinApi::query()->where('api_kode', 'ARINDRIVE')->where('api_status', true)->first();
 
         if (!$api) {
-            throw new \Exception(
-                'API ArinDrive belum dikonfigurasi.'
-            );
+            throw new \Exception('API ArinDrive belum dikonfigurasi.');
         }
 
+        /*
+    |--------------------------------------------------------------------------
+    | EXTENSION FILE
+    |--------------------------------------------------------------------------
+    */
+
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        if ($extension === '') {
+            throw new \Exception('Format file tidak ditemukan.');
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | JUDUL PERMINTAAN
+    |--------------------------------------------------------------------------
+    */
+
+        $judul = trim((string) $permintaan->permintaan_judul);
+
+        /*
+    | Jika judul kosong, gunakan nama jenis berkas.
+    */
+
+        if ($judul === '') {
+            $judul = trim((string) ($permintaan->jenisBerkas?->jenis_berkas_nama ?? 'Berkas'));
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | BERSIHKAN JUDUL
+    |--------------------------------------------------------------------------
+    |
+    | Contoh:
+    |
+    | Pakta Integritas
+    | ↓
+    | Pakta_Integritas
+    |
+    */
+
+        $judul = preg_replace('/[^A-Za-z0-9]+/', '_', $judul);
+
+        $judul = trim($judul, '_');
+
+        /*
+    |--------------------------------------------------------------------------
+    | TAHUN
+    |--------------------------------------------------------------------------
+    */
+
+        $tahun = trim((string) $permintaan->permintaan_tahun);
+
+        /*
+    |--------------------------------------------------------------------------
+    | IDENTITAS PEGAWAI
+    |--------------------------------------------------------------------------
+    |
+    | Utamakan NIP.
+    | Jika NIP kosong, gunakan UID.
+    |
+    */
+
+        $identitas = trim((string) ($user->user_nip ?: $user->user_uid));
 
         /*
     |--------------------------------------------------------------------------
@@ -737,7 +759,7 @@ class SamperinPegawaiController extends Controller
     |
     | Format:
     |
-    | NIP_JUDUL_TAHUN.EXT
+    | NIP_Judul_Tahun.ext
     |
     | Contoh:
     |
@@ -745,202 +767,83 @@ class SamperinPegawaiController extends Controller
     |
     */
 
-        $extension = strtolower(
-            $file->getClientOriginalExtension()
-        );
-
-        /*
-    |--------------------------------------------------------------------------
-    | AMBIL JUDUL
-    |--------------------------------------------------------------------------
-    */
-
-        $judul = trim(
-            (string) $permintaan->permintaan_judul
-        );
-
-        /*
-    | Kalau judul permintaan kosong,
-    | gunakan nama jenis berkas.
-    */
-
-        if ($judul === '') {
-            $judul = trim(
-                (string) (
-                    $permintaan
-                    ->jenisBerkas
-                    ?->jenis_berkas_nama
-                    ?? 'Berkas'
-                )
-            );
-        }
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | BERSIHKAN JUDUL
-    |--------------------------------------------------------------------------
-    |
-    | Pakta Integritas
-    | ↓
-    | Pakta_Integritas
-    |
-    */
-
-        $judul = preg_replace(
-            '/[^A-Za-z0-9]+/',
-            '_',
-            $judul
-        );
-
-        $judul = trim(
-            $judul,
-            '_'
-        );
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | TAHUN
-    |--------------------------------------------------------------------------
-    */
-
-        $tahun = trim(
-            (string) $permintaan->permintaan_tahun
-        );
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | NIP
-    |--------------------------------------------------------------------------
-    */
-
-        $identitas = trim(
-            (string) (
-                $user->user_nip
-                ?: $user->user_uid
-            )
-        );
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | SUSUN NAMA FILE
-    |--------------------------------------------------------------------------
-    */
-
-        $parts = [
-            $identitas,
-            $judul,
-        ];
-
-        /*
-    | Tambahkan tahun jika tersedia.
-    */
+        $parts = [$identitas, $judul];
 
         if ($tahun !== '') {
             $parts[] = $tahun;
         }
 
-        $filename =
-            implode(
-                '_',
-                array_filter($parts)
-            )
-            . '.'
-            . $extension;
-
+        $filename = implode('_', array_filter($parts)) . '.' . $extension;
 
         /*
     |--------------------------------------------------------------------------
-    | FILE CONTENT
+    | BACA FILE
     |--------------------------------------------------------------------------
     */
 
-        $fileContent = file_get_contents(
-            $file->getRealPath()
-        );
+        $fileContent = file_get_contents($file->getRealPath());
 
         if ($fileContent === false) {
-            throw new \Exception(
-                'File tidak dapat dibaca.'
-            );
+            throw new \Exception('File tidak dapat dibaca.');
         }
-
 
         /*
     |--------------------------------------------------------------------------
     | UPLOAD KE ARINDRIVE
     |--------------------------------------------------------------------------
+    |
+    | API dan folder semuanya berasal dari database.
+    |
     */
 
-        $response = Http::withToken(
-            $api->api_token
-        )
+        $response = Http::withToken($api->api_token)
             ->timeout(120)
-            ->attach(
-                'file',
-                $fileContent,
-                $filename
-            )
-            ->post(
-                rtrim(
-                    $api->api_url,
-                    '/'
-                ) . '/api/upload-drive',
-                [
-
-                    /*
+            ->attach('file', $fileContent, $filename)
+            ->post(rtrim($api->api_url, '/') . '/api/upload-drive', [
+                /*
                 |--------------------------------------------------------------------------
-                | FOLDER DRIVE DARI DATABASE
+                | FOLDER DRIVE
                 |--------------------------------------------------------------------------
+                |
+                | Menggunakan folder_drive_id dari
+                | samperin_folder yang dipilih pada target permintaan.
+                |
                 */
 
-                    'folder_id' =>
-                    $folder->folder_drive_id,
+                'folder_id' => $folder->folder_drive_id,
 
-                    /*
+            /*
                 |--------------------------------------------------------------------------
                 | NAMA FILE
                 |--------------------------------------------------------------------------
                 */
 
-                    'filename' =>
-                    $filename,
+            'filename' => $filename,
 
-                    /*
+            /*
                 |--------------------------------------------------------------------------
-                | IDENTITAS APLIKASI
+                | SOURCE APPLICATION
                 |--------------------------------------------------------------------------
                 */
 
-                    'source_app' =>
-                'samperin',
+            'source_app' => 'samperin',
 
-                /*
+            /*
                 |--------------------------------------------------------------------------
                 | PREFIX FOLDER
                 |--------------------------------------------------------------------------
                 */
 
-                'folder' =>
-                $folder->folder_prefix
-                    ?: 'berkas-pegawai',
+            'folder' => $folder->folder_prefix ?: 'berkas-pegawai',
 
-                    /*
+                /*
                 |--------------------------------------------------------------------------
-                | REFERENCE
+                | REFERENCE ID
                 |--------------------------------------------------------------------------
                 */
 
-                    'reference_id' =>
-                    $user->user_uid
-                        . '-berkas-'
-                        . $permintaan->permintaan_uid,
-                ]
-            );
-
+                'reference_id' => $user->user_uid . '-berkas-' . $permintaan->permintaan_uid,
+            ]);
 
         /*
     |--------------------------------------------------------------------------
@@ -949,16 +852,8 @@ class SamperinPegawaiController extends Controller
     */
 
         if (!$response->successful()) {
-
-            throw new \Exception(
-                'Upload ke ArinDrive gagal. '
-                    . 'HTTP '
-                    . $response->status()
-                    . ': '
-                    . $response->body()
-            );
+            throw new \Exception('Upload ke ArinDrive gagal. ' . 'HTTP ' . $response->status() . ': ' . $response->body());
         }
-
 
         /*
     |--------------------------------------------------------------------------
@@ -968,20 +863,13 @@ class SamperinPegawaiController extends Controller
 
         $result = $response->json();
 
-
         /*
     |--------------------------------------------------------------------------
     | AMBIL URL FILE
     |--------------------------------------------------------------------------
     */
 
-        $url =
-            data_get($result, 'url')
-            ?? data_get($result, 'file_url')
-            ?? data_get($result, 'data.url')
-            ?? data_get($result, 'data.file_url')
-            ?? data_get($result, 'data.web_view_link');
-
+        $url = data_get($result, 'url') ?? (data_get($result, 'file_url') ?? (data_get($result, 'data.url') ?? (data_get($result, 'data.file_url') ?? data_get($result, 'data.web_view_link'))));
 
         /*
     |--------------------------------------------------------------------------
@@ -990,19 +878,8 @@ class SamperinPegawaiController extends Controller
     */
 
         if (!$url) {
-
-            throw new \Exception(
-                'Upload ke ArinDrive berhasil, '
-                    . 'tetapi URL file tidak ditemukan. '
-                    . 'Response: '
-                    . json_encode(
-                        $result,
-                        JSON_UNESCAPED_SLASHES
-                            | JSON_UNESCAPED_UNICODE
-                    )
-            );
+            throw new \Exception('Upload ke ArinDrive berhasil, ' . 'tetapi URL file tidak ditemukan. ' . 'Response: ' . json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         }
-
 
         /*
     |--------------------------------------------------------------------------

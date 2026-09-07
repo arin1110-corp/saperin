@@ -1539,31 +1539,58 @@
             font-size: 12px;
         }
 
-        .samperin-alert {
+        .pegawai-alert-wrap {
+            width: 100%;
+            max-width: 1400px;
+            margin: 24px auto 0;
+            padding: 0 32px;
+            box-sizing: border-box;
+        }
+
+        .pegawai-alert {
+            width: 100%;
+            min-height: 58px;
             display: flex;
-            align-items: flex-start;
-            gap: 10px;
-
-            margin: 0 0 18px;
-
-            padding: 13px 16px;
-
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
             border-radius: 10px;
-
-            font-size: 13px;
+            box-sizing: border-box;
+            font-size: 14px;
         }
 
-        .samperin-alert>i {
-            margin-top: 2px;
-            font-size: 17px;
+        .pegawai-alert-success {
+            background: #ecfdf5;
+            border: 1px solid #86efac;
+            color: #047857;
         }
 
-        .samperin-alert ul {
-            padding-left: 18px;
+        .pegawai-alert-success i {
+            font-size: 18px;
+            color: #16a34a;
+            flex-shrink: 0;
         }
 
-        .samperin-alert li {
-            margin-bottom: 2px;
+        /* =========================================================
+   MOBILE
+   ========================================================= */
+
+        @media (max-width: 576px) {
+
+            .samperin-alert {
+                padding: 12px 13px;
+                gap: 10px;
+                font-size: 13px;
+                border-radius: 9px;
+            }
+
+            .samperin-alert>i {
+                font-size: 17px;
+            }
+
+            .samperin-alert-danger strong {
+                font-size: 13px;
+            }
         }
 
         /* =========================
@@ -1817,32 +1844,37 @@
         @include('pegawai.partials.role-modal')
 
         <main class="samperin-main">
+
             {{-- ALERT SUCCESS --}}
             @if (session('success'))
-                <div class="alert alert-success samperin-alert" role="alert">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span>{{ session('success') }}</span>
+                <div class="pegawai-alert-wrap">
+                    <div class="pegawai-alert pegawai-alert-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>{{ session('success') }}</span>
+                    </div>
                 </div>
             @endif
 
+
             {{-- ALERT ERROR --}}
             @if (session('error'))
-                <div class="alert alert-danger samperin-alert" role="alert">
+                <div class="samperin-alert samperin-alert-danger" role="alert">
                     <i class="bi bi-exclamation-triangle-fill"></i>
                     <span>{{ session('error') }}</span>
                 </div>
             @endif
 
+
             {{-- VALIDATION ERROR --}}
             @if ($errors->any())
-                <div class="alert alert-danger samperin-alert" role="alert">
+                <div class="samperin-alert samperin-alert-danger" role="alert">
 
                     <i class="bi bi-exclamation-triangle-fill"></i>
 
                     <div>
                         <strong>Terdapat kesalahan pada data.</strong>
 
-                        <ul class="mb-0 mt-1">
+                        <ul>
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -1851,7 +1883,10 @@
 
                 </div>
             @endif
+
+
             @yield('content')
+
         </main>
 
         <footer class="samperin-footer">
