@@ -208,10 +208,6 @@ class SamperinAdminController extends Controller
         | ROLE LAIN
         |--------------------------------------------------------------------------
         */
-
-        return redirect()
-            ->route('samperin.dashboard')
-            ->with('success', 'Role berhasil diganti menjadi ' . $role->role_nama);
     }
 
     /*
