@@ -20,10 +20,10 @@
     $activeRoleSlug = session('samperin_role_slug');
 
     /*
-    |--------------------------------------------------------------------------
-    | ROLE YANG TERSEDIA
-    |--------------------------------------------------------------------------
-    */
+|--------------------------------------------------------------------------
+| ROLE YANG TERSEDIA
+|--------------------------------------------------------------------------
+*/
 
     $availableRoles = collect($roles ?? []);
 
@@ -32,6 +32,28 @@
             if (method_exists($sidebarUser, 'roles')) {
                 $availableRoles = $sidebarUser->roles()->where('role_status', true)->orderBy('role_nama')->get();
             }
+        } catch (\Throwable $e) {
+            $availableRoles = collect();
+        }
+    }
+
+    /*
+|--------------------------------------------------------------------------
+| FALLBACK GLOBAL
+|--------------------------------------------------------------------------
+|
+| Jika halaman tidak mengirim $roles dan session user
+| tidak dapat digunakan untuk mengambil relasi roles,
+| ambil role aktif yang tersedia langsung dari database.
+|
+*/
+
+    if ($availableRoles->isEmpty()) {
+        try {
+            $availableRoles = \App\Models\SamperinRole::query()
+                ->where('role_status', true)
+                ->orderBy('role_nama')
+                ->get();
         } catch (\Throwable $e) {
             $availableRoles = collect();
         }
@@ -180,8 +202,8 @@
 
 
     .admin-brand-logo {
-        width: 44px;
-        height: 44px;
+        width: 200px;
+        height: 60px;
 
         border-radius: 11px;
 
@@ -198,8 +220,8 @@
 
 
     .admin-brand-logo img {
-        width: 35px;
-        height: 35px;
+        width: 200px;
+        height: 60px;
 
         object-fit: contain;
     }
@@ -1508,26 +1530,7 @@
 
         <div class="admin-brand-logo">
 
-            <img src="{{ asset('assets/images/logo-samperin.png') }}" alt="Logo SAMPERIN">
-
-        </div>
-
-
-        <div class="admin-brand-text">
-
-            <div class="admin-brand-title">
-
-                SAMPER<span>IN</span>
-
-            </div>
-
-
-            <div class="admin-brand-subtitle">
-
-                Sistem Administrasi Manajemen
-                Pegawai dan Berkas Internal
-
-            </div>
+            <img src="{{ asset('assets/images/logo-samperin-full.png') }}" alt="Logo SAMPERIN">
 
         </div>
 
@@ -1541,7 +1544,6 @@
         </button>
 
     </div>
-
 
 
     {{-- =====================================================
@@ -1989,8 +1991,6 @@
                 </span>
 
             </a>
-
-            
         @endif
 
 
