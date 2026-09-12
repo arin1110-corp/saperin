@@ -120,6 +120,8 @@ class SamperinUser extends Model
         */
 
         'user_password',
+        'user_reset_token',
+        'user_reset_expired',
     ];
 
     /*
@@ -150,6 +152,8 @@ class SamperinUser extends Model
         'user_status' => 'integer',
 
         'user_jmltanggungan' => 'integer',
+
+        'user_reset_expired' => 'datetime',
     ];
 
     /*

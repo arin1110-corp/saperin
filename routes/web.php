@@ -78,6 +78,21 @@ Route::post('/logout', [SamperinLoginController::class, 'logout'])->name('samper
 
 /*
 |--------------------------------------------------------------------------
+| LUPA PASSWORD SAMPERIN
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/password/forgot', [SamperinLoginController::class, 'showForgotPassword'])->name('password.forgot');
+
+Route::post('/password/forgot/check', [SamperinLoginController::class, 'checkResetIdentity'])->name('password.forgot.check');
+
+Route::post('/password/forgot/send', [SamperinLoginController::class, 'sendResetLink'])->name('password.forgot.send');
+
+Route::get('/password/reset/{token}', [SamperinLoginController::class, 'formReset'])->name('password.reset');
+
+Route::post('/password/reset', [SamperinLoginController::class, 'savePassword'])->name('password.update');
+/*
+|--------------------------------------------------------------------------
 | INTERNAL SYSTEM
 |--------------------------------------------------------------------------
 */
