@@ -263,106 +263,138 @@
 
                         <div
                             class="
-                            rounded-2xl
-                            border
-                            border-[#eadfd6]
-                            bg-[#faf8f5]
-                            p-6
-                        ">
+        rounded-2xl
+        border
+        border-[#eadfd6]
+        bg-[#faf8f5]
+        p-6
+    ">
 
-                            <h3
-                                class="
-                                text-[18px]
-                                font-black
-                                text-[#182238]
-                            ">
+                            <h3 class="
+            text-[18px]
+            font-black
+            text-[#182238]
+        ">
                                 Konfirmasi Reset Password
                             </h3>
 
-
                             <p
                                 class="
-                                mt-2
-                                text-sm
-                                leading-6
-                                text-slate-500
-                            ">
+            mt-2
+            text-sm
+            leading-6
+            text-slate-500
+        ">
                                 Data pegawai ditemukan.
                                 Link reset password akan dikirim
                                 ke email yang terdaftar pada akun ini.
                             </p>
 
-
                             <div
                                 class="
-                                mt-5
-                                rounded-xl
-                                border
-                                border-slate-200
-                                bg-white
-                                px-4
-                                py-4
-                            ">
+            mt-5
+            rounded-xl
+            border
+            border-slate-200
+            bg-white
+            px-4
+            py-4
+        ">
 
+                                {{-- NAMA PEGAWAI --}}
                                 <div
                                     class="
-                                    text-xs
-                                    font-semibold
-                                    uppercase
-                                    tracking-wide
-                                    text-slate-400
-                                ">
+                text-xs
+                font-semibold
+                uppercase
+                tracking-wide
+                text-slate-400
+            ">
                                     Nama Pegawai
                                 </div>
 
                                 <div
                                     class="
-                                    mt-1
-                                    text-[15px]
-                                    font-bold
-                                    text-[#182238]
-                                ">
+                mt-1
+                text-[15px]
+                font-bold
+                text-[#182238]
+            ">
                                     {{ $resetUser->user_nama }}
                                 </div>
 
 
+                                {{-- EMAIL --}}
                                 <div
                                     class="
-                                    mt-4
-                                    text-xs
-                                    font-semibold
-                                    uppercase
-                                    tracking-wide
-                                    text-slate-400
-                                ">
+                mt-4
+                text-xs
+                font-semibold
+                uppercase
+                tracking-wide
+                text-slate-400
+            ">
                                     Email Tujuan
                                 </div>
 
-                                <div
-                                    class="
-                                    mt-1
-                                    break-all
-                                    text-[15px]
-                                    font-bold
-                                    text-[#a84e15]
-                                ">
-                                    {{ $maskedEmail }}
+                                <div class="mt-1 flex items-center gap-2">
+
+                                    <span id="emailDisplay"
+                                        class="
+                    min-w-0
+                    break-all
+                    text-[15px]
+                    font-bold
+                    text-[#a84e15]
+                ">
+                                        {{ $maskedEmail }}
+                                    </span>
+
+                                    <button type="button" id="toggleEmailButton" onclick="toggleEmailVisibility()"
+                                        class="
+                    flex
+                    h-8
+                    w-8
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-lg
+                    text-slate-400
+                    transition
+                    hover:bg-slate-100
+                    hover:text-[#a84e15]
+                "
+                                        title="Tampilkan email" aria-label="Tampilkan email">
+
+                                        {{-- ICON MATA --}}
+                                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+
+                                    </button>
+
                                 </div>
 
                             </div>
 
 
+                            {{-- INFORMASI --}}
                             <div
                                 class="
-                                mt-4
-                                rounded-xl
-                                bg-amber-50
-                                px-4
-                                py-3
-                                text-xs
-                                leading-5
-                                text-amber-700
-                            ">
+            mt-4
+            rounded-xl
+            bg-amber-50
+            px-4
+            py-3
+            text-xs
+            leading-5
+            text-amber-700
+        ">
                                 Link reset password berlaku selama
                                 <strong>4 jam</strong>.
                                 Setelah link dikirim, permintaan reset
@@ -371,6 +403,7 @@
                             </div>
 
 
+                            {{-- BUTTON --}}
                             <form method="POST" action="{{ route('password.forgot.send') }}" class="mt-5">
 
                                 @csrf
@@ -379,36 +412,35 @@
 
                                     <a href="{{ route('password.forgot') }}"
                                         class="
-                                        flex
-                                        h-[54px]
-                                        items-center
-                                        justify-center
-                                        rounded-xl
-                                        border
-                                        border-slate-200
-                                        bg-white
-                                        text-sm
-                                        font-bold
-                                        text-slate-600
-                                        hover:bg-slate-50
-                                    ">
+                    flex
+                    h-[54px]
+                    items-center
+                    justify-center
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    text-sm
+                    font-bold
+                    text-slate-600
+                    hover:bg-slate-50
+                ">
                                         Batal
                                     </a>
 
-
                                     <button type="submit"
                                         class="
-                                        login-button
-                                        flex
-                                        h-[54px]
-                                        items-center
-                                        justify-center
-                                        rounded-xl
-                                        bg-[#a84e15]
-                                        text-sm
-                                        font-bold
-                                        text-white
-                                    ">
+                    login-button
+                    flex
+                    h-[54px]
+                    items-center
+                    justify-center
+                    rounded-xl
+                    bg-[#a84e15]
+                    text-sm
+                    font-bold
+                    text-white
+                ">
                                         OKE, Kirim Link
                                     </button>
 
@@ -438,3 +470,92 @@
     </div>
 
 @endsection
+
+
+
+<script>
+    let emailVisible = false;
+
+    function toggleEmailVisibility() {
+
+        const emailDisplay =
+            document.getElementById('emailDisplay');
+
+        const eyeIcon =
+            document.getElementById('eyeIcon');
+
+        const button =
+            document.getElementById('toggleEmailButton');
+
+        emailVisible = !emailVisible;
+
+        if (emailVisible) {
+
+            emailDisplay.textContent =
+                @json($email);
+
+            button.title = 'Sembunyikan email';
+            button.setAttribute(
+                'aria-label',
+                'Sembunyikan email'
+            );
+
+            eyeIcon.innerHTML = `
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3.98 8.223A10.477 10.477 0 001.458 12C2.732 16.057 6.523 19 11 19c1.61 0 3.14-.39 4.47-1.08"
+                />
+
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6.228 6.228A10.451 10.451 0 0111 5c4.477 0 8.268 2.943 9.542 7a10.51 10.51 0 01-4.132 5.411"
+                />
+
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6.228 6.228L3 3"
+                />
+
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 3l18 18"
+                />
+
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9.88 9.88a3 3 0 104.24 4.24"
+                />
+            `;
+
+        } else {
+
+            emailDisplay.textContent =
+                @json($maskedEmail);
+
+            button.title = 'Tampilkan email';
+            button.setAttribute(
+                'aria-label',
+                'Tampilkan email'
+            );
+
+            eyeIcon.innerHTML = `
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+            `;
+        }
+    }
+</script>

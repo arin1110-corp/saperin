@@ -279,7 +279,12 @@ class SamperinLoginController extends Controller
     */
     public function showForgotPassword()
     {
-        return view('auth.forgot_password');
+        return view('auth.forgot_password', [
+            'showConfirmation' => false,
+            'resetUser' => null,
+            'maskedEmail' => null,
+            'email' => null,
+        ]);
     }
     public function checkResetIdentity(Request $request)
     {
@@ -442,6 +447,7 @@ class SamperinLoginController extends Controller
             'resetUser' => $user,
             'maskedEmail' => $maskedEmail,
             'showConfirmation' => true,
+            'email' => $user->user_email,
         ]);
     }
     private function maskEmail(string $email): string
