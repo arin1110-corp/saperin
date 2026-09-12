@@ -1,6 +1,6 @@
 @extends('auth.layouts.app')
 
-@section('title', 'Login - SAMPERIN')
+@section('title', 'SAMPERIN')
 
 @section('content')
 
