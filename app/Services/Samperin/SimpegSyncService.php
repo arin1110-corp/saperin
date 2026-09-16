@@ -4,18 +4,16 @@ namespace App\Services\Samperin;
 
 use App\Imports\SimpegImport;
 use App\Models\SamperinUser;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
-use Throwable;
 
 class SimpegSyncService
 {
     /**
-     * Sinkronisasi Excel SIMPEG ke samperin_user.
+     * Sinkronisasi data SIMPEG dari file Excel XLSX.
      */
     public function sync(string $filePath): array
     {
@@ -29,14 +27,18 @@ class SimpegSyncService
         ];
 
         /*
-    |--------------------------------------------------------------------------
-    | IMPORT EXCEL
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | IMPORT EXCEL
+        |--------------------------------------------------------------------------
+        |
+        | Di VPS getRealPath() menghasilkan temporary file tanpa ekstensi.
+        | Karena itu Reader XLSX dipaksa secara eksplisit.
+        |
+        */
 
         $import = new SimpegImport();
 
-        Excel::import($import, $filePath);
+        Excel::import($import, $filePath, null, \Maatwebsite\Excel\Excel::XLSX);
 
         $rows = $import->rows ?? collect();
 
@@ -45,15 +47,15 @@ class SimpegSyncService
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | BARIS PERTAMA BUKAN DATA
-    |--------------------------------------------------------------------------
-    |
-    | Berdasarkan hasil pengecekan:
-    | index 0 = subheader
-    | index 1 = pegawai pertama
-    |
-    */
+        |--------------------------------------------------------------------------
+        | HAPUS BARIS PERTAMA
+        |--------------------------------------------------------------------------
+        |
+        | Berdasarkan hasil pengecekan Excel:
+        | index 0 = baris non-data
+        | index 1 = pegawai pertama
+        |
+        */
 
         $rows = $rows->skip(1)->values();
 
@@ -62,31 +64,25 @@ class SimpegSyncService
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | SIMPAN IDENTITAS YANG ADA DI EXCEL
-    |--------------------------------------------------------------------------
-    |
-    | Digunakan nanti untuk menentukan pegawai mana yang harus
-    | dinonaktifkan.
-    |
-    */
+        |--------------------------------------------------------------------------
+        | IDENTITAS YANG ADA DI EXCEL
+        |--------------------------------------------------------------------------
+        |
+        | Dipakai untuk menentukan pegawai SAMPERIN yang sudah tidak
+        | ada dalam dataset SIMPEG.
+        |
+        */
 
         $nipExcel = [];
         $nikExcel = [];
 
         /*
-    |--------------------------------------------------------------------------
-    | PROSES DATA PEGAWAI
-    |--------------------------------------------------------------------------
-    */
-
-        foreach ($rows as $index => $row) {
-            /*
         |--------------------------------------------------------------------------
-        | IDENTITAS
+        | PROSES SETIAP PEGAWAI
         |--------------------------------------------------------------------------
         */
 
+        foreach ($rows as $index => $row) {
             $nip = $this->normalizeIdentifier($this->getValue($row, 'nip'));
 
             $nik = $this->normalizeIdentifier($this->getValue($row, 'nik'));
@@ -94,20 +90,20 @@ class SimpegSyncService
             $nama = $this->cleanString($this->getValue($row, 'nama'));
 
             /*
-        |--------------------------------------------------------------------------
-        | LEWATI BARIS KOSONG
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | LEWATI BARIS KOSONG
+            |--------------------------------------------------------------------------
+            */
 
             if (!$nip && !$nik && !$nama) {
                 continue;
             }
 
             /*
-        |--------------------------------------------------------------------------
-        | NIP DAN NIK WAJIB SALAH SATU
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | NIP / NIK WAJIB ADA
+            |--------------------------------------------------------------------------
+            */
 
             if (!$nip && !$nik) {
                 $result['failed']++;
@@ -115,6 +111,8 @@ class SimpegSyncService
                 $result['errors'][] = [
                     'baris' => $index + 2,
                     'nama' => $nama,
+                    'nip' => null,
+                    'nik' => null,
                     'pesan' => 'NIP dan NIK kosong.',
                 ];
 
@@ -124,10 +122,10 @@ class SimpegSyncService
             $result['total']++;
 
             /*
-        |--------------------------------------------------------------------------
-        | CATAT IDENTITAS DARI EXCEL
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | SIMPAN IDENTITAS EXCEL
+            |--------------------------------------------------------------------------
+            */
 
             if ($nip) {
                 $nipExcel[$nip] = true;
@@ -137,23 +135,17 @@ class SimpegSyncService
                 $nikExcel[$nik] = true;
             }
 
-            /*
-        |--------------------------------------------------------------------------
-        | CEK DUPLIKAT DALAM EXCEL
-        |--------------------------------------------------------------------------
-        */
-
             try {
                 /*
-            |--------------------------------------------------------------------------
-            | CARI PEGAWAI DI SAMPERIN
-            |--------------------------------------------------------------------------
-            |
-            | Prioritas:
-            | 1. NIP
-            | 2. NIK jika NIP tidak tersedia / tidak ditemukan
-            |
-            */
+                |--------------------------------------------------------------------------
+                | CARI PEGAWAI
+                |--------------------------------------------------------------------------
+                |
+                | Prioritas:
+                | 1. NIP
+                | 2. NIK
+                |
+                */
 
                 $pegawai = null;
 
@@ -166,23 +158,13 @@ class SimpegSyncService
                 }
 
                 /*
-            |--------------------------------------------------------------------------
-            | VALIDASI NIP VS NIK
-            |--------------------------------------------------------------------------
-            |
-            | Contoh:
-            |
-            | Database:
-            | NIP = 123
-            | NIK = 111
-            |
-            | Excel:
-            | NIP = 123
-            | NIK = 222
-            |
-            | Jangan update karena identitas bertentangan.
-            |
-            */
+                |--------------------------------------------------------------------------
+                | VALIDASI NIP + NIK
+                |--------------------------------------------------------------------------
+                |
+                | Jika NIP sama tetapi NIK berbeda, jangan overwrite.
+                |
+                */
 
                 if ($pegawai && $nip && $nik && $pegawai->user_nip === $nip && $pegawai->user_nik && $pegawai->user_nik !== $nik) {
                     $result['failed']++;
@@ -191,51 +173,52 @@ class SimpegSyncService
                         'baris' => $index + 2,
                         'nama' => $nama,
                         'nip' => $nip,
-                        'nik_excel' => $nik,
-                        'nik_database' => $pegawai->user_nik,
+                        'nik' => $nik,
                         'pesan' => 'NIP cocok tetapi NIK berbeda. Data dilewati.',
                     ];
 
                     Log::warning('SAMPERIN SIMPEG: NIP cocok tetapi NIK berbeda.', [
+                        'baris' => $index + 2,
+                        'nama' => $nama,
                         'nip' => $nip,
                         'nik_excel' => $nik,
                         'nik_database' => $pegawai->user_nik,
-                        'nama' => $nama,
                     ]);
 
                     continue;
                 }
 
                 /*
-            |--------------------------------------------------------------------------
-            | MAPPING DATA
-            |--------------------------------------------------------------------------
-            */
+                |--------------------------------------------------------------------------
+                | MAPPING DATA SIMPEG
+                |--------------------------------------------------------------------------
+                */
 
                 $data = $this->mapPegawai($row, $nip, $nik);
 
                 /*
-            |--------------------------------------------------------------------------
-            | UPDATE
-            |--------------------------------------------------------------------------
-            */
+                |--------------------------------------------------------------------------
+                | UPDATE
+                |--------------------------------------------------------------------------
+                */
 
                 if ($pegawai) {
                     $pegawai->fill($data);
 
                     /*
-                | Pegawai ditemukan di SIMPEG berarti aktif.
-                */
+                    | Ditemukan di SIMPEG = aktif
+                    */
                     $pegawai->user_status = 1;
 
                     $pegawai->save();
 
                     $result['updated']++;
-                } /*
-            |--------------------------------------------------------------------------
-            | INSERT
-            |--------------------------------------------------------------------------
-            */ else {
+                }
+                /*
+                |--------------------------------------------------------------------------
+                | INSERT
+                |--------------------------------------------------------------------------
+                */ else {
                     $data['user_uid'] = (string) Str::uuid();
 
                     $data['user_status'] = 1;
@@ -266,14 +249,10 @@ class SimpegSyncService
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | NONAKTIFKAN PEGAWAI YANG TIDAK ADA DI EXCEL
-    |--------------------------------------------------------------------------
-    |
-    | Asumsi:
-    | Excel SIMPEG adalah full dataset pegawai Dinas Kebudayaan.
-    |
-    */
+        |--------------------------------------------------------------------------
+        | NONAKTIFKAN PEGAWAI YANG TIDAK ADA DI EXCEL
+        |--------------------------------------------------------------------------
+        */
 
         $result['deactivated'] = $this->deactivateMissing($nipExcel, $nikExcel);
 
@@ -281,7 +260,10 @@ class SimpegSyncService
     }
 
     /**
-     * Mapping Excel → samperin_user.
+     * Mapping data Excel SIMPEG ke samperin_user.
+     *
+     * CATATAN:
+     * user_lokasikerja TIDAK DIUBAH.
      */
     private function mapPegawai(Collection $row, ?string $nip, ?string $nik): array
     {
@@ -289,10 +271,7 @@ class SimpegSyncService
 
         $golongan = $this->findGolongan($this->getValue($row, 'golongan'));
 
-        $eselon = $this->findEselon(
-    $this->getValue($row, 'eselon'),
-    $this->getValue($row, 'sub_eselon')
-);
+        $eselon = $this->findEselon($this->getValue($row, 'eselon'), $this->getValue($row, 'sub_eselon'));
 
         $pendidikan = $this->findPendidikan($this->getValue($row, 'pendidikan_terakhir'), $this->getValue($row, 'jurusan_pendidikan'));
 
@@ -330,16 +309,23 @@ class SimpegSyncService
             'user_jenis_kerja_id' => $jenisKerja?->jenis_kerja_id,
 
             'user_kelasjabatan' => $this->cleanString($this->getValue($row, 'kelas_jabatan')),
+
+            /*
+            |--------------------------------------------------------------------------
+            | JANGAN MASUKKAN user_lokasikerja
+            |--------------------------------------------------------------------------
+            |
+            | Lokasi kerja adalah data SAMPERIN dan tidak boleh ditimpa
+            | oleh sinkronisasi SIMPEG.
+            |
+            */
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MASTER LOOKUP
-    |--------------------------------------------------------------------------
-    */
-
-    private function findJabatan($value)
+    /**
+     * Cari Jabatan.
+     */
+    private function findJabatan(?string $value)
     {
         $value = $this->cleanString($value);
 
@@ -348,23 +334,14 @@ class SimpegSyncService
         }
 
         return DB::table('samperin_jabatan')
-            ->whereRaw('LOWER(TRIM(jabatan_nama)) = ?', [strtolower($value)])
+            ->where('jabatan_status', 1)
+            ->whereRaw('UPPER(TRIM(jabatan_nama)) = ?', [strtoupper($value)])
             ->first();
     }
 
-    private function findBidang($value)
-    {
-        $value = $this->cleanString($value);
-
-        if (!$value) {
-            return null;
-        }
-
-        return DB::table('samperin_bidang')
-            ->whereRaw('LOWER(TRIM(bidang_nama)) = ?', [strtolower($value)])
-            ->first();
-    }
-
+    /**
+     * Cari Golongan.
+     */
     private function findGolongan(?string $value)
     {
         $value = $this->cleanString($value);
@@ -385,123 +362,126 @@ class SimpegSyncService
             ->first();
     }
 
-    private function findEselon(
-    ?string $eselon,
-    ?string $subEselon = null
-) {
-    $eselon = $this->cleanString($eselon);
-    $subEselon = $this->cleanString($subEselon);
-
-    /*
-    |--------------------------------------------------------------------------
-    | ESELON & SUB ESELON KOSONG
-    | → NON ESELON
-    |--------------------------------------------------------------------------
-    */
-
-    if (!$eselon && !$subEselon) {
-
-        return DB::table('samperin_eselon')
-            ->where('eselon_status', 1)
-            ->whereRaw(
-                'UPPER(TRIM(eselon_nama)) = ?',
-                ['NON ESELON']
-            )
-            ->first();
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | PRIORITAS SUB ESELON
-    |--------------------------------------------------------------------------
-    |
-    | IV.a  → Eselon IVA
-    | IV.b  → Eselon IVB
-    | III.a → Eselon IIIA
-    | III.b → Eselon IIIB
-    | II.a  → Eselon IIA
-    | II.b  → Eselon IIB
-    | I.a   → Eselon IA
-    | I.b   → Eselon IB
-    |
-    */
-
-    if ($subEselon) {
-
-        $sub = strtoupper(trim($subEselon));
-
-        $map = [
-            'I.A' => 'ESELON IA',
-            'I.B' => 'ESELON IB',
-
-            'II.A' => 'ESELON IIA',
-            'II.B' => 'ESELON IIB',
-
-            'III.A' => 'ESELON IIIA',
-            'III.B' => 'ESELON IIIB',
-
-            'IV.A' => 'ESELON IVA',
-            'IV.B' => 'ESELON IVB',
-        ];
-
-        $namaEselon = $map[$sub] ?? null;
-
-        if ($namaEselon) {
-
-            $result = DB::table('samperin_eselon')
-                ->where('eselon_status', 1)
-                ->whereRaw(
-                    'UPPER(TRIM(eselon_nama)) = ?',
-                    [$namaEselon]
-                )
-                ->first();
-
-            if ($result) {
-                return $result;
-            }
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | FALLBACK BERDASARKAN ESELON
-    |--------------------------------------------------------------------------
-    */
-
-    if ($eselon) {
-
-        $eselon = strtoupper(trim($eselon));
+    /**
+     * Cari Eselon.
+     *
+     * SIMPEG:
+     * IV + IV.a -> Eselon IVA
+     * IV + IV.b -> Eselon IVB
+     * III + III.a -> Eselon IIIA
+     * III + III.b -> Eselon IIIB
+     *
+     * Jika Eselon dan Sub Eselon kosong:
+     * -> Non Eselon
+     */
+    private function findEselon(?string $eselon, ?string $subEselon = null)
+    {
+        $eselon = $this->cleanString($eselon);
+        $subEselon = $this->cleanString($subEselon);
 
         /*
-        | Kalau Excel hanya memberi:
-        | IV → cari Eselon IVA sebagai fallback
-        | III → cari Eselon IIIA
+        |--------------------------------------------------------------------------
+        | KOSONG = NON ESELON
+        |--------------------------------------------------------------------------
         */
 
-        $mapEselon = [
-            'I' => 'ESELON IA',
-            'II' => 'ESELON IIA',
-            'III' => 'ESELON IIIA',
-            'IV' => 'ESELON IVA',
-        ];
-
-        $namaEselon = $mapEselon[$eselon] ?? null;
-
-        if ($namaEselon) {
-
+        if (!$eselon && !$subEselon) {
             return DB::table('samperin_eselon')
                 ->where('eselon_status', 1)
-                ->whereRaw(
-                    'UPPER(TRIM(eselon_nama)) = ?',
-                    [$namaEselon]
-                )
+                ->whereRaw('UPPER(TRIM(eselon_nama)) = ?', ['NON ESELON'])
                 ->first();
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUB ESELON
+        |--------------------------------------------------------------------------
+        */
+
+        if ($subEselon) {
+            $sub = strtoupper(trim($subEselon));
+
+            $sub = str_replace([' ', '-', '_'], '', $sub);
+
+            $map = [
+                'I.A' => 'ESELON IA',
+                'I.B' => 'ESELON IB',
+
+                'II.A' => 'ESELON IIA',
+                'II.B' => 'ESELON IIB',
+
+                'III.A' => 'ESELON IIIA',
+                'III.B' => 'ESELON IIIB',
+
+                'IV.A' => 'ESELON IVA',
+                'IV.B' => 'ESELON IVB',
+            ];
+
+            /*
+            | Karena sebelumnya tanda "." dihapus,
+            | gunakan bentuk tanpa titik.
+            */
+
+            $map = [
+                'IA' => 'ESELON IA',
+                'IB' => 'ESELON IB',
+
+                'IIA' => 'ESELON IIA',
+                'IIB' => 'ESELON IIB',
+
+                'IIIA' => 'ESELON IIIA',
+                'IIIB' => 'ESELON IIIB',
+
+                'IVA' => 'ESELON IVA',
+                'IVB' => 'ESELON IVB',
+            ];
+
+            $namaEselon = $map[$sub] ?? null;
+
+            if ($namaEselon) {
+                $result = DB::table('samperin_eselon')
+                    ->where('eselon_status', 1)
+                    ->whereRaw('UPPER(TRIM(eselon_nama)) = ?', [$namaEselon])
+                    ->first();
+
+                if ($result) {
+                    return $result;
+                }
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FALLBACK ESELON
+        |--------------------------------------------------------------------------
+        */
+
+        if ($eselon) {
+            $eselon = strtoupper(trim($eselon));
+
+            $mapEselon = [
+                'I' => 'ESELON IA',
+                'II' => 'ESELON IIA',
+                'III' => 'ESELON IIIA',
+                'IV' => 'ESELON IVA',
+            ];
+
+            $namaEselon = $mapEselon[$eselon] ?? null;
+
+            if ($namaEselon) {
+                return DB::table('samperin_eselon')
+                    ->where('eselon_status', 1)
+                    ->whereRaw('UPPER(TRIM(eselon_nama)) = ?', [$namaEselon])
+                    ->first();
+            }
+        }
+
+        return null;
     }
 
-    return null;
-}
-
+    /**
+     * Cari Pendidikan berdasarkan jenjang + jurusan.
+     */
     private function findPendidikan(?string $jenjang, ?string $jurusan = null)
     {
         $jenjang = $this->cleanString($jenjang);
@@ -514,10 +494,10 @@ class SimpegSyncService
         $jenjang = strtoupper(trim($jenjang));
 
         /*
-    |--------------------------------------------------------------------------
-    | Mapping jenjang SIMPEG ke jenjang SAMPERIN
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Mapping jenjang SIMPEG
+        |--------------------------------------------------------------------------
+        */
 
         $jenjangMap = [
             'SD' => 'SD',
@@ -562,10 +542,10 @@ class SimpegSyncService
         $jenjangMaster = $jenjangMap[$jenjang] ?? $jenjang;
 
         /*
-    |--------------------------------------------------------------------------
-    | Cari jenjang + jurusan
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Cari jenjang + jurusan
+        |--------------------------------------------------------------------------
+        */
 
         if ($jurusan) {
             $pendidikan = DB::table('samperin_pendidikan')
@@ -580,15 +560,10 @@ class SimpegSyncService
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | Jika jurusan tidak ditemukan
-    |--------------------------------------------------------------------------
-    |
-    | Tetap cari berdasarkan jenjang.
-    | Ini mencegah data menjadi gagal hanya karena
-    | penulisan jurusan berbeda.
-    |
-    */
+        |--------------------------------------------------------------------------
+        | Fallback jenjang
+        |--------------------------------------------------------------------------
+        */
 
         return DB::table('samperin_pendidikan')
             ->where('pendidikan_status', 1)
@@ -596,6 +571,9 @@ class SimpegSyncService
             ->first();
     }
 
+    /**
+     * Mapping STATUS PEGAWAI SIMPEG ke Jenis Kerja SAMPERIN.
+     */
     private function findJenisKerja(?string $value)
     {
         $value = $this->cleanString($value);
@@ -613,7 +591,7 @@ class SimpegSyncService
 
             'PPPK PW', 'PPPK-PW', 'PPPK PARUH WAKTU', 'PPPK PARUH-WAKTU' => 'PPPK-PW',
 
-            'KONTRAK', 'KONTRAK (PJLP)', 'KONTRAK PJLP', 'PJLP' => 'PJLP',
+            'KONTRAK (PJLP)', 'KONTRAK PJLP', 'PJLP' => 'PJLP',
 
             default => null,
         };
@@ -628,12 +606,66 @@ class SimpegSyncService
             ->first();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | IDENTIFIER
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * Nonaktifkan pegawai SAMPERIN yang tidak ditemukan di Excel.
+     */
+    private function deactivateMissing(array $nipExcel, array $nikExcel): int
+    {
+        $count = 0;
 
+        SamperinUser::query()
+            ->where('user_status', 1)
+            ->chunkById(500, function ($pegawais) use (&$count, $nipExcel, $nikExcel) {
+                foreach ($pegawais as $pegawai) {
+                    $adaDiExcel = false;
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Jika punya NIP, gunakan NIP
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if ($pegawai->user_nip) {
+                        $nip = $this->normalizeIdentifier($pegawai->user_nip);
+
+                        if ($nip && isset($nipExcel[$nip])) {
+                            $adaDiExcel = true;
+                        }
+                    }
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Jika tidak punya NIP, gunakan NIK
+                    |--------------------------------------------------------------------------
+                    */ elseif ($pegawai->user_nik) {
+                        $nik = $this->normalizeIdentifier($pegawai->user_nik);
+
+                        if ($nik && isset($nikExcel[$nik])) {
+                            $adaDiExcel = true;
+                        }
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Tidak ada di SIMPEG = NONAKTIF
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!$adaDiExcel) {
+                        $pegawai->user_status = 0;
+
+                        $pegawai->save();
+
+                        $count++;
+                    }
+                }
+            });
+
+        return $count;
+    }
+
+    /**
+     * Normalisasi NIP / NIK.
+     */
     private function normalizeIdentifier($value): ?string
     {
         if ($value === null) {
@@ -643,30 +675,24 @@ class SimpegSyncService
         $value = trim((string) $value);
 
         /*
-        | Excel apostrophe
+        | Excel sering menyimpan angka sebagai:
+        | '196712312000031043
         */
 
         $value = ltrim($value, "'");
 
         /*
-        | Hilangkan whitespace
+        | Hilangkan whitespace.
         */
 
         $value = preg_replace('/\s+/', '', $value);
 
-        if ($value === '') {
-            return null;
-        }
-
-        return $value;
+        return $value !== '' ? $value : null;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | PHONE
-    |--------------------------------------------------------------------------
-    */
-
+    /**
+     * Normalisasi nomor telepon.
+     */
     private function normalizePhone($value): ?string
     {
         if ($value === null) {
@@ -679,15 +705,12 @@ class SimpegSyncService
 
         $value = preg_replace('/\s+/', '', $value);
 
-        return $value === '' ? null : $value;
+        return $value !== '' ? $value : null;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | STRING
-    |--------------------------------------------------------------------------
-    */
-
+    /**
+     * Bersihkan string.
+     */
     private function cleanString($value): ?string
     {
         if ($value === null) {
@@ -696,22 +719,21 @@ class SimpegSyncService
 
         $value = trim((string) $value);
 
-        return $value === '' ? null : $value;
+        return $value !== '' ? $value : null;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GENDER
-    |--------------------------------------------------------------------------
-    */
-
+    /**
+     * Normalisasi jenis kelamin.
+     */
     private function normalizeGender($value): ?string
     {
+        $value = $this->cleanString($value);
+
         if (!$value) {
             return null;
         }
 
-        $value = strtoupper(trim((string) $value));
+        $value = strtoupper($value);
 
         return match ($value) {
             'L', 'LAKI', 'LAKI-LAKI', 'LAKI LAKI', 'PRIA' => 'L',
@@ -722,39 +744,61 @@ class SimpegSyncService
         };
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DATE
-    |--------------------------------------------------------------------------
-    */
-
+    /**
+     * Normalisasi tanggal.
+     */
     private function normalizeDate($value): ?string
     {
-        if (!$value) {
+        if ($value === null || $value === '') {
             return null;
         }
 
-        try {
-            /*
-            | Excel serial date
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | Excel serial date
+        |--------------------------------------------------------------------------
+        */
 
-            if (is_numeric($value) && (int) $value > 1000) {
-                return Carbon::create(1899, 12, 30)->addDays((int) $value)->format('Y-m-d');
+        if (is_numeric($value) && (float) $value > 1000) {
+            try {
+                $timestamp = ((float) $value - 25569) * 86400;
+
+                return gmdate('Y-m-d', (int) $timestamp);
+            } catch (\Throwable $e) {
+                return null;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | String date
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+            $value = trim((string) $value);
+
+            $formats = ['d-m-Y', 'd/m/Y', 'Y-m-d', 'Y/m/d'];
+
+            foreach ($formats as $format) {
+                $date = \DateTime::createFromFormat($format, $value);
+
+                if ($date && $date->format($format) === $value) {
+                    return $date->format('Y-m-d');
+                }
             }
 
-            return Carbon::parse($value)->format('Y-m-d');
-        } catch (Throwable $e) {
+            $date = new \DateTime($value);
+
+            return $date->format('Y-m-d');
+        } catch (\Throwable $e) {
             return null;
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GET VALUE
-    |--------------------------------------------------------------------------
-    */
-
+    /**
+     * Ambil value dari Collection / array / object.
+     */
     private function getValue($row, string $key)
     {
         if ($row instanceof Collection) {
@@ -765,59 +809,10 @@ class SimpegSyncService
             return $row[$key] ?? null;
         }
 
-        return $row->{$key} ?? null;
-    }
+        if (is_object($row)) {
+            return $row->{$key} ?? null;
+        }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DEACTIVATE MISSING
-    |--------------------------------------------------------------------------
-    */
-
-    private function deactivateMissing(array $nipExcel, array $nikExcel): int
-    {
-        $count = 0;
-
-        SamperinUser::where('user_status', 1)->chunkById(500, function ($users) use (&$count, $nipExcel, $nikExcel) {
-            foreach ($users as $user) {
-                $nip = $this->normalizeIdentifier($user->user_nip);
-
-                $nik = $this->normalizeIdentifier($user->user_nik);
-
-                $exists = false;
-
-                /*
-                        |--------------------------------------------------------------------------
-                        | USER PUNYA NIP
-                        |--------------------------------------------------------------------------
-                        */
-
-                if ($nip) {
-                    $exists = isset($nipExcel[$nip]);
-                } /*
-                        |--------------------------------------------------------------------------
-                        | USER TANPA NIP → NIK
-                        |--------------------------------------------------------------------------
-                        */ elseif ($nik) {
-                    $exists = isset($nikExcel[$nik]);
-                }
-
-                /*
-                        |--------------------------------------------------------------------------
-                        | TIDAK ADA DI EXCEL
-                        |--------------------------------------------------------------------------
-                        */
-
-                if (!$exists) {
-                    $user->user_status = 0;
-
-                    $user->save();
-
-                    $count++;
-                }
-            }
-        });
-
-        return $count;
+        return null;
     }
 }
