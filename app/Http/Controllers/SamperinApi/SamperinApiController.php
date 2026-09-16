@@ -289,14 +289,14 @@ class SamperinApiController extends Controller
             // Field lama TETAP dipertahankan
             // =====================================================
             'u.user_jabatan_id as user_jabatan',
-            'j.jabatan_nama as user_jabatan_nama',
+            'j.jabatan_nama as jabatan_nama',
 
             // =====================================================
             // BIDANG
             // Field lama TETAP dipertahankan
             // =====================================================
             'u.user_bidang_id as user_bidang',
-            'b.bidang_nama as user_bidang_nama',
+            'b.bidang_nama as bidang_nama',
 
             // =====================================================
             // DATA TAMBAHAN
