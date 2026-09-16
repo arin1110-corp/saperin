@@ -264,23 +264,52 @@ class SamperinApiController extends Controller
 
     public function pegawaiByID($id)
     {
-        $pegawai = DB::table('samperin_user')
+        $pegawai = DB::table('samperin_user as u')
+
+            ->leftJoin('samperin_jabatan as j', 'j.jabatan_id', '=', 'u.user_jabatan_id')
+
+            ->leftJoin('samperin_bidang as b', 'b.bidang_id', '=', 'u.user_bidang_id')
 
             ->select(
-                'user_id',
+            // =====================================================
+            // ID
+            // =====================================================
+            'u.user_id',
 
-                'user_nama',
+            // =====================================================
+            // IDENTITAS
+            // =====================================================
+            'u.user_nama',
+            'u.user_nip',
+            'u.user_nik',
+            'u.user_email',
 
-                'user_nip',
+            // =====================================================
+            // JABATAN
+            // Field lama TETAP dipertahankan
+            // =====================================================
+            'u.user_jabatan_id as user_jabatan',
+            'j.jabatan_nama as user_jabatan_nama',
 
-                'user_email',
+            // =====================================================
+            // BIDANG
+            // Field lama TETAP dipertahankan
+            // =====================================================
+            'u.user_bidang_id as user_bidang',
+            'b.bidang_nama as user_bidang_nama',
 
-                'user_jabatan_id as user_jabatan',
-
-                'user_bidang_id as user_bidang',
+            // =====================================================
+            // DATA TAMBAHAN
+            // Tambahkan sesuai kebutuhan SAMPERIN
+            // =====================================================
+            'u.user_status',
+            'u.user_golongan_id',
+            'u.user_eselon_id',
+            'u.user_pendidikan_id',
+            'u.user_jenis_kerja_id',
             )
 
-            ->where('user_id', $id)
+            ->where('u.user_id', $id)
 
             ->first();
 
@@ -288,7 +317,6 @@ class SamperinApiController extends Controller
             return response()->json(
                 [
                     'success' => false,
-
                     'message' => 'Pegawai tidak ditemukan',
                 ],
                 404,
@@ -297,7 +325,6 @@ class SamperinApiController extends Controller
 
         return response()->json([
             'success' => true,
-
             'data' => $pegawai,
         ]);
     }
