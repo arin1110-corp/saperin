@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Samperin;
 
+use App\Services\Samperin\SimpegSyncService;
 use App\Http\Controllers\Controller;
 use App\Models\SamperinBidang;
 use App\Models\SamperinEselon;
@@ -29,12 +30,7 @@ class SamperinUserController extends Controller
 
     public function index(Request $request)
     {
-        $query = SamperinUser::query()
-            ->leftJoin('samperin_jabatan', 'samperin_user.user_jabatan_id', '=', 'samperin_jabatan.jabatan_id')
-            ->leftJoin('samperin_bidang', 'samperin_user.user_bidang_id', '=', 'samperin_bidang.bidang_id')
-            ->leftJoin('samperin_golongan', 'samperin_user.user_golongan_id', '=', 'samperin_golongan.golongan_id')
-            ->leftJoin('samperin_jenis_kerja', 'samperin_user.user_jenis_kerja_id', '=', 'samperin_jenis_kerja.jenis_kerja_id')
-            ->select('samperin_user.*');
+        $query = SamperinUser::query()->leftJoin('samperin_jabatan', 'samperin_user.user_jabatan_id', '=', 'samperin_jabatan.jabatan_id')->leftJoin('samperin_bidang', 'samperin_user.user_bidang_id', '=', 'samperin_bidang.bidang_id')->leftJoin('samperin_golongan', 'samperin_user.user_golongan_id', '=', 'samperin_golongan.golongan_id')->leftJoin('samperin_jenis_kerja', 'samperin_user.user_jenis_kerja_id', '=', 'samperin_jenis_kerja.jenis_kerja_id')->select('samperin_user.*');
 
         /*
     |--------------------------------------------------------------------------
@@ -66,8 +62,7 @@ class SamperinUserController extends Controller
         |----------------------------------------------------------------------
         */
 
-                $q->orWhere('samperin_jabatan.jabatan_nama', 'like', '%' . $search . '%')
-                    ->orWhere('samperin_jabatan.jabatan_kategori', 'like', '%' . $search . '%');
+                $q->orWhere('samperin_jabatan.jabatan_nama', 'like', '%' . $search . '%')->orWhere('samperin_jabatan.jabatan_kategori', 'like', '%' . $search . '%');
 
                 /*
         |----------------------------------------------------------------------
@@ -153,11 +148,7 @@ class SamperinUserController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        $pegawais = $query
-            ->with('foto')
-            ->orderBy('user_nama')
-            ->paginate(10)
-            ->withQueryString();
+        $pegawais = $query->with('foto')->orderBy('user_nama')->paginate(10)->withQueryString();
 
         /*
     |--------------------------------------------------------------------------
@@ -165,36 +156,17 @@ class SamperinUserController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        $bidangs = SamperinBidang::query()
-            ->where('bidang_status', 1)
-            ->orderBy('bidang_nama')
-            ->get();
+        $bidangs = SamperinBidang::query()->where('bidang_status', 1)->orderBy('bidang_nama')->get();
 
-        $jabatans = SamperinJabatan::query()
-            ->where('jabatan_status', 1)
-            ->orderBy('jabatan_nama')
-            ->get();
+        $jabatans = SamperinJabatan::query()->where('jabatan_status', 1)->orderBy('jabatan_nama')->get();
 
-        $golongans = SamperinGolongan::query()
-            ->where('golongan_status', 1)
-            ->orderBy('golongan_nama')
-            ->get();
+        $golongans = SamperinGolongan::query()->where('golongan_status', 1)->orderBy('golongan_nama')->get();
 
-        $eselons = SamperinEselon::query()
-            ->where('eselon_status', 1)
-            ->orderBy('eselon_nama')
-            ->get();
+        $eselons = SamperinEselon::query()->where('eselon_status', 1)->orderBy('eselon_nama')->get();
 
-        $pendidikans = SamperinPendidikan::query()
-            ->where('pendidikan_status', 1)
-            ->orderBy('pendidikan_jenjang')
-            ->orderBy('pendidikan_jurusan')
-            ->get();
+        $pendidikans = SamperinPendidikan::query()->where('pendidikan_status', 1)->orderBy('pendidikan_jenjang')->orderBy('pendidikan_jurusan')->get();
 
-        $jenisKerjas = SamperinJenisKerja::query()
-            ->where('jenis_kerja_status', 1)
-            ->orderBy('jenis_kerja_nama')
-            ->get();
+        $jenisKerjas = SamperinJenisKerja::query()->where('jenis_kerja_status', 1)->orderBy('jenis_kerja_nama')->get();
 
         /*
     |--------------------------------------------------------------------------
@@ -217,21 +189,11 @@ class SamperinUserController extends Controller
         $statJenisKerja = SamperinJenisKerja::query()
             ->where('jenis_kerja_status', 1)
             ->leftJoin('samperin_user', function ($join) {
-                $join->on(
-                    'samperin_jenis_kerja.jenis_kerja_id',
-                    '=',
-                    'samperin_user.user_jenis_kerja_id'
-                )->where('samperin_user.user_status', 1);
+            $join->on('samperin_jenis_kerja.jenis_kerja_id', '=', 'samperin_user.user_jenis_kerja_id')->where('samperin_user.user_status', 1);
             })
-            ->select(
-                'samperin_jenis_kerja.jenis_kerja_id',
-                'samperin_jenis_kerja.jenis_kerja_nama'
-            )
+            ->select('samperin_jenis_kerja.jenis_kerja_id', 'samperin_jenis_kerja.jenis_kerja_nama')
             ->selectRaw('COUNT(samperin_user.user_id) as jumlah')
-            ->groupBy(
-                'samperin_jenis_kerja.jenis_kerja_id',
-                'samperin_jenis_kerja.jenis_kerja_nama'
-            )
+            ->groupBy('samperin_jenis_kerja.jenis_kerja_id', 'samperin_jenis_kerja.jenis_kerja_nama')
             ->orderBy('samperin_jenis_kerja.jenis_kerja_id')
             ->get();
 
@@ -244,21 +206,11 @@ class SamperinUserController extends Controller
         $statBidang = SamperinBidang::query()
             ->where('bidang_status', 1)
             ->leftJoin('samperin_user', function ($join) {
-                $join->on(
-                    'samperin_bidang.bidang_id',
-                    '=',
-                    'samperin_user.user_bidang_id'
-                )->where('samperin_user.user_status', 1);
+            $join->on('samperin_bidang.bidang_id', '=', 'samperin_user.user_bidang_id')->where('samperin_user.user_status', 1);
             })
-            ->select(
-                'samperin_bidang.bidang_id',
-                'samperin_bidang.bidang_nama'
-            )
+            ->select('samperin_bidang.bidang_id', 'samperin_bidang.bidang_nama')
             ->selectRaw('COUNT(samperin_user.user_id) as jumlah')
-            ->groupBy(
-                'samperin_bidang.bidang_id',
-                'samperin_bidang.bidang_nama'
-            )
+            ->groupBy('samperin_bidang.bidang_id', 'samperin_bidang.bidang_nama')
             ->orderBy('samperin_bidang.bidang_id')
             ->get();
         /*
@@ -274,19 +226,23 @@ class SamperinUserController extends Controller
             ->select('user_lokasikerja')
             ->selectRaw('COUNT(user_id) as jumlah')
             ->groupBy('user_lokasikerja')
-            ->orderByRaw("
+            ->orderByRaw(
+                "
     CASE
         WHEN user_lokasikerja LIKE 'Kota %' THEN 2
         WHEN user_lokasikerja LIKE 'Kabupaten %' THEN 2
         ELSE 1
     END
-")
-            ->orderByRaw("
+",
+            )
+            ->orderByRaw(
+            "
     CASE
         WHEN user_lokasikerja LIKE 'Kota %' THEN 1
         ELSE 2
     END
-")
+",
+        )
             ->orderBy('user_lokasikerja')
             ->get();
         /*
@@ -295,21 +251,7 @@ class SamperinUserController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        return view('dashboard.data-pegawai.index', compact(
-            'pegawais',
-            'bidangs',
-            'jabatans',
-            'golongans',
-            'eselons',
-            'pendidikans',
-            'jenisKerjas',
-            'totalPegawai',
-            'pegawaiAktif',
-            'pegawaiNonaktif',
-            'statJenisKerja',
-            'statBidang',
-            'statLokasi'
-        ));
+        return view('dashboard.data-pegawai.index', compact('pegawais', 'bidangs', 'jabatans', 'golongans', 'eselons', 'pendidikans', 'jenisKerjas', 'totalPegawai', 'pegawaiAktif', 'pegawaiNonaktif', 'statJenisKerja', 'statBidang', 'statLokasi'));
     }
 
     /*
@@ -328,10 +270,7 @@ class SamperinUserController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            !empty($validated['user_nip']) &&
-            SamperinUser::where('user_nip', trim($validated['user_nip']))->exists()
-        ) {
+        if (!empty($validated['user_nip']) && SamperinUser::where('user_nip', trim($validated['user_nip']))->exists()) {
             return back()
                 ->withInput()
                 ->withErrors([
@@ -345,10 +284,7 @@ class SamperinUserController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            !empty($validated['user_nik']) &&
-            SamperinUser::where('user_nik', trim($validated['user_nik']))->exists()
-        ) {
+        if (!empty($validated['user_nik']) && SamperinUser::where('user_nik', trim($validated['user_nik']))->exists()) {
             return back()
                 ->withInput()
                 ->withErrors([
@@ -407,9 +343,7 @@ class SamperinUserController extends Controller
 
             DB::commit();
 
-            return redirect()
-                ->route('kepeg.pegawai.index')
-                ->with('success', 'Data pegawai berhasil ditambahkan.');
+            return redirect()->route('kepeg.pegawai.index')->with('success', 'Data pegawai berhasil ditambahkan.');
         } catch (Throwable $e) {
             DB::rollBack();
 
@@ -446,10 +380,7 @@ class SamperinUserController extends Controller
         */
 
         if (!empty($validated['user_nip'])) {
-            $nipExists = SamperinUser::where(
-                'user_nip',
-                trim($validated['user_nip'])
-            )
+            $nipExists = SamperinUser::where('user_nip', trim($validated['user_nip']))
                 ->where('user_id', '!=', $pegawai->user_id)
                 ->exists();
 
@@ -469,10 +400,7 @@ class SamperinUserController extends Controller
         */
 
         if (!empty($validated['user_nik'])) {
-            $nikExists = SamperinUser::where(
-                'user_nik',
-                trim($validated['user_nik'])
-            )
+            $nikExists = SamperinUser::where('user_nik', trim($validated['user_nik']))
                 ->where('user_id', '!=', $pegawai->user_id)
                 ->exists();
 
@@ -508,9 +436,7 @@ class SamperinUserController extends Controller
 
             $pegawai->update($data);
 
-            return redirect()
-                ->route('kepeg.pegawai.index')
-                ->with('success', 'Data pegawai berhasil diperbarui.');
+            return redirect()->route('kepeg.pegawai.index')->with('success', 'Data pegawai berhasil diperbarui.');
         } catch (Throwable $e) {
             Log::error('SAMPERIN PEGAWAI UPDATE', [
                 'message' => $e->getMessage(),
@@ -540,12 +466,7 @@ class SamperinUserController extends Controller
 
         $pegawai->save();
 
-        return back()->with(
-            'success',
-            $pegawai->user_status === 1
-                ? 'Pegawai berhasil diaktifkan.'
-                : 'Pegawai berhasil dinonaktifkan.'
-        );
+        return back()->with('success', $pegawai->user_status === 1 ? 'Pegawai berhasil diaktifkan.' : 'Pegawai berhasil dinonaktifkan.');
     }
 
     /*
@@ -568,9 +489,7 @@ class SamperinUserController extends Controller
             */
 
             if (Schema::hasTable('samperin_user_role')) {
-                DB::table('samperin_user_role')
-                    ->where('user_role_user_uid', $pegawai->user_uid)
-                    ->delete();
+                DB::table('samperin_user_role')->where('user_role_user_uid', $pegawai->user_uid)->delete();
             }
 
             /*
@@ -580,9 +499,7 @@ class SamperinUserController extends Controller
             */
 
             if (Schema::hasTable('samperin_user_foto')) {
-                DB::table('samperin_user_foto')
-                    ->where('user_foto_user_uid', $pegawai->user_uid)
-                    ->delete();
+                DB::table('samperin_user_foto')->where('user_foto_user_uid', $pegawai->user_uid)->delete();
             }
 
             /*
@@ -595,10 +512,7 @@ class SamperinUserController extends Controller
 
             DB::commit();
 
-            return back()->with(
-                'success',
-                'Data pegawai berhasil dihapus.'
-            );
+            return back()->with('success', 'Data pegawai berhasil dihapus.');
         } catch (Throwable $e) {
             DB::rollBack();
 
@@ -652,17 +566,13 @@ class SamperinUserController extends Controller
 
         $request->validate(
             [
-                'file' => [
-                    'required',
-                    'file',
-                    'max:10240',
-                ],
+                'file' => ['required', 'file', 'max:10240'],
             ],
             [
                 'file.required' => 'File wajib dipilih.',
                 'file.file' => 'File tidak valid.',
                 'file.max' => 'Ukuran file maksimal 10 MB.',
-            ]
+            ],
         );
 
         $file = $request->file('file');
@@ -729,15 +639,9 @@ class SamperinUserController extends Controller
         |--------------------------------------------------------------------------
         */
 
-            $pattern = '/INSERT\s+INTO\s+(?:`[^`]+`\.)?`?sadarin_user`?\s*'
-                . '\((.*?)\)\s*VALUES\s*(.*?);/is';
+            $pattern = '/INSERT\s+INTO\s+(?:`[^`]+`\.)?`?sadarin_user`?\s*' . '\((.*?)\)\s*VALUES\s*(.*?);/is';
 
-            preg_match_all(
-                $pattern,
-                $sql,
-                $matches,
-                PREG_SET_ORDER
-            );
+            preg_match_all($pattern, $sql, $matches, PREG_SET_ORDER);
 
             if (empty($matches)) {
                 return back()->withErrors([
@@ -804,14 +708,9 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                    $userId = $this->sqlClean(
-                        $source['user_id'] ?? null
-                    );
+                    $userId = $this->sqlClean($source['user_id'] ?? null);
 
-                    if (
-                        $userId === null ||
-                        !is_numeric($userId)
-                    ) {
+                    if ($userId === null || !is_numeric($userId)) {
                         $skipped++;
 
                         continue;
@@ -825,9 +724,7 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                    $nama = $this->sqlClean(
-                        $source['user_nama'] ?? null
-                    );
+                    $nama = $this->sqlClean($source['user_nama'] ?? null);
 
                     if ($nama === null) {
                         $skipped++;
@@ -841,9 +738,7 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                    $nik = $this->sqlClean(
-                        $source['user_nik'] ?? null
-                    );
+                    $nik = $this->sqlClean($source['user_nik'] ?? null);
 
                     /*
                 |--------------------------------------------------------------------------
@@ -853,15 +748,8 @@ class SamperinUserController extends Controller
 
                     $password = null;
 
-                    if (
-                        array_key_exists(
-                            'user_password',
-                            $source
-                        )
-                    ) {
-                        $password = $this->sqlPassword(
-                            $source['user_password']
-                        );
+                    if (array_key_exists('user_password', $source)) {
+                        $password = $this->sqlPassword($source['user_password']);
                     }
 
                     /*
@@ -875,9 +763,7 @@ class SamperinUserController extends Controller
                 |
                 */
 
-                    $duplicateKey = $nik !== null
-                        ? 'nik:' . $nik
-                        : 'id:' . $userId;
+                    $duplicateKey = $nik !== null ? 'nik:' . $nik : 'id:' . $userId;
 
                     /*
                 |--------------------------------------------------------------------------
@@ -916,11 +802,9 @@ class SamperinUserController extends Controller
                 |
                 */
 
-                    $existingHasPassword =
-                        !empty($existing['password']);
+                    $existingHasPassword = !empty($existing['password']);
 
-                    $candidateHasPassword =
-                        !empty($candidate['password']);
+                    $candidateHasPassword = !empty($candidate['password']);
 
                     $replace = false;
 
@@ -930,47 +814,28 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                    if (
-                        $candidateHasPassword &&
-                        !$existingHasPassword
-                    ) {
+                    if ($candidateHasPassword && !$existingHasPassword) {
                         $replace = true;
-                    }
-
-                    /*
+                    } /*
                 |--------------------------------------------------------------------------
                 | SAMA-SAMA PUNYA PASSWORD
                 |--------------------------------------------------------------------------
                 |
                 | Pilih record paling lama.
                 |
-                */ elseif (
-                        $candidateHasPassword &&
-                        $existingHasPassword
-                    ) {
-                        if (
-                            $candidate['user_id'] <
-                            $existing['user_id']
-                        ) {
+                */ elseif ($candidateHasPassword && $existingHasPassword) {
+                        if ($candidate['user_id'] < $existing['user_id']) {
                             $replace = true;
                         }
-                    }
-
-                    /*
+                    } /*
                 |--------------------------------------------------------------------------
                 | SAMA-SAMA TIDAK PUNYA PASSWORD
                 |--------------------------------------------------------------------------
                 |
                 | Pilih record paling lama.
                 |
-                */ elseif (
-                        !$candidateHasPassword &&
-                        !$existingHasPassword
-                    ) {
-                        if (
-                            $candidate['user_id'] <
-                            $existing['user_id']
-                        ) {
+                */ elseif (!$candidateHasPassword && !$existingHasPassword) {
+                        if ($candidate['user_id'] < $existing['user_id']) {
                             $replace = true;
                         }
                     }
@@ -1002,9 +867,7 @@ class SamperinUserController extends Controller
             |--------------------------------------------------------------------------
             */
 
-                $data = $this->buildSadarinImportData(
-                    $source
-                );
+                $data = $this->buildSadarinImportData($source);
 
                 /*
             |--------------------------------------------------------------------------
@@ -1012,10 +875,7 @@ class SamperinUserController extends Controller
             |--------------------------------------------------------------------------
             */
 
-                $pegawai = SamperinUser::where(
-                    'user_id',
-                    $userId
-                )->first();
+                $pegawai = SamperinUser::where('user_id', $userId)->first();
 
                 /*
             |--------------------------------------------------------------------------
@@ -1028,15 +888,10 @@ class SamperinUserController extends Controller
             */
 
                 if (!$pegawai) {
-                    $nik = $this->sqlClean(
-                        $source['user_nik'] ?? null
-                    );
+                    $nik = $this->sqlClean($source['user_nik'] ?? null);
 
                     if ($nik !== null) {
-                        $pegawai = SamperinUser::where(
-                            'user_nik',
-                            $nik
-                        )->first();
+                        $pegawai = SamperinUser::where('user_nik', $nik)->first();
                     }
                 }
 
@@ -1072,9 +927,7 @@ class SamperinUserController extends Controller
                     SamperinUser::create($data);
 
                     $inserted++;
-                }
-
-                /*
+                } /*
             |--------------------------------------------------------------------------
             | UPDATE
             |--------------------------------------------------------------------------
@@ -1102,10 +955,7 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                    unset(
-                        $data['user_id'],
-                        $data['user_uid']
-                    );
+                    unset($data['user_id'], $data['user_uid']);
 
                     $pegawai->update($data);
 
@@ -1117,21 +967,15 @@ class SamperinUserController extends Controller
 
             return redirect()
                 ->route('kepeg.pegawai.index')
-                ->with(
-                    'success',
-                    "Import SQL berhasil. {$inserted} data ditambahkan, {$updated} data diperbarui, {$skipped} data dilewati."
-                );
+                ->with('success', "Import SQL berhasil. {$inserted} data ditambahkan, {$updated} data diperbarui, {$skipped} data dilewati.");
         } catch (Throwable $e) {
             DB::rollBack();
 
-            Log::error(
-                'SAMPERIN PEGAWAI IMPORT SQL',
-                [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                ]
-            );
+            Log::error('SAMPERIN PEGAWAI IMPORT SQL', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
 
             return back()->withErrors([
                 'import' => 'Import SQL gagal: ' . $e->getMessage(),
@@ -1148,18 +992,11 @@ class SamperinUserController extends Controller
     private function importExcel($file)
     {
         try {
-            $spreadsheet = IOFactory::load(
-                $file->getRealPath()
-            );
+            $spreadsheet = IOFactory::load($file->getRealPath());
 
             $sheet = $spreadsheet->getActiveSheet();
 
-            $rows = $sheet->toArray(
-                null,
-                true,
-                true,
-                true
-            );
+            $rows = $sheet->toArray(null, true, true, true);
 
             if (count($rows) < 2) {
                 return back()->withErrors([
@@ -1178,15 +1015,9 @@ class SamperinUserController extends Controller
             $columnMap = [];
 
             foreach ($header as $key => $value) {
-                $name = strtolower(
-                    trim((string) $value)
-                );
+                $name = strtolower(trim((string) $value));
 
-                $name = str_replace(
-                    [' ', '-', '.'],
-                    '_',
-                    $name
-                );
+                $name = str_replace([' ', '-', '.'], '_', $name);
 
                 $columnMap[$name] = $key;
             }
@@ -1197,10 +1028,7 @@ class SamperinUserController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if (
-                !isset($columnMap['user_nama']) &&
-                !isset($columnMap['nama'])
-            ) {
+            if (!isset($columnMap['user_nama']) && !isset($columnMap['nama'])) {
                 return back()->withErrors([
                     'import' => 'Excel wajib memiliki kolom user_nama atau nama.',
                 ]);
@@ -1210,28 +1038,14 @@ class SamperinUserController extends Controller
             $updated = 0;
             $skipped = 0;
 
-            $nextId = (
-                (int) SamperinUser::max('user_id')
-            ) + 1;
+            $nextId = ((int) SamperinUser::max('user_id')) + 1;
 
             DB::beginTransaction();
 
             foreach ($rows as $row) {
-                $nip = $this->clean(
-                    $this->excelValue(
-                        $row,
-                        $columnMap,
-                        ['user_nip', 'nip']
-                    )
-                );
+                $nip = $this->clean($this->excelValue($row, $columnMap, ['user_nip', 'nip']));
 
-                $nama = $this->clean(
-                    $this->excelValue(
-                        $row,
-                        $columnMap,
-                        ['user_nama', 'nama']
-                    )
-                );
+                $nama = $this->clean($this->excelValue($row, $columnMap, ['user_nama', 'nama']));
 
                 if ($nip === null && $nama === null) {
                     continue;
@@ -1249,15 +1063,9 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                $userIdValue = $this->excelValue(
-                    $row,
-                    $columnMap,
-                    ['user_id', 'id']
-                );
+                $userIdValue = $this->excelValue($row, $columnMap, ['user_id', 'id']);
 
-                $userId = $this->integerOrNull(
-                    $userIdValue
-                );
+                $userId = $this->integerOrNull($userIdValue);
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1268,17 +1076,11 @@ class SamperinUserController extends Controller
                 $pegawai = null;
 
                 if ($userId !== null) {
-                    $pegawai = SamperinUser::where(
-                        'user_id',
-                        $userId
-                    )->first();
+                    $pegawai = SamperinUser::where('user_id', $userId)->first();
                 }
 
                 if (!$pegawai && $nip !== null) {
-                    $pegawai = SamperinUser::where(
-                        'user_nip',
-                        $nip
-                    )->first();
+                    $pegawai = SamperinUser::where('user_nip', $nip)->first();
                 }
 
                 /*
@@ -1294,10 +1096,7 @@ class SamperinUserController extends Controller
                         $nextId++;
                     }
 
-                    $data = $this->buildImportData(
-                        $row,
-                        $columnMap
-                    );
+                    $data = $this->buildImportData($row, $columnMap);
 
                     $data['user_id'] = $userId;
 
@@ -1309,19 +1108,10 @@ class SamperinUserController extends Controller
                     |--------------------------------------------------------------------------
                     */
 
-                    $password = $this->excelValue(
-                        $row,
-                        $columnMap,
-                        ['user_password', 'password']
-                    );
+                    $password = $this->excelValue($row, $columnMap, ['user_password', 'password']);
 
-                    if (
-                        $password !== null &&
-                        $password !== ''
-                    ) {
-                        $data['user_password'] = Hash::make(
-                            $password
-                        );
+                    if ($password !== null && $password !== '') {
+                        $data['user_password'] = Hash::make($password);
                     } else {
                         $data['user_password'] = null;
                     }
@@ -1336,30 +1126,15 @@ class SamperinUserController extends Controller
                     |--------------------------------------------------------------------------
                     */
 
-                    $data = $this->buildImportData(
-                        $row,
-                        $columnMap
-                    );
+                    $data = $this->buildImportData($row, $columnMap);
 
-                    $password = $this->excelValue(
-                        $row,
-                        $columnMap,
-                        ['user_password', 'password']
-                    );
+                    $password = $this->excelValue($row, $columnMap, ['user_password', 'password']);
 
-                    if (
-                        $password !== null &&
-                        $password !== ''
-                    ) {
-                        $data['user_password'] = Hash::make(
-                            $password
-                        );
+                    if ($password !== null && $password !== '') {
+                        $data['user_password'] = Hash::make($password);
                     }
 
-                    unset(
-                        $data['user_uid'],
-                        $data['user_id']
-                    );
+                    unset($data['user_uid'], $data['user_id']);
 
                     $pegawai->update($data);
 
@@ -1371,10 +1146,7 @@ class SamperinUserController extends Controller
 
             return redirect()
                 ->route('kepeg.pegawai.index')
-                ->with(
-                    'success',
-                    "Import Excel berhasil. {$inserted} data ditambahkan, {$updated} data diperbarui, {$skipped} data dilewati."
-                );
+                ->with('success', "Import Excel berhasil. {$inserted} data ditambahkan, {$updated} data diperbarui, {$skipped} data dilewati.");
         } catch (Throwable $e) {
             DB::rollBack();
 
@@ -1471,25 +1243,8 @@ class SamperinUserController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if (
-                in_array(
-                    $samperinField,
-                    [
-                        'user_jabatan_id',
-                        'user_bidang_id',
-                        'user_golongan_id',
-                        'user_eselon_id',
-                        'user_pendidikan_id',
-                        'user_jenis_kerja_id',
-                    ],
-                    true
-                )
-            ) {
-                if (
-                    $value === null ||
-                    $value === '0' ||
-                    $value === 0
-                ) {
+            if (in_array($samperinField, ['user_jabatan_id', 'user_bidang_id', 'user_golongan_id', 'user_eselon_id', 'user_pendidikan_id', 'user_jenis_kerja_id'], true)) {
+                if ($value === null || $value === '0' || $value === 0) {
                     $value = null;
                 } else {
                     $value = (int) $value;
@@ -1536,10 +1291,8 @@ class SamperinUserController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    private function validatePegawai(
-        Request $request,
-        ?SamperinUser $pegawai = null
-    ): array {
+    private function validatePegawai(Request $request, ?SamperinUser $pegawai = null): array
+    {
         return $request->validate(
             [
                 /*
@@ -1548,52 +1301,21 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                'user_nip' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_nip' => ['nullable', 'string', 'max:100'],
 
-                'user_nik' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_nik' => ['nullable', 'string', 'max:100'],
 
-                'user_nama' => [
-                    'required',
-                    'string',
-                    'max:100',
-                ],
+                'user_nama' => ['required', 'string', 'max:100'],
 
-                'user_gelardepan' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_gelardepan' => ['nullable', 'string', 'max:100'],
 
-                'user_gelarbelakang' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_gelarbelakang' => ['nullable', 'string', 'max:100'],
 
-                'user_tempatlahir' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_tempatlahir' => ['nullable', 'string', 'max:100'],
 
-                'user_tgllahir' => [
-                    'nullable',
-                    'date',
-                ],
+                'user_tgllahir' => ['nullable', 'date'],
 
-                'user_jk' => [
-                    'nullable',
-                    'string',
-                    'max:1',
-                ],
+                'user_jk' => ['nullable', 'string', 'max:1'],
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1601,41 +1323,17 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                'user_jabatan_id' => [
-                    'nullable',
-                    'integer',
-                    'exists:samperin_jabatan,jabatan_id',
-                ],
+                'user_jabatan_id' => ['nullable', 'integer', 'exists:samperin_jabatan,jabatan_id'],
 
-                'user_bidang_id' => [
-                    'nullable',
-                    'integer',
-                    'exists:samperin_bidang,bidang_id',
-                ],
+                'user_bidang_id' => ['nullable', 'integer', 'exists:samperin_bidang,bidang_id'],
 
-                'user_golongan_id' => [
-                    'nullable',
-                    'integer',
-                    'exists:samperin_golongan,golongan_id',
-                ],
+                'user_golongan_id' => ['nullable', 'integer', 'exists:samperin_golongan,golongan_id'],
 
-                'user_eselon_id' => [
-                    'nullable',
-                    'integer',
-                    'exists:samperin_eselon,eselon_id',
-                ],
+                'user_eselon_id' => ['nullable', 'integer', 'exists:samperin_eselon,eselon_id'],
 
-                'user_pendidikan_id' => [
-                    'nullable',
-                    'integer',
-                    'exists:samperin_pendidikan,pendidikan_id',
-                ],
+                'user_pendidikan_id' => ['nullable', 'integer', 'exists:samperin_pendidikan,pendidikan_id'],
 
-                'user_jenis_kerja_id' => [
-                    'nullable',
-                    'integer',
-                    'exists:samperin_jenis_kerja,jenis_kerja_id',
-                ],
+                'user_jenis_kerja_id' => ['nullable', 'integer', 'exists:samperin_jenis_kerja,jenis_kerja_id'],
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1643,45 +1341,19 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                'user_tmt' => [
-                    'nullable',
-                    'date',
-                ],
+                'user_tmt' => ['nullable', 'date'],
 
-                'user_spmt' => [
-                    'nullable',
-                    'date',
-                ],
+                'user_spmt' => ['nullable', 'date'],
 
-                'user_npwp' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_npwp' => ['nullable', 'string', 'max:100'],
 
-                'user_bpjs' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_bpjs' => ['nullable', 'string', 'max:100'],
 
-                'user_norek_bpd' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_norek_bpd' => ['nullable', 'string', 'max:100'],
 
-                'user_kelasjabatan' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_kelasjabatan' => ['nullable', 'string', 'max:100'],
 
-                'user_jmltanggungan' => [
-                    'nullable',
-                    'integer',
-                    'min:0',
-                ],
+                'user_jmltanggungan' => ['nullable', 'integer', 'min:0'],
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1689,35 +1361,15 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                'user_email' => [
-                    'nullable',
-                    'email',
-                    'max:100',
-                ],
+                'user_email' => ['nullable', 'email', 'max:100'],
 
-                'user_notelp' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_notelp' => ['nullable', 'string', 'max:100'],
 
-                'user_alamat' => [
-                    'nullable',
-                    'string',
-                    'max:255',
-                ],
+                'user_alamat' => ['nullable', 'string', 'max:255'],
 
-                'user_lokasikerja' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
+                'user_lokasikerja' => ['nullable', 'string', 'max:100'],
 
-                'user_keterangan' => [
-                    'nullable',
-                    'string',
-                    'max:255',
-                ],
+                'user_keterangan' => ['nullable', 'string', 'max:255'],
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1725,10 +1377,7 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                'user_status' => [
-                    'required',
-                    'in:0,1',
-                ],
+                'user_status' => ['required', 'in:0,1'],
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1736,41 +1385,27 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                'user_password' => [
-                    'nullable',
-                    'string',
-                    'min:6',
-                    'max:255',
-                ],
+                'user_password' => ['nullable', 'string', 'min:6', 'max:255'],
             ],
             [
-                'user_nama.required' =>
-                'Nama pegawai wajib diisi.',
+                'user_nama.required' => 'Nama pegawai wajib diisi.',
 
-                'user_status.required' =>
-                'Status pegawai wajib dipilih.',
+                'user_status.required' => 'Status pegawai wajib dipilih.',
 
-                'user_status.in' =>
-                'Status pegawai tidak valid.',
+                'user_status.in' => 'Status pegawai tidak valid.',
 
-                'user_jabatan_id.exists' =>
-                'Jabatan tidak ditemukan.',
+                'user_jabatan_id.exists' => 'Jabatan tidak ditemukan.',
 
-                'user_bidang_id.exists' =>
-                'Bidang tidak ditemukan.',
+                'user_bidang_id.exists' => 'Bidang tidak ditemukan.',
 
-                'user_golongan_id.exists' =>
-                'Golongan tidak ditemukan.',
+                'user_golongan_id.exists' => 'Golongan tidak ditemukan.',
 
-                'user_eselon_id.exists' =>
-                'Eselon tidak ditemukan.',
+                'user_eselon_id.exists' => 'Eselon tidak ditemukan.',
 
-                'user_pendidikan_id.exists' =>
-                'Pendidikan tidak ditemukan.',
+                'user_pendidikan_id.exists' => 'Pendidikan tidak ditemukan.',
 
-                'user_jenis_kerja_id.exists' =>
-                'Jenis kerja tidak ditemukan.',
-            ]
+                'user_jenis_kerja_id.exists' => 'Jenis kerja tidak ditemukan.',
+            ],
         );
     }
 
@@ -1780,47 +1415,9 @@ class SamperinUserController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    private function preparePegawaiData(
-        array $validated
-    ): array {
-        $fields = [
-            'user_nip',
-            'user_nik',
-            'user_nama',
-
-            'user_gelardepan',
-            'user_gelarbelakang',
-
-            'user_tempatlahir',
-            'user_tgllahir',
-            'user_jk',
-
-            'user_jabatan_id',
-            'user_bidang_id',
-            'user_golongan_id',
-            'user_eselon_id',
-            'user_pendidikan_id',
-            'user_jenis_kerja_id',
-
-            'user_tmt',
-            'user_spmt',
-
-            'user_npwp',
-            'user_bpjs',
-            'user_norek_bpd',
-
-            'user_kelasjabatan',
-            'user_jmltanggungan',
-
-            'user_email',
-            'user_notelp',
-            'user_alamat',
-
-            'user_lokasikerja',
-            'user_keterangan',
-
-            'user_status',
-        ];
+    private function preparePegawaiData(array $validated): array
+    {
+        $fields = ['user_nip', 'user_nik', 'user_nama', 'user_gelardepan', 'user_gelarbelakang', 'user_tempatlahir', 'user_tgllahir', 'user_jk', 'user_jabatan_id', 'user_bidang_id', 'user_golongan_id', 'user_eselon_id', 'user_pendidikan_id', 'user_jenis_kerja_id', 'user_tmt', 'user_spmt', 'user_npwp', 'user_bpjs', 'user_norek_bpd', 'user_kelasjabatan', 'user_jmltanggungan', 'user_email', 'user_notelp', 'user_alamat', 'user_lokasikerja', 'user_keterangan', 'user_status'];
 
         $data = [];
 
@@ -1843,166 +1440,68 @@ class SamperinUserController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    private function buildImportData(
-        array $row,
-        array $columnMap
-    ): array {
+    private function buildImportData(array $row, array $columnMap): array
+    {
         $data = [];
 
         $mapping = [
-            'user_nip' => [
-                'user_nip',
-                'nip',
-            ],
+            'user_nip' => ['user_nip', 'nip'],
 
-            'user_nik' => [
-                'user_nik',
-                'nik',
-            ],
+            'user_nik' => ['user_nik', 'nik'],
 
-            'user_nama' => [
-                'user_nama',
-                'nama',
-            ],
+            'user_nama' => ['user_nama', 'nama'],
 
-            'user_gelardepan' => [
-                'user_gelardepan',
-                'gelardepan',
-            ],
+            'user_gelardepan' => ['user_gelardepan', 'gelardepan'],
 
-            'user_gelarbelakang' => [
-                'user_gelarbelakang',
-                'gelarbelakang',
-            ],
+            'user_gelarbelakang' => ['user_gelarbelakang', 'gelarbelakang'],
 
-            'user_tempatlahir' => [
-                'user_tempatlahir',
-                'tempatlahir',
-            ],
+            'user_tempatlahir' => ['user_tempatlahir', 'tempatlahir'],
 
-            'user_tgllahir' => [
-                'user_tgllahir',
-                'tgllahir',
-                'tanggal_lahir',
-            ],
+            'user_tgllahir' => ['user_tgllahir', 'tgllahir', 'tanggal_lahir'],
 
-            'user_jk' => [
-                'user_jk',
-                'jk',
-            ],
+            'user_jk' => ['user_jk', 'jk'],
 
-            'user_jabatan_id' => [
-                'user_jabatan_id',
-                'jabatan_id',
-                'user_jabatan',
-            ],
+            'user_jabatan_id' => ['user_jabatan_id', 'jabatan_id', 'user_jabatan'],
 
-            'user_bidang_id' => [
-                'user_bidang_id',
-                'bidang_id',
-                'user_bidang',
-            ],
+            'user_bidang_id' => ['user_bidang_id', 'bidang_id', 'user_bidang'],
 
-            'user_golongan_id' => [
-                'user_golongan_id',
-                'golongan_id',
-                'user_golongan',
-            ],
+            'user_golongan_id' => ['user_golongan_id', 'golongan_id', 'user_golongan'],
 
-            'user_eselon_id' => [
-                'user_eselon_id',
-                'eselon_id',
-                'user_eselon',
-            ],
+            'user_eselon_id' => ['user_eselon_id', 'eselon_id', 'user_eselon'],
 
-            'user_pendidikan_id' => [
-                'user_pendidikan_id',
-                'pendidikan_id',
-                'user_pendidikan',
-            ],
+            'user_pendidikan_id' => ['user_pendidikan_id', 'pendidikan_id', 'user_pendidikan'],
 
-            'user_jenis_kerja_id' => [
-                'user_jenis_kerja_id',
-                'jenis_kerja_id',
-                'user_jeniskerja',
-            ],
+            'user_jenis_kerja_id' => ['user_jenis_kerja_id', 'jenis_kerja_id', 'user_jeniskerja'],
 
-            'user_tmt' => [
-                'user_tmt',
-                'tmt',
-            ],
+            'user_tmt' => ['user_tmt', 'tmt'],
 
-            'user_spmt' => [
-                'user_spmt',
-                'spmt',
-            ],
+            'user_spmt' => ['user_spmt', 'spmt'],
 
-            'user_npwp' => [
-                'user_npwp',
-                'npwp',
-            ],
+            'user_npwp' => ['user_npwp', 'npwp'],
 
-            'user_bpjs' => [
-                'user_bpjs',
-                'bpjs',
-            ],
+            'user_bpjs' => ['user_bpjs', 'bpjs'],
 
-            'user_norek_bpd' => [
-                'user_norek_bpd',
-                'user_norek',
-                'norek',
-            ],
+            'user_norek_bpd' => ['user_norek_bpd', 'user_norek', 'norek'],
 
-            'user_kelasjabatan' => [
-                'user_kelasjabatan',
-                'kelasjabatan',
-            ],
+            'user_kelasjabatan' => ['user_kelasjabatan', 'kelasjabatan'],
 
-            'user_jmltanggungan' => [
-                'user_jmltanggungan',
-                'jmltanggungan',
-            ],
+            'user_jmltanggungan' => ['user_jmltanggungan', 'jmltanggungan'],
 
-            'user_email' => [
-                'user_email',
-                'email',
-            ],
+            'user_email' => ['user_email', 'email'],
 
-            'user_notelp' => [
-                'user_notelp',
-                'notelp',
-                'no_telp',
-            ],
+            'user_notelp' => ['user_notelp', 'notelp', 'no_telp'],
 
-            'user_alamat' => [
-                'user_alamat',
-                'alamat',
-            ],
+            'user_alamat' => ['user_alamat', 'alamat'],
 
-            'user_lokasikerja' => [
-                'user_lokasikerja',
-                'lokasikerja',
-                'lokasi_kerja',
-            ],
+            'user_lokasikerja' => ['user_lokasikerja', 'lokasikerja', 'lokasi_kerja'],
 
-            'user_keterangan' => [
-                'user_keterangan',
-                'user_ket',
-                'keterangan',
-            ],
+            'user_keterangan' => ['user_keterangan', 'user_ket', 'keterangan'],
 
-            'user_status' => [
-                'user_status',
-                'status',
-            ],
+            'user_status' => ['user_status', 'status'],
         ];
 
         foreach ($mapping as $field => $aliases) {
-            $value = $this->excelValue(
-                $row,
-                $columnMap,
-                $aliases
-            );
+            $value = $this->excelValue($row, $columnMap, $aliases);
 
             if (is_string($value)) {
                 $value = trim($value);
@@ -2014,25 +1513,8 @@ class SamperinUserController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if (
-                in_array(
-                    $field,
-                    [
-                        'user_jabatan_id',
-                        'user_bidang_id',
-                        'user_golongan_id',
-                        'user_eselon_id',
-                        'user_pendidikan_id',
-                        'user_jenis_kerja_id',
-                    ],
-                    true
-                )
-            ) {
-                if (
-                    $value === null ||
-                    $value === '' ||
-                    (string) $value === '0'
-                ) {
+            if (in_array($field, ['user_jabatan_id', 'user_bidang_id', 'user_golongan_id', 'user_eselon_id', 'user_pendidikan_id', 'user_jenis_kerja_id'], true)) {
+                if ($value === null || $value === '' || (string) $value === '0') {
                     $value = null;
                 } else {
                     $value = (int) $value;
@@ -2048,14 +1530,10 @@ class SamperinUserController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $data['user_jmltanggungan'] === null ||
-            $data['user_jmltanggungan'] === ''
-        ) {
+        if ($data['user_jmltanggungan'] === null || $data['user_jmltanggungan'] === '') {
             $data['user_jmltanggungan'] = 0;
         } else {
-            $data['user_jmltanggungan'] =
-                (int) $data['user_jmltanggungan'];
+            $data['user_jmltanggungan'] = (int) $data['user_jmltanggungan'];
         }
 
         /*
@@ -2064,14 +1542,10 @@ class SamperinUserController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $data['user_status'] === null ||
-            $data['user_status'] === ''
-        ) {
+        if ($data['user_status'] === null || $data['user_status'] === '') {
             $data['user_status'] = 1;
         } else {
-            $data['user_status'] =
-                (int) $data['user_status'];
+            $data['user_status'] = (int) $data['user_status'];
         }
 
         return $data;
@@ -2087,18 +1561,12 @@ class SamperinUserController extends Controller
     {
         $columns = [];
 
-        $parts = $this->splitSqlFields(
-            $columnString,
-            ','
-        );
+        $parts = $this->splitSqlFields($columnString, ',');
 
         foreach ($parts as $column) {
             $column = trim($column);
 
-            $column = trim(
-                $column,
-                " \t\n\r\0\x0B`"
-            );
+            $column = trim($column, " \t\n\r\0\x0B`");
 
             if ($column !== '') {
                 $columns[] = strtolower($column);
@@ -2152,11 +1620,7 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                if (
-                    $inString &&
-                    $i + 1 < $length &&
-                    $valuesString[$i + 1] === "'"
-                ) {
+                if ($inString && $i + 1 < $length && $valuesString[$i + 1] === "'") {
                     $current .= $valuesString[$i + 1];
 
                     $i++;
@@ -2188,9 +1652,7 @@ class SamperinUserController extends Controller
                     $depth--;
 
                     if ($depth === 0) {
-                        $rows[] = $this->parseSqlRow(
-                            $current
-                        );
+                        $rows[] = $this->parseSqlRow($current);
 
                         $current = '';
 
@@ -2219,10 +1681,7 @@ class SamperinUserController extends Controller
 
     private function parseSqlRow(string $row): array
     {
-        return $this->splitSqlFields(
-            $row,
-            ','
-        );
+        return $this->splitSqlFields($row, ',');
     }
 
     /*
@@ -2231,10 +1690,8 @@ class SamperinUserController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    private function splitSqlFields(
-        string $value,
-        string $delimiter = ','
-    ): array {
+    private function splitSqlFields(string $value, string $delimiter = ','): array
+    {
         $parts = [];
 
         $length = strlen($value);
@@ -2270,11 +1727,7 @@ class SamperinUserController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                if (
-                    $inString &&
-                    $i + 1 < $length &&
-                    $value[$i + 1] === "'"
-                ) {
+                if ($inString && $i + 1 < $length && $value[$i + 1] === "'") {
                     $current .= $value[$i + 1];
 
                     $i++;
@@ -2287,10 +1740,7 @@ class SamperinUserController extends Controller
                 continue;
             }
 
-            if (
-                !$inString &&
-                $char === $delimiter
-            ) {
+            if (!$inString && $char === $delimiter) {
                 $parts[] = trim($current);
 
                 $current = '';
@@ -2303,10 +1753,7 @@ class SamperinUserController extends Controller
 
         $parts[] = trim($current);
 
-        return array_map(
-            fn($item) => $this->parseSqlValue($item),
-            $parts
-        );
+        return array_map(fn($item) => $this->parseSqlValue($item), $parts);
     }
 
     /*
@@ -2319,10 +1766,7 @@ class SamperinUserController extends Controller
     {
         $value = trim((string) $value);
 
-        if (
-            strtoupper($value) === 'NULL' ||
-            $value === ''
-        ) {
+        if (strtoupper($value) === 'NULL' || $value === '') {
             return null;
         }
 
@@ -2332,16 +1776,8 @@ class SamperinUserController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            strlen($value) >= 2 &&
-            $value[0] === "'" &&
-            $value[strlen($value) - 1] === "'"
-        ) {
-            $value = substr(
-                $value,
-                1,
-                -1
-            );
+        if (strlen($value) >= 2 && $value[0] === "'" && $value[strlen($value) - 1] === "'") {
+            $value = substr($value, 1, -1);
 
             /*
             |--------------------------------------------------------------------------
@@ -2349,27 +1785,7 @@ class SamperinUserController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $value = str_replace(
-                [
-                    "\\0",
-                    "\\'",
-                    '\\"',
-                    "\\n",
-                    "\\r",
-                    "\\t",
-                    "\\\\",
-                ],
-                [
-                    "\0",
-                    "'",
-                    '"',
-                    "\n",
-                    "\r",
-                    "\t",
-                    "\\",
-                ],
-                $value
-            );
+            $value = str_replace(["\\0", "\\'", '\\"', "\\n", "\\r", "\\t", '\\\\'], ["\0", "'", '"', "\n", "\r", "\t", '\\'], $value);
 
             /*
             |--------------------------------------------------------------------------
@@ -2377,11 +1793,7 @@ class SamperinUserController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $value = str_replace(
-                "''",
-                "'",
-                $value
-            );
+            $value = str_replace("''", "'", $value);
         }
 
         return $value;
@@ -2431,10 +1843,7 @@ class SamperinUserController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $value === '0000-00-00' ||
-            $value === '0000-00-00 00:00:00'
-        ) {
+        if ($value === '0000-00-00' || $value === '0000-00-00 00:00:00') {
             return null;
         }
 
@@ -2468,18 +1877,10 @@ class SamperinUserController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    private function excelValue(
-        array $row,
-        array $columnMap,
-        array $aliases
-    ) {
+    private function excelValue(array $row, array $columnMap, array $aliases)
+    {
         foreach ($aliases as $alias) {
-            if (
-                array_key_exists(
-                    $alias,
-                    $columnMap
-                )
-            ) {
+            if (array_key_exists($alias, $columnMap)) {
                 return $row[$columnMap[$alias]] ?? null;
             }
         }
@@ -2520,13 +1921,51 @@ class SamperinUserController extends Controller
 
     private function integerOrNull($value)
     {
-        if (
-            $value === null ||
-            $value === ''
-        ) {
+        if ($value === null || $value === '') {
             return null;
         }
 
         return (int) $value;
+    }
+
+    public function formSinkronSimpeg()
+    {
+        return view('Dashboard.data-pegawai.sinkron-simpeg');
+    }
+
+    public function sinkronSimpegProcess(Request $request, SimpegSyncService $service)
+    {
+        $request->validate(
+            [
+                'file_simpeg' => ['required', 'file', 'mimes:xlsx,xls', 'max:51200'],
+            ],
+            [
+                'file_simpeg.required' => 'File Excel SIMPEG wajib dipilih.',
+                'file_simpeg.file' => 'File yang dikirim tidak valid.',
+                'file_simpeg.mimes' => 'File harus berupa Excel (.xlsx atau .xls).',
+                'file_simpeg.max' => 'Ukuran file maksimal 50 MB.',
+            ],
+        );
+
+        try {
+            $result = $service->sync($request->file('file_simpeg')->getRealPath());
+
+            return redirect()
+                ->route('kepeg.pegawai.index')
+                ->with('success', sprintf('Sinkronisasi SIMPEG selesai. Total: %d, diperbarui: %d, ditambahkan: %d, dinonaktifkan: %d, gagal: %d.', $result['total'], $result['updated'], $result['inserted'], $result['deactivated'], $result['failed']))
+                ->with('sync_result', $result)
+                ->with('sync_errors', $result['errors']);
+        } catch (\Throwable $e) {
+            \Log::error('SINKRON SIMPEG GAGAL', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()
+                ->route('kepeg.pegawai.index')
+                ->withErrors([
+                    'file_simpeg' => 'Sinkronisasi SIMPEG gagal: ' . $e->getMessage(),
+                ]);
+        }
     }
 }

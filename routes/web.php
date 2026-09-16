@@ -275,6 +275,10 @@ Route::middleware('samperin.auth')->group(function () {
 
             Route::post('/import', [SamperinUserController::class, 'importProcess'])->name('import.process');
 
+            Route::get('/sinkron/simpeg', [SamperinUserController::class, 'formSinkronSimpeg'])->name('sinkron.simpeg');
+
+            Route::post('/sinkron/simpeg/process', [SamperinUserController::class, 'sinkronSimpegProcess'])->name('sinkron-simpeg.process');
+
             /*
                     |--------------------------------------------------------------------------
                     | UPDATE PEGAWAI
