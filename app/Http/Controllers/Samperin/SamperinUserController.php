@@ -1930,7 +1930,7 @@ class SamperinUserController extends Controller
 
     public function formSinkronSimpeg()
     {
-        return view('Dashboard.data-pegawai.sinkron-simpeg');
+        return view('dashboard.data-pegawai.sinkron-simpeg');
     }
 
     public function sinkronSimpegProcess(Request $request, SimpegSyncService $service)
