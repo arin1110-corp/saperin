@@ -1696,6 +1696,41 @@
 
         </a>
 
+        {{-- =================================================
+     PERATURAN GAJI
+================================================== --}}
+
+@if (Route::has('samperin.admin.peraturan-gaji.index'))
+    <a href="{{ route('samperin.admin.peraturan-gaji.index') }}"
+        class="admin-nav-link {{ request()->routeIs('samperin.admin.peraturan-gaji.*') ? 'active' : '' }}">
+
+        <i class="bi bi-cash-stack"></i>
+
+        <span>
+            Peraturan Gaji
+        </span>
+
+    </a>
+@endif
+
+
+{{-- =================================================
+     KENAIKAN GAJI BERKALA
+================================================== --}}
+
+@if (Route::has('samperin.admin.kgb.index'))
+    <a href="{{ route('samperin.admin.kgb.index') }}"
+        class="admin-nav-link {{ request()->routeIs('samperin.admin.kgb.*') ? 'active' : '' }}">
+
+        <i class="bi bi-file-earmark-text"></i>
+
+        <span>
+            Kenaikan Gaji Berkala
+        </span>
+
+    </a>
+@endif
+
         @if ($isAdministrator)
             <a href="{{ route('admin.import.berkas') }}"
                 class="admin-nav-link {{ request()->routeIs('admin.import.berkas') ? 'active' : '' }}">

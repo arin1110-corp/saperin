@@ -19,6 +19,8 @@ use App\Http\Controllers\Samperin\SamperinPengaturanController;
 use App\Http\Controllers\Samperin\SamperinFotoImportController;
 use App\Http\Controllers\Samperin\SamperinRekapBerkasController;
 use App\Http\Controllers\Samperin\SamperinPermintaanBerkasController;
+use App\Http\Controllers\Samperin\SamperinAdminPeraturanGajiController;
+use App\Http\Controllers\Samperin\SamperinAdminKgbController;
 use App\Http\Controllers\SamperinUser\SamperinPegawaiController;
 
 /*
@@ -157,6 +159,8 @@ Route::middleware('samperin.auth')->group(function () {
 */
 
         Route::post('/akun/berkas/upload/{permintaanUid}', [SamperinPegawaiController::class, 'upload'])->name('berkas.upload');
+
+        Route::put('/kgb/{id}/nomor-sk', [SamperinAdminKgbController::class, 'updateNomorSk'])->name('kgb.update-nomor-sk');
         });
 
     /*
@@ -584,5 +588,63 @@ Route::middleware('samperin.auth')->group(function () {
         Route::get('/permintaan-berkas/{permintaanUid}/edit', [SamperinPermintaanBerkasController::class, 'edit'])->name('permintaan.berkas.edit');
 
         Route::put('/permintaan-berkas/{permintaanUid}', [SamperinPermintaanBerkasController::class, 'update'])->name('permintaan.berkas.update');
+        });
+
+    /*
+        |--------------------------------------------------------------------------
+        | ADMIN - PERATURAN GAJI
+        |--------------------------------------------------------------------------
+        */
+
+    Route::prefix('admin/peraturan-gaji')
+        ->name('samperin.admin.peraturan-gaji.')
+        ->controller(SamperinAdminPeraturanGajiController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+
+            Route::get('/create', 'create')->name('create');
+
+            Route::post('/', 'store')->name('store');
+
+            Route::get('/{id}', 'show')->name('show');
+
+            Route::get('/{id}/edit', 'edit')->name('edit');
+
+            Route::put('/{id}', 'update')->name('update');
+
+            Route::post('/{id}/golongan', 'saveGolongan')->name('save-golongan');
+
+            Route::put('/{id}/golongan/{golonganId}', 'updateGolongan')->name('update-golongan');
+
+            Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
+        });
+
+    Route::prefix('admin/kgb')
+        ->name('samperin.admin.kgb.')
+        ->controller(SamperinAdminKgbController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+
+            Route::get('/create', 'create')->name('create');
+
+            Route::post('/', 'store')->name('store');
+
+            Route::get('/{id}', 'show')->name('show');
+
+            Route::get('/{id}/edit', 'edit')->name('edit');
+
+            Route::delete('/{id}/pegawai/{kgbId}', 'removePegawai')->name('remove-pegawai');
+
+            Route::put('/{id}', 'update')->name('update');
+
+            Route::post('/{id}/generate', 'generate')->name('generate');
+
+            Route::post('/{id}/nomor-sk', 'updateNomorSk')->name('nomor-sk');
+
+            Route::post('/{id}/status', 'toggleStatus')->name('toggle-status');
+
+            Route::get('/{id}/pegawai/{kgbId}/pdf', 'pdf')->name('pdf');
+
+            Route::get('/{id}/pdf', 'pdfAll')->name('pdf-all');
         });
 });

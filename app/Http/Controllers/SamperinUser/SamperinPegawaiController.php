@@ -8,6 +8,7 @@ use App\Models\SamperinBerkasKategori;
 use App\Models\SamperinFolder;
 use App\Models\SamperinJenisBerkas;
 use App\Models\SamperinPengumpulanBerkas;
+use App\Models\SamperinKgb;
 use App\Models\SamperinPermintaanBerkas;
 use App\Models\SamperinUser;
 use Illuminate\Http\Request;
@@ -27,47 +28,42 @@ class SamperinPegawaiController extends Controller
     {
         $user = $this->getLoginUser();
 
+        /*
+    |--------------------------------------------------------------------------
+    | KGB PEGAWAI
+    |--------------------------------------------------------------------------
+    */
+
+        $kgbList = SamperinKgb::query()
+            ->with(['golongan', 'pejabat', 'batch'])
+            ->where('kgb_user_id', $user->user_id)
+            ->where('kgb_status', true)
+            ->orderByDesc('kgb_mulai_berlaku')
+            ->orderByDesc('kgb_id')
+            ->get();
+
+        /*
+    |--------------------------------------------------------------------------
+    | PERMINTAAN BERKAS AKTIF
+    |--------------------------------------------------------------------------
+    */
+
         $permintaanAktif = SamperinPermintaanBerkas::query()
             ->with([
                 'jenisBerkas.kategori',
                 'target' => function ($query) use ($user) {
-                $query->where('target_status', true)->where('target_jenis_kerja_id', $user->user_jenis_kerja_id)->with('folder');
+                    $query->where('target_status', true)->where('target_jenis_kerja_id', $user->user_jenis_kerja_id)->with('folder');
                 },
             ])
-
-            /*
-        |--------------------------------------------------------------------------
-        | PERMINTAAN HARUS AKTIF
-        |--------------------------------------------------------------------------
-        */
-
             ->where('permintaan_status', true)
-
-            /*
-        |--------------------------------------------------------------------------
-        | SUDAH MEMASUKI MASA PENGUMPULAN
-        |--------------------------------------------------------------------------
-        */
 
             ->where(function ($query) {
             $query->whereNull('permintaan_mulai')->orWhere('permintaan_mulai', '<=', now());
             })
 
-            /*
-        |--------------------------------------------------------------------------
-        | BELUM MELEWATI DEADLINE
-        |--------------------------------------------------------------------------
-        */
-
             ->where(function ($query) {
             $query->whereNull('permintaan_expired')->orWhere('permintaan_expired', '>=', now());
             })
-
-            /*
-        |--------------------------------------------------------------------------
-        | TARGET HARUS SESUAI JENIS KERJA PEGAWAI
-        |--------------------------------------------------------------------------
-        */
 
             ->whereHas('target', function ($query) use ($user) {
                 $query->where('target_status', true)->where('target_jenis_kerja_id', $user->user_jenis_kerja_id);
@@ -77,7 +73,39 @@ class SamperinPegawaiController extends Controller
             ->orderByDesc('permintaan_id')
             ->get();
 
-        return view('pegawai.index', compact('user', 'permintaanAktif'));
+        return view('pegawai.index', compact('user', 'permintaanAktif', 'kgbList'));
+    }
+
+    /*
+|--------------------------------------------------------------------------
+| UPDATE NOMOR SK KGB
+|--------------------------------------------------------------------------
+|
+| Pegawai hanya boleh mengubah Nomor SK KGB miliknya sendiri.
+|
+*/
+
+    public function updateNomorSk(Request $request, int $id)
+    {
+        $user = $this->getLoginUser();
+
+        $validated = $request->validate(
+            [
+                'kgb_nomor_sk' => ['required', 'string', 'max:255'],
+            ],
+            [
+                'kgb_nomor_sk.required' => 'Nomor SK wajib diisi.',
+                'kgb_nomor_sk.max' => 'Nomor SK maksimal 255 karakter.',
+            ],
+        );
+
+        $kgb = SamperinKgb::query()->where('kgb_id', $id)->where('kgb_user_id', $user->user_id)->where('kgb_status', true)->firstOrFail();
+
+        $kgb->update([
+            'kgb_nomor_sk' => trim($validated['kgb_nomor_sk']),
+        ]);
+
+        return back()->with('success', 'Nomor SK berhasil diperbarui.');
     }
 
     /*
@@ -90,7 +118,15 @@ class SamperinPegawaiController extends Controller
     {
         $user = $this->getLoginUser();
 
-        return view('pegawai.profil', compact('user'));
+        $kgbList = SamperinKgb::query()
+            ->with(['golongan', 'pejabat', 'batch'])
+            ->where('kgb_user_id', $user->user_id)
+            ->where('kgb_status', true)
+            ->orderByDesc('kgb_mulai_berlaku')
+            ->orderByDesc('kgb_id')
+            ->get();
+
+        return view('pegawai.profil', compact('user', 'kgbList'));
     }
 
     /*

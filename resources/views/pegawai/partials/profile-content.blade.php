@@ -841,6 +841,297 @@
             font-size: 9.5px;
         }
     }
+
+    /* =========================================================
+   KGB
+========================================================= */
+
+    .samperin-kgb-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 14px;
+    }
+
+    .samperin-kgb-item {
+        border: 1px solid #dce7f3;
+        border-radius: 11px;
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .samperin-kgb-item-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 13px 15px;
+        background: #f8fbfe;
+        border-bottom: 1px solid #e3ebf4;
+    }
+
+    .samperin-kgb-item-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #18305d;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .samperin-kgb-item-title i {
+        color: #126cff;
+        font-size: 15px;
+    }
+
+    .samperin-kgb-item-subtitle {
+        margin-top: 4px;
+        color: #7186a4;
+        font-size: 11px;
+    }
+
+    .samperin-kgb-item-subtitle strong {
+        color: #263e68;
+        font-weight: 700;
+    }
+
+    .samperin-kgb-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 9px;
+        border-radius: 7px;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .samperin-kgb-status.success {
+        color: #008b56;
+        background: #ebfaf3;
+        border: 1px solid #c8ebda;
+    }
+
+    .samperin-kgb-status.warning {
+        color: #a46a00;
+        background: #fff8e8;
+        border: 1px solid #f2dfb0;
+    }
+
+
+    /* =========================================================
+   DATA KGB
+========================================================= */
+
+    .samperin-kgb-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        border-bottom: 1px solid #edf1f6;
+    }
+
+    .samperin-kgb-info {
+        padding: 12px 14px;
+        border-right: 1px solid #edf1f6;
+    }
+
+    .samperin-kgb-info:nth-child(4n) {
+        border-right: 0;
+    }
+
+    .samperin-kgb-label {
+        margin-bottom: 4px;
+        color: #7186a4;
+        font-size: 10px;
+        line-height: 1.4;
+    }
+
+    .samperin-kgb-value {
+        color: #263e68;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.5;
+    }
+
+
+    /* =========================================================
+   NOMOR SK
+========================================================= */
+
+    .samperin-kgb-sk {
+        padding: 13px 14px;
+        background: #fbfdff;
+    }
+
+    .samperin-kgb-sk-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 7px;
+    }
+
+    .samperin-kgb-sk-label label {
+        margin: 0;
+        color: #263e68;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .samperin-kgb-sk-label label span {
+        color: #e04b4b;
+    }
+
+    .samperin-kgb-sk-label small {
+        color: #8294ac;
+        font-size: 10px;
+        font-style: italic;
+    }
+
+    .samperin-kgb-sk-form {
+        display: flex;
+        gap: 8px;
+    }
+
+    .samperin-kgb-sk-input {
+        flex: 1;
+        min-width: 0;
+        height: 38px;
+        padding: 0 11px;
+        border: 1px solid #cfdceb;
+        border-radius: 7px;
+        background: #fff;
+        color: #263e68;
+        font-size: 12px;
+        outline: none;
+        transition: .2s ease;
+    }
+
+    .samperin-kgb-sk-input:focus {
+        border-color: #126cff;
+        box-shadow: 0 0 0 3px rgba(18, 108, 255, .08);
+    }
+
+    .samperin-kgb-sk-input::placeholder {
+        color: #a3b0c0;
+    }
+
+    .samperin-kgb-sk-button {
+        flex: 0 0 auto;
+        height: 38px;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 7px;
+        background: #126cff;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+    .samperin-kgb-sk-button:hover {
+        background: #095bd7;
+    }
+
+    .samperin-kgb-error {
+        margin-top: 6px;
+        color: #dc3545;
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+   MOBILE KGB
+========================================================= */
+
+    @media (max-width: 1100px) {
+
+        .samperin-kgb-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .samperin-kgb-info:nth-child(4n) {
+            border-right: 1px solid #edf1f6;
+        }
+
+        .samperin-kgb-info:nth-child(2n) {
+            border-right: 0;
+        }
+
+    }
+
+    @media (max-width: 767px) {
+
+        .samperin-kgb-list {
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .samperin-kgb-item-header {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 8px;
+            padding: 11px 12px;
+        }
+
+        .samperin-kgb-status {
+            font-size: 9px;
+        }
+
+        .samperin-kgb-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .samperin-kgb-info {
+            padding: 10px 11px;
+        }
+
+        .samperin-kgb-label {
+            font-size: 9px;
+        }
+
+        .samperin-kgb-value {
+            font-size: 11px;
+        }
+
+        .samperin-kgb-sk {
+            padding: 11px;
+        }
+
+        .samperin-kgb-sk-label {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .samperin-kgb-sk-form {
+            flex-direction: column;
+        }
+
+        .samperin-kgb-sk-input,
+        .samperin-kgb-sk-button {
+            width: 100%;
+            height: 38px;
+        }
+
+    }
+
+    @media (max-width: 420px) {
+
+        .samperin-kgb-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .samperin-kgb-info {
+            border-right: 0 !important;
+            border-bottom: 1px solid #edf1f6;
+        }
+
+        .samperin-kgb-info:last-child {
+            border-bottom: 0;
+        }
+
+    }
 </style>
 
 
@@ -1533,6 +1824,284 @@
 
         </section>
 
+
+        {{-- =========================================================
+     KENAIKAN GAJI BERKALA
+========================================================== --}}
+
+        <section class="samperin-data-card full">
+
+            <div class="samperin-data-card-header">
+
+                <div class="samperin-data-card-title">
+
+                    <i class="bi bi-cash-stack"></i>
+
+                    Kenaikan Gaji Berkala
+
+                </div>
+
+            </div>
+
+            <div class="samperin-data-card-body">
+
+                @if ($kgbList && $kgbList->isNotEmpty())
+
+                    <div class="samperin-kgb-list">
+
+                        @foreach ($kgbList as $kgb)
+                            @php
+                                $tanggalSurat = $kgb->kgb_tanggal_surat
+                                    ? \Carbon\Carbon::parse($kgb->kgb_tanggal_surat)->translatedFormat('d F Y')
+                                    : '-';
+
+                                $mulaiBerlaku = $kgb->kgb_mulai_berlaku
+                                    ? \Carbon\Carbon::parse($kgb->kgb_mulai_berlaku)->translatedFormat('d F Y')
+                                    : '-';
+
+                                $gajiLama = number_format((int) $kgb->kgb_gaji_lama, 0, ',', '.');
+
+                                $gajiBaru = number_format((int) $kgb->kgb_gaji_baru, 0, ',', '.');
+
+                                $nomorSk = $kgb->kgb_nomor_sk;
+                            @endphp
+
+                            <div class="samperin-kgb-item">
+
+                                {{-- HEADER KGB --}}
+
+                                <div class="samperin-kgb-item-header">
+
+                                    <div>
+
+                                        <div class="samperin-kgb-item-title">
+
+                                            <i class="bi bi-file-earmark-text"></i>
+
+                                            KGB
+                                            {{ $kgb->kgb_mulai_berlaku ? \Carbon\Carbon::parse($kgb->kgb_mulai_berlaku)->format('Y') : '-' }}
+
+                                        </div>
+
+                                        <div class="samperin-kgb-item-subtitle">
+
+                                            Nomor Surat:
+                                            <strong>
+                                                {{ $kgb->kgb_nomor_surat ?: '-' }}
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                    @if ($nomorSk)
+                                        <span class="samperin-kgb-status success">
+
+                                            <i class="bi bi-check-circle-fill"></i>
+
+                                            Nomor SK Sudah Diisi
+
+                                        </span>
+                                    @else
+                                        <span class="samperin-kgb-status warning">
+
+                                            <i class="bi bi-exclamation-circle-fill"></i>
+
+                                            Nomor SK Belum Diisi
+
+                                        </span>
+                                    @endif
+
+                                </div>
+
+
+                                {{-- DATA KGB --}}
+
+                                <div class="samperin-kgb-grid">
+
+                                    <div class="samperin-kgb-info">
+
+                                        <div class="samperin-kgb-label">
+                                            Golongan
+                                        </div>
+
+                                        <div class="samperin-kgb-value">
+
+                                            {{ $kgb->golongan?->golongan_nama ?? '-' }}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="samperin-kgb-info">
+
+                                        <div class="samperin-kgb-label">
+                                            Masa Kerja
+                                        </div>
+
+                                        <div class="samperin-kgb-value">
+
+                                            {{ $kgb->kgb_masa_kerja_tahun ?? 0 }}
+                                            Tahun
+                                            {{ $kgb->kgb_masa_kerja_bulan ?? 0 }}
+                                            Bulan
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="samperin-kgb-info">
+
+                                        <div class="samperin-kgb-label">
+                                            Gaji Lama
+                                        </div>
+
+                                        <div class="samperin-kgb-value">
+
+                                            Rp {{ $gajiLama }}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="samperin-kgb-info">
+
+                                        <div class="samperin-kgb-label">
+                                            Gaji Baru
+                                        </div>
+
+                                        <div class="samperin-kgb-value">
+
+                                            Rp {{ $gajiBaru }}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="samperin-kgb-info">
+
+                                        <div class="samperin-kgb-label">
+                                            Tanggal Surat
+                                        </div>
+
+                                        <div class="samperin-kgb-value">
+
+                                            {{ $tanggalSurat }}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="samperin-kgb-info">
+
+                                        <div class="samperin-kgb-label">
+                                            Mulai Berlaku
+                                        </div>
+
+                                        <div class="samperin-kgb-value">
+
+                                            {{ $mulaiBerlaku }}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="samperin-kgb-info">
+
+                                        <div class="samperin-kgb-label">
+                                            Pejabat
+                                        </div>
+
+                                        <div class="samperin-kgb-value">
+
+                                            {{ $kgb->pejabat?->user_nama ?? '-' }}
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                {{-- NOMOR SK --}}
+
+                                <div class="samperin-kgb-sk">
+
+                                    <form method="POST"
+                                        action="{{ route('pegawai.kgb.update-nomor-sk', $kgb->kgb_id) }}">
+
+                                        @csrf
+
+                                        @method('PUT')
+
+                                        <div class="samperin-kgb-sk-label">
+
+                                            <label for="kgb_nomor_sk_{{ $kgb->kgb_id }}">
+
+                                                Nomor SK
+
+                                                <span>*</span>
+
+                                            </label>
+
+                                            <small>
+                                                Diisi oleh pegawai
+                                            </small>
+
+                                        </div>
+
+
+                                        <div class="samperin-kgb-sk-form">
+
+                                            <input type="text" id="kgb_nomor_sk_{{ $kgb->kgb_id }}"
+                                                name="kgb_nomor_sk" class="samperin-kgb-sk-input"
+                                                value="{{ old('kgb_nomor_sk', $nomorSk) }}"
+                                                placeholder="Masukkan Nomor SK" maxlength="255" required>
+
+                                            <button type="submit" class="samperin-kgb-sk-button">
+
+                                                <i class="bi bi-check-lg"></i>
+
+                                                Simpan Nomor SK
+
+                                            </button>
+
+                                        </div>
+
+                                        @error('kgb_nomor_sk')
+                                            <div class="samperin-kgb-error">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+                        @endforeach
+
+                    </div>
+                @else
+                    <div class="samperin-no-request">
+
+                        <i class="bi bi-cash-stack"></i>
+
+                        Belum terdapat data Kenaikan Gaji Berkala.
+
+                    </div>
+
+                @endif
+
+            </div>
+
+        </section>
 
         {{-- =========================================================
          PERMINTAAN BERKAS
