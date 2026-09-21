@@ -2,541 +2,1097 @@
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <title>
-        KGB - {{ $batch->kgb_batch_nama }}
-    </title>
 
     <style>
         @page {
-            size: A4 portrait;
-            margin: 2.2cm 2.2cm 2cm 2.5cm;
+            size: 215mm 330mm;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 215mm;
+            height: 330mm;
         }
 
         body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 11pt;
+            font-family: Arial, Helvetica, sans-serif;
             color: #000;
-            line-height: 1.5;
+            font-size: 12pt;
+            line-height: 1;
         }
 
+        /* =========================================================
+           HALAMAN
+        ========================================================= */
+
         .page {
+            position: relative;
+            width: 215mm;
+            height: 330mm;
+            overflow: hidden;
             page-break-after: always;
+            page-break-inside: avoid;
         }
 
         .page:last-child {
             page-break-after: auto;
         }
 
-        .kop {
-            text-align: center;
-            margin-bottom: 18px;
+        /* =========================================================
+           TEMPLATE WORD / JPG
+        ========================================================= */
+
+        .template {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 215mm;
+            height: 330mm;
+            z-index: 1;
         }
 
-        .kop-title {
-            font-size: 14pt;
-            font-weight: bold;
-        }
+        /* =========================================================
+           FIELD DINAMIS
+        ========================================================= */
 
-        .kop-subtitle {
-            font-size: 11pt;
-            font-weight: bold;
-        }
-
-        .kop-address {
-            font-size: 9pt;
-        }
-
-        .line {
-            border-bottom: 2px solid #000;
-            margin-top: 8px;
-        }
-
-        .line-thin {
-            border-bottom: 1px solid #000;
-            margin-top: 2px;
-        }
-
-        .judul {
-            text-align: center;
-            font-weight: bold;
+        .field {
+            position: absolute;
+            z-index: 10;
+            white-space: nowrap;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 12pt;
-            margin-top: 25px;
-            margin-bottom: 20px;
+            line-height: 1;
+            color: #000;
         }
 
-        .nomor {
-            text-align: center;
-            margin-bottom: 20px;
+        /* =========================================================
+           TANGGAL SURAT
+        ========================================================= */
+
+        .tanggal-surat {
+            left: 155mm;
+            top: 54.5mm;
         }
 
-        .content {
-            text-align: justify;
+        /* =========================================================
+           NOMOR SURAT
+        ========================================================= */
+
+        .nomor-surat {
+            left: 46.5mm;
+            top: 60.7mm;
         }
 
-        .paragraph {
-            margin-bottom: 12px;
+        .lampiran {
+            left: 46.5mm;
+            top: 65.7mm;
         }
 
-        table.data {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 12px 0 16px 0;
+        /* =========================================================
+           DATA PEGAWAI
+        ========================================================= */
+
+        .nama {
+            left: 118.5mm;
+            top: 132.0mm;
         }
 
-        table.data td {
-            padding: 3px 4px;
-            vertical-align: top;
+        .tempat-tgl-lahir {
+            left: 118.5mm;
+            top: 137.1mm;
         }
 
-        .label {
-            width: 32%;
+        .nip {
+            left: 118.5mm;
+            top: 142.2mm;
         }
 
-        .separator {
-            width: 3%;
+        .jabatan {
+            left: 118.5mm;
+            top: 147mm;
+            white-space: normal;
+            width: 70mm;
+            line-height: 1.05;
         }
 
-        .value {
-            width: 65%;
+        .tempat-kerja {
+            left: 118.5mm;
+            top: 152.1mm;
+            white-space: normal;
+            width: 75mm;
+            line-height: 1.05;
         }
 
-        table.salary {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
+        /* =========================================================
+           GAJI LAMA
+        ========================================================= */
+
+        .gaji-lama {
+            left: 128mm;
+            top: 157mm;
         }
 
-        table.salary th,
-        table.salary td {
-            border: 1px solid #000;
-            padding: 7px;
+        /* =========================================================
+           DASAR KEPUTUSAN
+        ========================================================= */
+
+        .oleh-pejabat {
+            left: 118.5mm;
+            top: 167.0mm;
+            white-space: normal;
+            width: 70mm;
+            line-height: 1.05;
         }
 
-        table.salary th {
-            text-align: center;
+        .nomor-sk {
+            left: 118.5mm;
+            top: 172.5mm;
+        }
+
+        .tanggal-berlaku {
+            left: 118.5mm;
+            top: 177.5mm;
+        }
+
+        /* =========================================================
+           MASA KERJA GOLONGAN
+        ========================================================= */
+
+        .masa-kerja-tahun {
+            left: 118.5mm;
+            top: 182.7mm;
+        }
+
+        .masa-kerja-bulan {
+            left: 153mm;
+            top: 182.7mm;
+        }
+
+        /* =========================================================
+           GAJI BARU
+        ========================================================= */
+
+        .gaji-baru {
+            left: 128mm;
+            top: 198.0mm;
+        }
+
+        /* =========================================================
+           TERBILANG
+        ========================================================= */
+
+        .terbilang {
+            left: 118.5mm;
+            top: 203.2mm;
+            white-space: normal;
+            width: 90mm;
+            line-height: 1.05;
+        }
+
+        /* =========================================================
+           BERDASARKAN MASA KERJA
+        ========================================================= */
+
+        .berdasarkan-tahun {
+            left: 118.5mm;
+            top: 213.3mm;
+        }
+
+        .berdasarkan-bulan {
+            left: 153mm;
+            top: 213.3mm;
+        }
+
+        /* =========================================================
+           GOLONGAN
+        ========================================================= */
+
+        .golongan {
+            left: 118.5mm;
+            top: 218.8mm;
+        }
+
+        /* =========================================================
+           MULAI TANGGAL
+        ========================================================= */
+
+        .mulai-tanggal {
+            left: 118.5mm;
+            top: 224mm;
+        }
+
+        /* =========================================================
+           BERKEDUDUKAN
+        ========================================================= */
+
+        .berkedudukan {
+            left: 118.5mm;
+            top: 228.8mm;
+        }
+
+        /* =========================================================
+           PEJABAT PENANDATANGAN
+        ========================================================= */
+
+        .pejabat-nama {
+            left: 128mm;
+            top: 286.0mm;
             font-weight: bold;
         }
 
-        .signature {
-            width: 100%;
-            margin-top: 35px;
+        .pejabat-golongan {
+            left: 128mm;
+            top: 291.2mm;
         }
 
-        .signature-right {
-            width: 42%;
-            text-align: left;
+        .pejabat-nip {
+            left: 128mm;
+            top: 296.2mm;
         }
 
-        .signature-space {
-            height: 70px;
+        .text-underline {
+            text-decoration: underline;
+        }
+
+        .wrap {
+            white-space: normal;
         }
     </style>
-
 </head>
-
 
 <body>
 
+    {{-- =========================================================
+         FUNCTION FORMAT NAMA
+    ========================================================== --}}
+
+    @php
+
+        $formatNama = function ($value) {
+            $value = trim((string) $value);
+
+            if ($value === '') {
+                return '';
+            }
+
+            $parts = preg_split('/\s+/', $value);
+
+            $result = [];
+
+            foreach ($parts as $part) {
+                $part = trim($part);
+
+                if ($part === '') {
+                    continue;
+                }
+
+                if (str_contains($part, '.')) {
+                    $result[] = strtoupper($part);
+                } else {
+                    $result[] = ucwords(strtolower($part));
+                }
+            }
+
+            return implode(' ', $result);
+        };
+
+        /*
+        |--------------------------------------------------------------------------
+        | FORMAT TANGGAL
+        |--------------------------------------------------------------------------
+        */
+
+        $bulanIndonesia = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+
+        $formatTanggal = function ($tanggal) use ($bulanIndonesia) {
+
+            if (!$tanggal) {
+                return '';
+            }
+
+            try {
+
+                $tanggal = \Carbon\Carbon::parse($tanggal);
+
+                return $tanggal->format('d')
+                    . ' '
+                    . $bulanIndonesia[(int) $tanggal->format('m')]
+                    . ' '
+                    . $tanggal->format('Y');
+
+            } catch (\Throwable $e) {
+
+                return '';
+
+            }
+        };
+
+        /*
+        |--------------------------------------------------------------------------
+        | TERBILANG
+        |--------------------------------------------------------------------------
+        */
+
+        $terbilang = function ($angka) use (&$terbilang) {
+
+            $angka = (int) $angka;
+
+            $huruf = [
+                0 => 'nol',
+                1 => 'satu',
+                2 => 'dua',
+                3 => 'tiga',
+                4 => 'empat',
+                5 => 'lima',
+                6 => 'enam',
+                7 => 'tujuh',
+                8 => 'delapan',
+                9 => 'sembilan',
+                10 => 'sepuluh',
+                11 => 'sebelas',
+            ];
+
+            if ($angka < 12) {
+                return $huruf[$angka];
+            }
+
+            if ($angka < 20) {
+                return $huruf[$angka - 10] . ' belas';
+            }
+
+            if ($angka < 100) {
+
+                $puluh = intdiv($angka, 10);
+                $sisa = $angka % 10;
+
+                $hasil = $huruf[$puluh] . ' puluh';
+
+                if ($sisa > 0) {
+                    $hasil .= ' ' . $huruf[$sisa];
+                }
+
+                return $hasil;
+            }
+
+            if ($angka < 200) {
+
+                $sisa = $angka - 100;
+
+                return $sisa > 0
+                    ? 'seratus ' . $terbilang($sisa)
+                    : 'seratus';
+            }
+
+            if ($angka < 1000) {
+
+                $ratus = intdiv($angka, 100);
+                $sisa = $angka % 100;
+
+                $hasil = $huruf[$ratus] . ' ratus';
+
+                if ($sisa > 0) {
+                    $hasil .= ' ' . $terbilang($sisa);
+                }
+
+                return $hasil;
+            }
+
+            if ($angka < 2000) {
+
+                $sisa = $angka - 1000;
+
+                return $sisa > 0
+                    ? 'seribu ' . $terbilang($sisa)
+                    : 'seribu';
+            }
+
+            if ($angka < 1000000) {
+
+                $ribu = intdiv($angka, 1000);
+                $sisa = $angka % 1000;
+
+                $hasil = $terbilang($ribu) . ' ribu';
+
+                if ($sisa > 0) {
+                    $hasil .= ' ' . $terbilang($sisa);
+                }
+
+                return $hasil;
+            }
+
+            if ($angka < 1000000000) {
+
+                $juta = intdiv($angka, 1000000);
+                $sisa = $angka % 1000000;
+
+                $hasil = $terbilang($juta) . ' juta';
+
+                if ($sisa > 0) {
+                    $hasil .= ' ' . $terbilang($sisa);
+                }
+
+                return $hasil;
+            }
+
+            if ($angka < 1000000000000) {
+
+                $miliar = intdiv($angka, 1000000000);
+                $sisa = $angka % 1000000000;
+
+                $hasil = $terbilang($miliar) . ' miliar';
+
+                if ($sisa > 0) {
+                    $hasil .= ' ' . $terbilang($sisa);
+                }
+
+                return $hasil;
+            }
+
+            return (string) $angka;
+        };
+
+    @endphp
+
+
+    {{-- =========================================================
+         LOOP SEMUA KGB
+    ========================================================== --}}
+
     @foreach ($batch->kgb as $kgb)
+
         @php
 
-            $pegawai = $kgb->user;
+            /*
+            |--------------------------------------------------------------------------
+            | PEGAWAI
+            |--------------------------------------------------------------------------
+            */
 
-            $golongan = $kgb->golongan->golongan_nama ?? ($pegawai?->golongan?->golongan_nama ?? '-');
-
-            $masaKerjaTahun = $kgb->kgb_masa_kerja_tahun ?? 0;
-            $masaKerjaBulan = $kgb->kgb_masa_kerja_bulan ?? 0;
+            $pegawai = $kgb->user ?? null;
 
             /*
-             * Hitung ulang dari TMT ke mulai berlaku
-             * sebagai pengaman untuk data lama.
-             */
+            |--------------------------------------------------------------------------
+            | NAMA PEGAWAI
+            |--------------------------------------------------------------------------
+            */
 
-            if ($pegawai?->user_tmt && $kgb->kgb_mulai_berlaku) {
+            $nama = $formatNama($pegawai?->user_nama);
+
+            $gelarBelakang = trim(
+                (string) ($pegawai?->user_gelarbelakang ?? '')
+            );
+
+            if ($gelarBelakang !== '') {
+                $nama .= ', ' . $gelarBelakang;
+            }
+
+            $nama = trim($nama);
+
+            /*
+            |--------------------------------------------------------------------------
+            | TEMPAT / TANGGAL LAHIR
+            |--------------------------------------------------------------------------
+            */
+
+            $tanggalLahir = $formatTanggal(
+                $pegawai?->user_tgllahir
+            );
+
+            $tempatLahir = ucwords(strtolower(trim((string) ($pegawai?->user_tempatlahir ?? ''))));
+
+            if ($tempatLahir !== '' && $tanggalLahir !== '') {
+
+                $tempatTanggalLahir =
+                    $tempatLahir . ', ' . $tanggalLahir;
+
+            } elseif ($tempatLahir !== '') {
+
+                $tempatTanggalLahir = $tempatLahir;
+
+            } else {
+
+                $tempatTanggalLahir = $tanggalLahir;
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOKASI KERJA
+            |--------------------------------------------------------------------------
+            */
+
+            $lokasiKerja = trim(
+                (string) ($pegawai?->user_lokasikerja ?? '')
+            );
+
+            if ($lokasiKerja === 'Kantor Dinas Kebudayaan Provinsi Bali') {
+
+                $lokasiKerja = 'Dinas Kebudayaan Provinsi Bali';
+
+            } elseif ($lokasiKerja === 'Kantor UPTD Taman Budaya') {
+
+                $lokasiKerja = 'UPTD Taman Budaya';
+
+            } elseif ($lokasiKerja === 'Kantor UPTD Museum Bali') {
+
+                $lokasiKerja = 'UPTD Museum Bali';
+
+            } elseif ($lokasiKerja === 'Kantor UPTD Monumen Perjuangan Rakyat Bali') {
+
+                $lokasiKerja =
+                    'UPTD Monumen Perjuangan Rakyat Bali';
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | JABATAN
+            |--------------------------------------------------------------------------
+            */
+
+            $jabatan = trim(
+                (string) ($pegawai?->jabatan?->jabatan_nama ?? '')
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | TANGGAL SURAT
+            |--------------------------------------------------------------------------
+            */
+
+            $tanggalSurat = $formatTanggal(
+                $kgb->kgb_tanggal_surat
+                ?? $batch->kgb_batch_tanggal
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | NOMOR SURAT
+            |--------------------------------------------------------------------------
+            */
+
+            $nomorSurat = trim(
+                (string) ($kgb->kgb_nomor_surat ?? '')
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | TARIF GAJI
+            |--------------------------------------------------------------------------
+            */
+
+            $tarifGaji = null;
+
+            if (
+                $batch->peraturanGaji &&
+                $batch->peraturanGaji->golongan
+            ) {
+
+                $tarifGaji =
+                    $batch->peraturanGaji
+                        ->golongan
+                        ->firstWhere(
+                            'golongan_id',
+                            $kgb->kgb_golongan_id
+                        );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | GAJI LAMA
+            |--------------------------------------------------------------------------
+            */
+
+            $nilaiGajiLama = (int) (
+                $tarifGaji?->peraturan_gaji_gaji_lama ?? 0
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | GAJI BARU
+            |--------------------------------------------------------------------------
+            */
+
+            $nilaiGajiBaru = (int) (
+                $tarifGaji?->peraturan_gaji_gaji_baru ?? 0
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | FORMAT GAJI
+            |--------------------------------------------------------------------------
+            */
+
+            $gajiLama = number_format(
+                $nilaiGajiLama,
+                0,
+                ',',
+                '.'
+            );
+
+            $gajiBaru = number_format(
+                $nilaiGajiBaru,
+                0,
+                ',',
+                '.'
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | NOMOR SK
+            |--------------------------------------------------------------------------
+            */
+
+            $nomorSk = trim(
+                (string) ($kgb->kgb_nomor_sk ?? '')
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | TANGGAL MULAI BERLAKU
+            |--------------------------------------------------------------------------
+            */
+
+            $tanggalMulaiBerlaku = $formatTanggal(
+                $kgb->kgb_mulai_berlaku
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | MASA KERJA GOLONGAN
+            |--------------------------------------------------------------------------
+            */
+
+            $masaKerjaTahun = (int) (
+                $kgb->kgb_masa_kerja_tahun ?? 0
+            );
+
+            $masaKerjaBulan = (int) (
+                $kgb->kgb_masa_kerja_bulan ?? 0
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | MASA KERJA BERDASARKAN TMT
+            |--------------------------------------------------------------------------
+            */
+
+            $masaKerjaBerdasarkanTmtTahun =
+                $masaKerjaTahun;
+
+            $masaKerjaBerdasarkanTmtBulan =
+                $masaKerjaBulan;
+
+            if (
+                $pegawai?->user_tmt &&
+                $kgb->kgb_mulai_berlaku
+            ) {
+
                 try {
-                    $tmt = \Carbon\Carbon::parse($pegawai->user_tmt);
 
-                    $berlaku = \Carbon\Carbon::parse($kgb->kgb_mulai_berlaku);
+                    $tmt = \Carbon\Carbon::parse(
+                        $pegawai->user_tmt
+                    );
 
-                    if ($tmt->lessThanOrEqualTo($berlaku)) {
-                        $masaKerja = $tmt->diff($berlaku);
+                    $efektif = \Carbon\Carbon::parse(
+                        $kgb->kgb_mulai_berlaku
+                    );
 
-                        $masaKerjaTahun = $masaKerja->y;
-                        $masaKerjaBulan = $masaKerja->m;
+                    if ($tmt->lessThanOrEqualTo($efektif)) {
+
+                        $diff = $tmt->diff($efektif);
+
+                        $masaKerjaBerdasarkanTmtTahun =
+                            $diff->y;
+
+                        $masaKerjaBerdasarkanTmtBulan =
+                            $diff->m;
                     }
+
                 } catch (\Throwable $e) {
-                    // gunakan data database
+                    //
                 }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | GOLONGAN PEGAWAI
+            |--------------------------------------------------------------------------
+            */
+
+            $golongan =
+                $kgb->golongan?->golongan_nama
+                ?? ($pegawai?->golongan?->golongan_nama ?? '');
+
+            $golongan = preg_replace(
+                '/^golongan\s*/i',
+                '',
+                trim($golongan)
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | BERKEDUDUKAN SEBAGAI
+            |--------------------------------------------------------------------------
+            */
+
+            $berkedudukan = trim(
+                (string) ($pegawai?->status_pegawai ?? '')
+            );
+
+            if ($berkedudukan === '') {
+                $berkedudukan = 'PPPK Daerah Provinsi Bali';
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | TERBILANG GAJI BARU
+            |--------------------------------------------------------------------------
+            */
+
+            $terbilangGaji =
+                ucfirst($terbilang($nilaiGajiBaru))
+                . ' rupiah';
+
+            /*
+            |--------------------------------------------------------------------------
+            | PEJABAT PENANDATANGAN
+            |--------------------------------------------------------------------------
+            */
+
+            $pejabat =
+                $kgb->pejabat
+                ?? ($batch->pejabat ?? null);
+
+            $pejabatNama =
+                $formatNama($pejabat?->user_nama);
+
+            $pejabatGelar = trim(
+                (string) ($pejabat?->user_gelarbelakang ?? '')
+            );
+
+            if ($pejabatGelar !== '') {
+
+                $pejabatNama .=
+                    ', ' . $pejabatGelar;
+            }
+
+            $pejabatNama = trim($pejabatNama);
+
+            $pejabatNip = trim(
+                (string) ($pejabat?->user_nip ?? '')
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | GOLONGAN + PANGKAT PEJABAT
+            |--------------------------------------------------------------------------
+            */
+
+            $pejabatGolongan = trim(
+                (string) (
+                    $pejabat?->golongan?->golongan_nama ?? ''
+                )
+            );
+
+            $pejabatPangkat = trim(
+                (string) (
+                    $pejabat?->golongan?->golongan_pangkat ?? ''
+                )
+            );
+
+            $pejabatGolongan = preg_replace(
+                '/^golongan\s*/i',
+                '',
+                $pejabatGolongan
+            );
+
+            if (
+                $pejabatGolongan !== ''
+                && $pejabatPangkat !== ''
+            ) {
+
+                $pejabatGolongan .=
+                    ' (' . $pejabatPangkat . ')';
             }
 
         @endphp
 
 
+        {{-- =====================================================
+             SATU PEGAWAI = SATU HALAMAN
+        ====================================================== --}}
+
         <div class="page">
 
+            {{-- TEMPLATE --}}
 
-            {{-- ================================================= --}}
-            {{-- KOP --}}
-            {{-- ================================================= --}}
+            <img
+                src="{{ public_path('assets/images/template-surat.png') }}"
+                class="template"
+                alt=""
+            >
 
-            <div class="kop">
 
-                <div class="kop-title">
-                    PEMERINTAH PROVINSI BALI
+            {{-- =================================================
+                 TANGGAL SURAT
+            ================================================== --}}
+
+            @if ($tanggalSurat !== '')
+                <div class="field tanggal-surat">
+                    {{ $tanggalSurat }}
                 </div>
+            @endif
 
-                <div class="kop-title">
-                    DINAS KEBUDAYAAN
+
+            {{-- =================================================
+                 NOMOR SURAT
+            ================================================== --}}
+
+            @if ($nomorSurat !== '')
+                <div class="field nomor-surat">
+                    {{ $nomorSurat }}
                 </div>
+            @endif
 
-                <div class="kop-address">
-                    Provinsi Bali
-                </div>
 
-                <div class="line"></div>
+            {{-- =================================================
+                 LAMPIRAN
+            ================================================== --}}
 
-                <div class="line-thin"></div>
-
+            <div class="field lampiran">
+                -
             </div>
 
 
-            {{-- ================================================= --}}
-            {{-- JUDUL --}}
-            {{-- ================================================= --}}
+            {{-- =================================================
+                 NAMA
+            ================================================== --}}
 
-            <div class="judul">
+            @if ($nama !== '')
+                <div class="field nama">
+                    {{ $nama }}
+                </div>
+            @endif
 
-                SURAT KENAIKAN GAJI BERKALA
 
+            {{-- =================================================
+                 TEMPAT / TANGGAL LAHIR
+            ================================================== --}}
+
+            @if ($tempatTanggalLahir !== '')
+                <div class="field tempat-tgl-lahir">
+                    {{ $tempatTanggalLahir }}
+                </div>
+            @endif
+
+
+            {{-- =================================================
+                 NIP
+            ================================================== --}}
+
+            @if ($pegawai?->user_nip)
+                <div class="field nip">
+                    {{ $pegawai->user_nip }}
+                </div>
+            @endif
+
+
+            {{-- =================================================
+                 JABATAN
+            ================================================== --}}
+
+            @if ($jabatan !== '')
+                <div class="field jabatan">
+                    {{ $jabatan }}
+                </div>
+            @endif
+
+
+            {{-- =================================================
+                 TEMPAT BEKERJA
+            ================================================== --}}
+
+            @if ($lokasiKerja !== '')
+                <div class="field tempat-kerja">
+                    {{ $lokasiKerja }}
+                </div>
+            @endif
+
+
+            {{-- =================================================
+                 GAJI POKOK LAMA
+            ================================================== --}}
+
+            @if ($nilaiGajiLama > 0)
+                <div class="field gaji-lama">
+                    {{ $gajiLama }},-
+                </div>
+            @endif
+
+
+            {{-- =================================================
+                 OLEH PEJABAT
+            ================================================== --}}
+
+            @if (!empty($batch->kgb_batch_oleh_pejabat))
+                <div class="field oleh-pejabat">
+                    {{ $batch->kgb_batch_oleh_pejabat }}
+                </div>
+            @endif
+
+
+            {{-- =================================================
+                 NOMOR SK
+            ================================================== --}}
+
+            @if ($nomorSk !== '')
+                <div class="field nomor-sk">
+                    {{ $nomorSk }}
+                </div>
+            @endif
+
+
+            {{-- =================================================
+                 TANGGAL MULAI BERLAKU
+            ================================================== --}}
+
+            @if ($tanggalMulaiBerlaku !== '')
+                <div class="field tanggal-berlaku">
+                    {{ $tanggalMulaiBerlaku }}
+                </div>
+            @endif
+
+
+            {{-- =================================================
+                 MASA KERJA GOLONGAN
+            ================================================== --}}
+
+            <div class="field masa-kerja-tahun">
+                {{ str_pad($masaKerjaTahun, 2, '0', STR_PAD_LEFT) }}
+            </div>
+
+            <div class="field masa-kerja-bulan">
+                {{ str_pad($masaKerjaBulan, 2, '0', STR_PAD_LEFT) }}
             </div>
 
 
-            <div class="nomor">
+            {{-- =================================================
+                 GAJI POKOK BARU
+            ================================================== --}}
 
-                Nomor:
+            @if ($nilaiGajiBaru > 0)
+                <div class="field gaji-baru">
+                    {{ $gajiBaru }},-
+                </div>
+            @endif
 
-                <strong>
-                    {{ $kgb->kgb_nomor_surat }}
-                </strong>
 
+            {{-- =================================================
+                 TERBILANG
+            ================================================== --}}
+
+            @if ($nilaiGajiBaru > 0)
+                <div class="field terbilang">
+                    ({{ $terbilangGaji }})
+                </div>
+            @endif
+
+
+            {{-- =================================================
+                 BERDASARKAN MASA KERJA
+            ================================================== --}}
+
+            <div class="field berdasarkan-tahun">
+                {{ str_pad($masaKerjaBerdasarkanTmtTahun, 2, '0', STR_PAD_LEFT) }}
+            </div>
+
+            <div class="field berdasarkan-bulan">
+                {{ str_pad($masaKerjaBerdasarkanTmtBulan, 2, '0', STR_PAD_LEFT) }}
             </div>
 
 
-            {{-- ================================================= --}}
-            {{-- ISI --}}
-            {{-- ================================================= --}}
+            {{-- =================================================
+                 DALAM GOLONGAN
+            ================================================== --}}
 
-            <div class="content">
-
-                <div class="paragraph">
-
-                    Berdasarkan ketentuan peraturan perundang-undangan
-                    mengenai kenaikan gaji berkala, dengan ini diberikan
-                    kenaikan gaji berkala kepada:
-
+            @if ($golongan !== '')
+                <div class="field golongan">
+                    {{ $golongan }}
                 </div>
+            @endif
 
 
-                <table class="data">
+            {{-- =================================================
+                 MULAI TANGGAL
+            ================================================== --}}
 
-                    <tr>
-
-                        <td class="label">
-                            Nama
-                        </td>
-
-                        <td class="separator">
-                            :
-                        </td>
-
-                        <td class="value">
-
-                            <strong>
-                                {{ $pegawai?->user_nama ?? '-' }}
-                            </strong>
-
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="label">
-                            NIP
-                        </td>
-
-                        <td class="separator">
-                            :
-                        </td>
-
-                        <td class="value">
-                            {{ $pegawai?->user_nip ?? '-' }}
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="label">
-                            Pangkat / Golongan
-                        </td>
-
-                        <td class="separator">
-                            :
-                        </td>
-
-                        <td class="value">
-                            {{ $golongan }}
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="label">
-                            Jabatan
-                        </td>
-
-                        <td class="separator">
-                            :
-                        </td>
-
-                        <td class="value">
-                            {{ $pegawai?->jabatan?->jabatan_nama ?? '-' }}
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="label">
-                            Unit Kerja
-                        </td>
-
-                        <td class="separator">
-                            :
-                        </td>
-
-                        <td class="value">
-                            {{ $pegawai?->bidang?->bidang_nama ?? '-' }}
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="label">
-                            TMT
-                        </td>
-
-                        <td class="separator">
-                            :
-                        </td>
-
-                        <td class="value">
-
-                            @if ($pegawai?->user_tmt)
-                                {{ \Carbon\Carbon::parse($pegawai->user_tmt)->translatedFormat('d F Y') }}
-                            @else
-                                -
-                            @endif
-
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="label">
-                            Masa Kerja
-                        </td>
-
-                        <td class="separator">
-                            :
-                        </td>
-
-                        <td class="value">
-
-                            {{ $masaKerjaTahun }}
-                            Tahun
-                            {{ $masaKerjaBulan }}
-                            Bulan
-
-                        </td>
-
-                    </tr>
-
-                </table>
-
-
-                <div class="paragraph">
-
-                    Dengan demikian gaji pokok pegawai yang bersangkutan
-                    menjadi:
-
+            @if ($tanggalMulaiBerlaku !== '')
+                <div class="field mulai-tanggal">
+                    {{ $tanggalMulaiBerlaku }}
                 </div>
+            @endif
 
 
-                {{-- ================================================= --}}
-                {{-- GAJI --}}
-                {{-- ================================================= --}}
+            {{-- =================================================
+                 BERKEDUDUKAN SEBAGAI
+            ================================================== --}}
 
-                <table class="salary">
-
-                    <thead>
-
-                        <tr>
-
-                            <th width="50%">
-                                Keterangan
-                            </th>
-
-                            <th width="50%">
-                                Jumlah
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        <tr>
-
-                            <td>
-                                Gaji Pokok Lama
-                            </td>
-
-                            <td>
-
-                                Rp
-                                {{ number_format($kgb->kgb_gaji_lama ?? 0, 0, ',', '.') }}
-
-                            </td>
-
-                        </tr>
-
-
-                        <tr>
-
-                            <td>
-                                Gaji Pokok Baru
-                            </td>
-
-                            <td>
-
-                                <strong>
-
-                                    Rp
-                                    {{ number_format($kgb->kgb_gaji_baru ?? 0, 0, ',', '.') }}
-
-                                </strong>
-
-                            </td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-
-                {{-- ================================================= --}}
-                {{-- BERLAKU --}}
-                {{-- ================================================= --}}
-
-                <div class="paragraph">
-
-                    Kenaikan gaji berkala tersebut berlaku mulai tanggal
-
-                    <strong>
-
-                        @if ($kgb->kgb_mulai_berlaku)
-                            {{ \Carbon\Carbon::parse($kgb->kgb_mulai_berlaku)->translatedFormat('d F Y') }}
-                        @else
-                            -
-                        @endif
-
-                    </strong>
-
-                    dengan nomor Surat Keputusan:
-
-                    <strong>
-                        {{ $kgb->kgb_nomor_sk ?? '-' }}
-                    </strong>.
-
+            @if ($berkedudukan !== '')
+                <div class="field berkedudukan">
+                    {{ $berkedudukan }}
                 </div>
+            @endif
 
 
-                <div class="paragraph">
+            {{-- =================================================
+                 PEJABAT PENANDATANGAN
+            ================================================== --}}
 
-                    Demikian surat kenaikan gaji berkala ini dibuat
-                    untuk dapat dipergunakan sebagaimana mestinya.
-
+            @if ($pejabatNama !== '')
+                <div class="field pejabat-nama text-underline">
+                    {{ $pejabatNama }}
                 </div>
+            @endif
 
-            </div>
+
+            @if ($pejabatGolongan !== '')
+                <div class="field pejabat-golongan">
+                    {{ $pejabatGolongan }}
+                </div>
+            @endif
 
 
-            {{-- ================================================= --}}
-            {{-- TANDA TANGAN --}}
-            {{-- ================================================= --}}
-
-            <table class="signature">
-
-                <tr>
-
-                    <td width="58%">
-                        &nbsp;
-                    </td>
-
-                    <td class="signature-right">
-
-                        Bali,
-
-                        @if ($kgb->kgb_tanggal_surat)
-                            {{ \Carbon\Carbon::parse($kgb->kgb_tanggal_surat)->translatedFormat('d F Y') }}
-                        @else
-                            -
-                        @endif
-
-                        <br><br>
-
-                        Pejabat Penandatangan,
-
-                        <div class="signature-space">
-                            &nbsp;
-                        </div>
-
-                        <strong>
-
-                            {{ $kgb->pejabat?->user_nama ?? '-' }}
-
-                        </strong>
-
-                        @if ($kgb->pejabat?->user_nip)
-                            <br>
-
-                            NIP.
-                            {{ $kgb->pejabat->user_nip }}
-                        @endif
-
-                    </td>
-
-                </tr>
-
-            </table>
+            @if ($pejabatNip !== '')
+                <div class="field pejabat-nip">
+                    NIP. {{ $pejabatNip }}
+                </div>
+            @endif
 
         </div>
+
     @endforeach
 
 </body>

@@ -407,7 +407,7 @@
 
         $tanggalLahir = $formatTanggal($pegawai?->user_tgllahir);
 
-        $tempatLahir = trim((string) ($pegawai?->user_tempatlahir ?? ''));
+        $tempatLahir = ucwords(strtolower(trim((string) ($pegawai?->user_tempatlahir ?? ''))));
 
         if ($tempatLahir !== '' && $tanggalLahir !== '') {
             $tempatTanggalLahir = $tempatLahir . ', ' . $tanggalLahir;

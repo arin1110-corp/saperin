@@ -11,6 +11,7 @@ use App\Models\SamperinBidang;
 use App\Models\SamperinPeraturanGaji;
 use App\Models\SamperinUser;
 use Barryvdh\DomPDF\Facade\Pdf;
+use setasign\Fpdi\Fpdi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -1289,7 +1290,15 @@ class SamperinAdminKgbController extends Controller
     public function pdfAll($id)
     {
         $batch = SamperinKgbBatch::query()
-            ->with(['peraturanGaji.golongan', 'pejabat', 'kgb.user.jabatan', 'kgb.user.bidang', 'kgb.user.golongan', 'kgb.golongan', 'kgb.pejabat'])
+            ->with([
+                'peraturanGaji.golongan',
+                'pejabat',
+                'kgb.user.jabatan',
+                'kgb.user.bidang',
+                'kgb.user.golongan',
+                'kgb.golongan',
+                'kgb.pejabat',
+            ])
             ->findOrFail($id);
 
         if ($batch->kgb->isEmpty()) {
@@ -1298,10 +1307,19 @@ class SamperinAdminKgbController extends Controller
             ]);
         }
 
-        $pdf = Pdf::loadView('dashboard.kepegawaian.kgb.pdf-all', compact('batch'));
+        $pdf = Pdf::loadView(
+            'dashboard.kepegawaian.kgb.pdf-all',
+            compact('batch')
+        );
 
-        $pdf->setPaper('A4', 'portrait');
+        // F4 Portrait
+        $pdf->setPaper([0, 0, 609.45, 935.43], 'portrait');
 
-        return $pdf->stream('KGB-' . $batch->kgb_batch_nama . '.pdf');
+        // Kalau server punya RAM cukup
+        $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
+
+        return $pdf->stream(
+            'KGB-' . $batch->kgb_batch_nama . '.pdf'
+        );
     }
 }
