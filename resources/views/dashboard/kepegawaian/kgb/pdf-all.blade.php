@@ -129,7 +129,7 @@
             left: 118.5mm;
             top: 152.1mm;
             white-space: normal;
-            width: 75mm;
+            width: 90mm;
             line-height: 1.05;
         }
 
@@ -328,25 +328,20 @@
         ];
 
         $formatTanggal = function ($tanggal) use ($bulanIndonesia) {
-
             if (!$tanggal) {
                 return '';
             }
 
             try {
-
                 $tanggal = \Carbon\Carbon::parse($tanggal);
 
-                return $tanggal->format('d')
-                    . ' '
-                    . $bulanIndonesia[(int) $tanggal->format('m')]
-                    . ' '
-                    . $tanggal->format('Y');
-
+                return $tanggal->format('d') .
+                    ' ' .
+                    $bulanIndonesia[(int) $tanggal->format('m')] .
+                    ' ' .
+                    $tanggal->format('Y');
             } catch (\Throwable $e) {
-
                 return '';
-
             }
         };
 
@@ -357,7 +352,6 @@
         */
 
         $terbilang = function ($angka) use (&$terbilang) {
-
             $angka = (int) $angka;
 
             $huruf = [
@@ -384,7 +378,6 @@
             }
 
             if ($angka < 100) {
-
                 $puluh = intdiv($angka, 10);
                 $sisa = $angka % 10;
 
@@ -398,16 +391,12 @@
             }
 
             if ($angka < 200) {
-
                 $sisa = $angka - 100;
 
-                return $sisa > 0
-                    ? 'seratus ' . $terbilang($sisa)
-                    : 'seratus';
+                return $sisa > 0 ? 'seratus ' . $terbilang($sisa) : 'seratus';
             }
 
             if ($angka < 1000) {
-
                 $ratus = intdiv($angka, 100);
                 $sisa = $angka % 100;
 
@@ -421,16 +410,12 @@
             }
 
             if ($angka < 2000) {
-
                 $sisa = $angka - 1000;
 
-                return $sisa > 0
-                    ? 'seribu ' . $terbilang($sisa)
-                    : 'seribu';
+                return $sisa > 0 ? 'seribu ' . $terbilang($sisa) : 'seribu';
             }
 
             if ($angka < 1000000) {
-
                 $ribu = intdiv($angka, 1000);
                 $sisa = $angka % 1000;
 
@@ -444,7 +429,6 @@
             }
 
             if ($angka < 1000000000) {
-
                 $juta = intdiv($angka, 1000000);
                 $sisa = $angka % 1000000;
 
@@ -458,7 +442,6 @@
             }
 
             if ($angka < 1000000000000) {
-
                 $miliar = intdiv($angka, 1000000000);
                 $sisa = $angka % 1000000000;
 
@@ -482,7 +465,6 @@
     ========================================================== --}}
 
     @foreach ($batch->kgb as $kgb)
-
         @php
 
             /*
@@ -501,9 +483,7 @@
 
             $nama = $formatNama($pegawai?->user_nama);
 
-            $gelarBelakang = trim(
-                (string) ($pegawai?->user_gelarbelakang ?? '')
-            );
+            $gelarBelakang = trim((string) ($pegawai?->user_gelarbelakang ?? ''));
 
             if ($gelarBelakang !== '') {
                 $nama .= ', ' . $gelarBelakang;
@@ -517,25 +497,16 @@
             |--------------------------------------------------------------------------
             */
 
-            $tanggalLahir = $formatTanggal(
-                $pegawai?->user_tgllahir
-            );
+            $tanggalLahir = $formatTanggal($pegawai?->user_tgllahir);
 
             $tempatLahir = ucwords(strtolower(trim((string) ($pegawai?->user_tempatlahir ?? ''))));
 
             if ($tempatLahir !== '' && $tanggalLahir !== '') {
-
-                $tempatTanggalLahir =
-                    $tempatLahir . ', ' . $tanggalLahir;
-
+                $tempatTanggalLahir = $tempatLahir . ', ' . $tanggalLahir;
             } elseif ($tempatLahir !== '') {
-
                 $tempatTanggalLahir = $tempatLahir;
-
             } else {
-
                 $tempatTanggalLahir = $tanggalLahir;
-
             }
 
             /*
@@ -544,26 +515,10 @@
             |--------------------------------------------------------------------------
             */
 
-            $lokasiKerja = trim(
-                (string) ($pegawai?->user_lokasikerja ?? '')
-            );
+            $lokasiKerja = trim((string) ($pegawai?->bidang?->bidang_nama ?? ''));
 
-            if ($lokasiKerja === 'Kantor Dinas Kebudayaan Provinsi Bali') {
-
+            if (!str_contains(strtolower($lokasiKerja), 'uptd')) {
                 $lokasiKerja = 'Dinas Kebudayaan Provinsi Bali';
-
-            } elseif ($lokasiKerja === 'Kantor UPTD Taman Budaya') {
-
-                $lokasiKerja = 'UPTD Taman Budaya';
-
-            } elseif ($lokasiKerja === 'Kantor UPTD Museum Bali') {
-
-                $lokasiKerja = 'UPTD Museum Bali';
-
-            } elseif ($lokasiKerja === 'Kantor UPTD Monumen Perjuangan Rakyat Bali') {
-
-                $lokasiKerja =
-                    'UPTD Monumen Perjuangan Rakyat Bali';
             }
 
             /*
@@ -572,9 +527,7 @@
             |--------------------------------------------------------------------------
             */
 
-            $jabatan = trim(
-                (string) ($pegawai?->jabatan?->jabatan_nama ?? '')
-            );
+            $jabatan = trim((string) ($pegawai?->jabatan?->jabatan_nama ?? ''));
 
             /*
             |--------------------------------------------------------------------------
@@ -582,10 +535,7 @@
             |--------------------------------------------------------------------------
             */
 
-            $tanggalSurat = $formatTanggal(
-                $kgb->kgb_tanggal_surat
-                ?? $batch->kgb_batch_tanggal
-            );
+            $tanggalSurat = $formatTanggal($kgb->kgb_tanggal_surat ?? $batch->kgb_batch_tanggal);
 
             /*
             |--------------------------------------------------------------------------
@@ -593,9 +543,7 @@
             |--------------------------------------------------------------------------
             */
 
-            $nomorSurat = trim(
-                (string) ($kgb->kgb_nomor_surat ?? '')
-            );
+            $nomorSurat = trim((string) ($kgb->kgb_nomor_surat ?? ''));
 
             /*
             |--------------------------------------------------------------------------
@@ -605,18 +553,8 @@
 
             $tarifGaji = null;
 
-            if (
-                $batch->peraturanGaji &&
-                $batch->peraturanGaji->golongan
-            ) {
-
-                $tarifGaji =
-                    $batch->peraturanGaji
-                        ->golongan
-                        ->firstWhere(
-                            'golongan_id',
-                            $kgb->kgb_golongan_id
-                        );
+            if ($batch->peraturanGaji && $batch->peraturanGaji->golongan) {
+                $tarifGaji = $batch->peraturanGaji->golongan->firstWhere('golongan_id', $kgb->kgb_golongan_id);
             }
 
             /*
@@ -625,9 +563,7 @@
             |--------------------------------------------------------------------------
             */
 
-            $nilaiGajiLama = (int) (
-                $tarifGaji?->peraturan_gaji_gaji_lama ?? 0
-            );
+            $nilaiGajiLama = (int) ($tarifGaji?->peraturan_gaji_gaji_lama ?? 0);
 
             /*
             |--------------------------------------------------------------------------
@@ -635,9 +571,7 @@
             |--------------------------------------------------------------------------
             */
 
-            $nilaiGajiBaru = (int) (
-                $tarifGaji?->peraturan_gaji_gaji_baru ?? 0
-            );
+            $nilaiGajiBaru = (int) ($tarifGaji?->peraturan_gaji_gaji_baru ?? 0);
 
             /*
             |--------------------------------------------------------------------------
@@ -645,19 +579,9 @@
             |--------------------------------------------------------------------------
             */
 
-            $gajiLama = number_format(
-                $nilaiGajiLama,
-                0,
-                ',',
-                '.'
-            );
+            $gajiLama = number_format($nilaiGajiLama, 0, ',', '.');
 
-            $gajiBaru = number_format(
-                $nilaiGajiBaru,
-                0,
-                ',',
-                '.'
-            );
+            $gajiBaru = number_format($nilaiGajiBaru, 0, ',', '.');
 
             /*
             |--------------------------------------------------------------------------
@@ -665,9 +589,7 @@
             |--------------------------------------------------------------------------
             */
 
-            $nomorSk = trim(
-                (string) ($kgb->kgb_nomor_sk ?? '')
-            );
+            $nomorSk = trim((string) ($kgb->kgb_nomor_sk ?? ''));
 
             /*
             |--------------------------------------------------------------------------
@@ -675,9 +597,7 @@
             |--------------------------------------------------------------------------
             */
 
-            $tanggalMulaiBerlaku = $formatTanggal(
-                $kgb->kgb_mulai_berlaku
-            );
+            $tanggalMulaiBerlaku = $formatTanggal($kgb->kgb_mulai_berlaku);
 
             /*
             |--------------------------------------------------------------------------
@@ -685,13 +605,9 @@
             |--------------------------------------------------------------------------
             */
 
-            $masaKerjaTahun = (int) (
-                $kgb->kgb_masa_kerja_tahun ?? 0
-            );
+            $masaKerjaTahun = (int) ($kgb->kgb_masa_kerja_tahun ?? 0);
 
-            $masaKerjaBulan = (int) (
-                $kgb->kgb_masa_kerja_bulan ?? 0
-            );
+            $masaKerjaBulan = (int) ($kgb->kgb_masa_kerja_bulan ?? 0);
 
             /*
             |--------------------------------------------------------------------------
@@ -699,38 +615,23 @@
             |--------------------------------------------------------------------------
             */
 
-            $masaKerjaBerdasarkanTmtTahun =
-                $masaKerjaTahun;
+            $masaKerjaBerdasarkanTmtTahun = $masaKerjaTahun;
 
-            $masaKerjaBerdasarkanTmtBulan =
-                $masaKerjaBulan;
+            $masaKerjaBerdasarkanTmtBulan = $masaKerjaBulan;
 
-            if (
-                $pegawai?->user_tmt &&
-                $kgb->kgb_mulai_berlaku
-            ) {
-
+            if ($pegawai?->user_tmt && $kgb->kgb_mulai_berlaku) {
                 try {
+                    $tmt = \Carbon\Carbon::parse($pegawai->user_tmt);
 
-                    $tmt = \Carbon\Carbon::parse(
-                        $pegawai->user_tmt
-                    );
-
-                    $efektif = \Carbon\Carbon::parse(
-                        $kgb->kgb_mulai_berlaku
-                    );
+                    $efektif = \Carbon\Carbon::parse($kgb->kgb_mulai_berlaku);
 
                     if ($tmt->lessThanOrEqualTo($efektif)) {
-
                         $diff = $tmt->diff($efektif);
 
-                        $masaKerjaBerdasarkanTmtTahun =
-                            $diff->y;
+                        $masaKerjaBerdasarkanTmtTahun = $diff->y;
 
-                        $masaKerjaBerdasarkanTmtBulan =
-                            $diff->m;
+                        $masaKerjaBerdasarkanTmtBulan = $diff->m;
                     }
-
                 } catch (\Throwable $e) {
                     //
                 }
@@ -742,15 +643,9 @@
             |--------------------------------------------------------------------------
             */
 
-            $golongan =
-                $kgb->golongan?->golongan_nama
-                ?? ($pegawai?->golongan?->golongan_nama ?? '');
+            $golongan = $kgb->golongan?->golongan_nama ?? ($pegawai?->golongan?->golongan_nama ?? '');
 
-            $golongan = preg_replace(
-                '/^golongan\s*/i',
-                '',
-                trim($golongan)
-            );
+            $golongan = preg_replace('/^golongan\s*/i', '', trim($golongan));
 
             /*
             |--------------------------------------------------------------------------
@@ -758,9 +653,7 @@
             |--------------------------------------------------------------------------
             */
 
-            $berkedudukan = trim(
-                (string) ($pegawai?->status_pegawai ?? '')
-            );
+            $berkedudukan = trim((string) ($pegawai?->status_pegawai ?? ''));
 
             if ($berkedudukan === '') {
                 $berkedudukan = 'PPPK Daerah Provinsi Bali';
@@ -772,9 +665,7 @@
             |--------------------------------------------------------------------------
             */
 
-            $terbilangGaji =
-                ucfirst($terbilang($nilaiGajiBaru))
-                . ' rupiah';
+            $terbilangGaji = ucfirst($terbilang($nilaiGajiBaru)) . ' rupiah';
 
             /*
             |--------------------------------------------------------------------------
@@ -782,28 +673,19 @@
             |--------------------------------------------------------------------------
             */
 
-            $pejabat =
-                $kgb->pejabat
-                ?? ($batch->pejabat ?? null);
+            $pejabat = $kgb->pejabat ?? ($batch->pejabat ?? null);
 
-            $pejabatNama =
-                $formatNama($pejabat?->user_nama);
+            $pejabatNama = $formatNama($pejabat?->user_nama);
 
-            $pejabatGelar = trim(
-                (string) ($pejabat?->user_gelarbelakang ?? '')
-            );
+            $pejabatGelar = trim((string) ($pejabat?->user_gelarbelakang ?? ''));
 
             if ($pejabatGelar !== '') {
-
-                $pejabatNama .=
-                    ', ' . $pejabatGelar;
+                $pejabatNama .= ', ' . $pejabatGelar;
             }
 
             $pejabatNama = trim($pejabatNama);
 
-            $pejabatNip = trim(
-                (string) ($pejabat?->user_nip ?? '')
-            );
+            $pejabatNip = trim((string) ($pejabat?->user_nip ?? ''));
 
             /*
             |--------------------------------------------------------------------------
@@ -811,33 +693,15 @@
             |--------------------------------------------------------------------------
             */
 
-            $pejabatGolongan = trim(
-                (string) (
-                    $pejabat?->golongan?->golongan_nama ?? ''
-                )
-            );
+            $pejabatGolongan = trim((string) ($pejabat?->golongan?->golongan_nama ?? ''));
 
-            $pejabatPangkat = trim(
-                (string) (
-                    $pejabat?->golongan?->golongan_pangkat ?? ''
-                )
-            );
+            $pejabatPangkat = trim((string) ($pejabat?->golongan?->golongan_pangkat ?? ''));
 
-            $pejabatGolongan = preg_replace(
-                '/^golongan\s*/i',
-                '',
-                $pejabatGolongan
-            );
+            $pejabatGolongan = preg_replace('/^golongan\s*/i', '', $pejabatGolongan);
 
-            if (
-                $pejabatGolongan !== ''
-                && $pejabatPangkat !== ''
-            ) {
-
-                $pejabatGolongan .=
-                    ' (' . $pejabatPangkat . ')';
+            if ($pejabatGolongan !== '' && $pejabatPangkat !== '') {
+                $pejabatGolongan .= ' (' . $pejabatPangkat . ')';
             }
-
         @endphp
 
 
@@ -849,11 +713,7 @@
 
             {{-- TEMPLATE --}}
 
-            <img
-                src="{{ public_path('assets/images/template-surat.png') }}"
-                class="template"
-                alt=""
-            >
+            <img src="{{ public_path('assets/images/template-surat.png') }}" class="template" alt="">
 
 
             {{-- =================================================
@@ -1092,7 +952,6 @@
             @endif
 
         </div>
-
     @endforeach
 
 </body>

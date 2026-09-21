@@ -128,7 +128,7 @@
             left: 118.5mm;
             top: 152.1mm;
             white-space: normal;
-            width: 75mm;
+            width: 90mm;
             line-height: 1.05;
         }
 
@@ -423,16 +423,10 @@
     |--------------------------------------------------------------------------
     */
 
-        $lokasiKerja = trim((string) ($pegawai?->user_lokasikerja ?? ''));
+        $lokasiKerja = trim((string) ($pegawai?->bidang?->bidang_nama ?? ''));
 
-        if ($lokasiKerja === 'Kantor Dinas Kebudayaan Provinsi Bali') {
+        if (!str_contains(strtolower($lokasiKerja), 'uptd')) {
             $lokasiKerja = 'Dinas Kebudayaan Provinsi Bali';
-        } elseif ($lokasiKerja === 'Kantor UPTD Taman Budaya') {
-            $lokasiKerja = 'UPTD Taman Budaya';
-        } elseif ($lokasiKerja === 'Kantor UPTD Museum Bali') {
-            $lokasiKerja = 'UPTD Museum Bali';
-        } elseif ($lokasiKerja === 'Kantor UPTD Monumen Perjuangan Rakyat Bali') {
-            $lokasiKerja = 'UPTD Monumen Perjuangan Rakyat Bali';
         }
 
         /*
