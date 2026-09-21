@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\SamperinGolongan;
 use App\Models\SamperinKgb;
 use App\Models\SamperinKgbBatch;
+use App\Models\SamperinJenisKerja;
+use App\Models\SamperinBidang;
 use App\Models\SamperinPeraturanGaji;
 use App\Models\SamperinUser;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -184,17 +186,17 @@ class SamperinAdminKgbController extends Controller
         |--------------------------------------------------------------------------
         */
         foreach ($pegawaiTerpilih as $pegawai) {
-            if (!$pegawai->user_tmt) {
+            if (!$pegawai->user_tmt_berkala) {
                 throw ValidationException::withMessages([
-                    'pegawai' => "Pegawai {$pegawai->user_nama} belum memiliki TMT.",
+                    'pegawai' => "Pegawai {$pegawai->user_nama} belum memiliki TMT berkala.",
                 ]);
             }
 
-            $tmt = Carbon::parse($pegawai->user_tmt);
+            $tmt_berkala = Carbon::parse($pegawai->user_tmt_berkala);
 
-            if ($tmt->greaterThan($mulaiBerlaku)) {
+            if ($tmt_berkala->greaterThan($mulaiBerlaku)) {
                 throw ValidationException::withMessages([
-                    'pegawai' => "TMT pegawai {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.",
+                    'pegawai' => "TMT Berkala {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.",
                 ]);
             }
         }
@@ -352,14 +354,14 @@ class SamperinAdminKgbController extends Controller
             | Pastikan TMT
             |--------------------------------------------------------------------------
             */
-            if (!$pegawai->user_tmt) {
-                throw new \Exception("TMT pegawai {$pegawai->user_nama} belum tersedia.");
+            if (!$pegawai->user_tmt_berkala) {
+                throw new \Exception("TMT Berkala {$pegawai->user_nama} belum tersedia.");
             }
 
-            $tmt = Carbon::parse($pegawai->user_tmt);
+            $tmt_berkala = Carbon::parse($pegawai->user_tmt_berkala);
 
-            if ($tmt->greaterThan($tanggalMulaiBerlaku)) {
-                throw new \Exception("TMT pegawai {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
+            if ($tmt_berkala->greaterThan($tanggalMulaiBerlaku)) {
+                throw new \Exception("TMT Berkala {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
             }
 
             /*
@@ -378,7 +380,7 @@ class SamperinAdminKgbController extends Controller
             | Masa Kerja
             |--------------------------------------------------------------------------
             */
-            $masaKerja = $tmt->diff($tanggalMulaiBerlaku);
+            $masaKerja = $tmt_berkala->diff($tanggalMulaiBerlaku);
 
             /*
             |--------------------------------------------------------------------------
@@ -466,9 +468,21 @@ class SamperinAdminKgbController extends Controller
      */
     public function edit($id)
     {
+        /*
+    |--------------------------------------------------------------------------
+    | BATCH
+    |--------------------------------------------------------------------------
+    */
+
         $batch = SamperinKgbBatch::query()
-            ->with(['kgb.user', 'kgb.golongan'])
+            ->with(['kgb.user.jabatan', 'kgb.user.bidang', 'kgb.user.jenisKerja', 'kgb.user.golongan', 'kgb.golongan'])
             ->findOrFail($id);
+
+        /*
+    |--------------------------------------------------------------------------
+    | MASTER DATA
+    |--------------------------------------------------------------------------
+    */
 
         $peraturanGaji = SamperinPeraturanGaji::query()->where('peraturan_gaji_status', 1)->orderByDesc('peraturan_gaji_tahun')->orderBy('peraturan_gaji_nama')->get();
 
@@ -476,15 +490,230 @@ class SamperinAdminKgbController extends Controller
 
         $golongan = SamperinGolongan::query()->where('golongan_status', 1)->orderBy('golongan_nama')->get();
 
+        /*
+    |--------------------------------------------------------------------------
+    | PEGAWAI YANG SUDAH ADA DALAM BATCH
+    |--------------------------------------------------------------------------
+    |
+    | FILTER HANYA BERLAKU UNTUK BAGIAN INI.
+    |
+    */
+
         $pegawaiDalamBatch = $batch->kgb->pluck('kgb_user_id')->values();
 
+        $kgbDalamBatchQuery = SamperinKgb::query()
+            ->with(['user.jabatan', 'user.bidang', 'user.jenisKerja', 'user.golongan', 'golongan'])
+            ->where('kgb_batch_id', $batch->kgb_batch_id);
+
+        /*
+    |--------------------------------------------------------------------------
+    | FILTER JENIS KERJA
+    |--------------------------------------------------------------------------
+    */
+
+        if (request()->filled('jenis_kerja_id')) {
+            $kgbDalamBatchQuery->whereHas('user', function ($query) {
+                $query->where('user_jenis_kerja_id', request('jenis_kerja_id'));
+            });
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | FILTER BIDANG
+    |--------------------------------------------------------------------------
+    */
+
+        if (request()->filled('bidang_id')) {
+            $kgbDalamBatchQuery->whereHas('user', function ($query) {
+                $query->where('user_bidang_id', request('bidang_id'));
+            });
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | FILTER LOKASI KERJA
+    |--------------------------------------------------------------------------
+    |
+    | Lokasi kerja disimpan pada:
+    | samperin_user.user_lokasikerja
+    |
+    */
+
+        if (request()->filled('lokasi_kerja')) {
+            $kgbDalamBatchQuery->whereHas('user', function ($query) {
+                $query->where('user_lokasikerja', request('lokasi_kerja'));
+            });
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | FILTER MASA KERJA
+    |--------------------------------------------------------------------------
+    |
+    | Masa kerja dihitung dari:
+    | user_tmt_berkala
+    |
+    | sampai:
+    | kgb_batch_mulai_berlaku
+    |
+    */
+
+        if (request()->filled('masa_kerja')) {
+            $masaKerja = request('masa_kerja');
+
+            $tanggalBerlaku = $batch->kgb_batch_mulai_berlaku;
+
+            if ($tanggalBerlaku) {
+                switch ($masaKerja) {
+                    case '<2':
+                        $tanggalBerlaku = \Carbon\Carbon::parse($tanggalBerlaku);
+
+                        $tanggalMin = $tanggalBerlaku->copy()->subYears(2)->startOfDay();
+
+                        $tanggalMax = $tanggalBerlaku->copy()->endOfDay();
+
+                        $kgbDalamBatchQuery->whereHas('user', function ($query) use ($tanggalMin, $tanggalMax) {
+                            $query->whereNotNull('user_tmt_berkala')->where('user_tmt_berkala', '>', $tanggalMin)->where('user_tmt_berkala', '<=', $tanggalMax);
+                        });
+
+                        break;
+
+                    case '0-5':
+                        $tanggalMin = \Carbon\Carbon::parse($tanggalBerlaku)->subYears(5)->startOfDay();
+
+                        $tanggalMax = \Carbon\Carbon::parse($tanggalBerlaku)->endOfDay();
+
+                        $kgbDalamBatchQuery->whereHas('user', function ($query) use ($tanggalMin, $tanggalMax) {
+                            $query->whereBetween('user_tmt_berkala', [$tanggalMin, $tanggalMax]);
+                        });
+
+                        break;
+
+                    case '6-10':
+                        $tanggalMin = \Carbon\Carbon::parse($tanggalBerlaku)->subYears(10)->startOfDay();
+
+                        $tanggalMax = \Carbon\Carbon::parse($tanggalBerlaku)->subYears(5)->subDay()->endOfDay();
+
+                        $kgbDalamBatchQuery->whereHas('user', function ($query) use ($tanggalMin, $tanggalMax) {
+                            $query->whereBetween('user_tmt_berkala', [$tanggalMin, $tanggalMax]);
+                        });
+
+                        break;
+
+                    case '11-15':
+                        $tanggalMin = \Carbon\Carbon::parse($tanggalBerlaku)->subYears(15)->startOfDay();
+
+                        $tanggalMax = \Carbon\Carbon::parse($tanggalBerlaku)->subYears(10)->subDay()->endOfDay();
+
+                        $kgbDalamBatchQuery->whereHas('user', function ($query) use ($tanggalMin, $tanggalMax) {
+                            $query->whereBetween('user_tmt_berkala', [$tanggalMin, $tanggalMax]);
+                        });
+
+                        break;
+
+                    case '16-20':
+                        $tanggalMin = \Carbon\Carbon::parse($tanggalBerlaku)->subYears(20)->startOfDay();
+
+                        $tanggalMax = \Carbon\Carbon::parse($tanggalBerlaku)->subYears(15)->subDay()->endOfDay();
+
+                        $kgbDalamBatchQuery->whereHas('user', function ($query) use ($tanggalMin, $tanggalMax) {
+                            $query->whereBetween('user_tmt_berkala', [$tanggalMin, $tanggalMax]);
+                        });
+
+                        break;
+
+                    case '21-plus':
+                        $tanggalMax = \Carbon\Carbon::parse($tanggalBerlaku)->subYears(20)->endOfDay();
+
+                        $kgbDalamBatchQuery->whereHas('user', function ($query) use ($tanggalMax) {
+                            $query->where('user_tmt_berkala', '<=', $tanggalMax);
+                        });
+
+                        break;
+                }
+            }
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | SEARCH PEGAWAI DALAM BATCH
+    |--------------------------------------------------------------------------
+    */
+
+        if (request()->filled('batch_search')) {
+            $search = trim((string) request('batch_search'));
+
+            $kgbDalamBatchQuery->whereHas('user', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('user_nama', 'like', "%{$search}%")->orWhere('user_nip', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | PAGINATION PEGAWAI DALAM BATCH
+    |--------------------------------------------------------------------------
+    */
+
+        $kgbDalamBatch = $kgbDalamBatchQuery
+            ->orderBy('kgb_id')
+            ->paginate(10, ['*'], 'batch_page')
+            ->withQueryString();
+
+        /*
+    |--------------------------------------------------------------------------
+    | MASTER FILTER
+    |--------------------------------------------------------------------------
+    */
+
+        /*
+    | Jenis Kerja
+    */
+
+        $jenisKerja = SamperinJenisKerja::query()->orderBy('jenis_kerja_nama')->get();
+
+        /*
+    | Bidang
+    */
+
+        $bidang = SamperinBidang::query()->where('bidang_status', 1)->orderBy('bidang_nama')->get();
+
+        /*
+    | Lokasi Kerja
+    |
+    | Karena lokasi kerja berada pada field user_lokasikerja,
+    | ambil hanya lokasi yang memang digunakan oleh pegawai
+    | dalam batch ini.
+    */
+
+        $lokasiKerja = SamperinUser::query()->whereIn('user_id', $pegawaiDalamBatch)->whereNotNull('user_lokasikerja')->where('user_lokasikerja', '!=', '')->select('user_lokasikerja')->distinct()->orderBy('user_lokasikerja')->pluck('user_lokasikerja');
+
+        /*
+    |--------------------------------------------------------------------------
+    | QUERY PEGAWAI UNTUK DITAMBAHKAN
+    |--------------------------------------------------------------------------
+    |
+    | BAGIAN INI SENGAJA DIPERTAHANKAN SEPERTI CONTROLLER LAMA.
+    | Filter di atas TIDAK mempengaruhi bagian ini.
+    |
+    */
+
         $pegawaiQuery = SamperinUser::query()
-            ->with(['jabatan', 'bidang', 'golongan'])
+            ->with(['jabatan', 'bidang', 'golongan', 'jenisKerja'])
             ->where('user_status', 1);
+
+        /*
+    | Filter golongan pegawai tambahan
+    */
 
         if (request()->filled('golongan_id')) {
             $pegawaiQuery->where('user_golongan_id', request('golongan_id'));
         }
+
+        /*
+    | Search pegawai tambahan
+    */
 
         if (request()->filled('search')) {
             $search = trim((string) request('search'));
@@ -494,11 +723,29 @@ class SamperinAdminKgbController extends Controller
             });
         }
 
+        /*
+    |--------------------------------------------------------------------------
+    | PEGAWAI TAMBAHAN
+    |--------------------------------------------------------------------------
+    */
+
         $pegawai = $pegawaiQuery->orderBy('user_nama')->get();
+
+        /*
+    |--------------------------------------------------------------------------
+    | JUMLAH PEGAWAI TAMBAHAN
+    |--------------------------------------------------------------------------
+    */
 
         $jumlahPegawai = $pegawai->count();
 
-        return view('dashboard.kepegawaian.kgb.edit', compact('batch', 'peraturanGaji', 'pejabat', 'golongan', 'pegawai', 'jumlahPegawai', 'pegawaiDalamBatch'));
+        /*
+    |--------------------------------------------------------------------------
+    | VIEW
+    |--------------------------------------------------------------------------
+    */
+
+        return view('dashboard.kepegawaian.kgb.edit', compact('batch', 'peraturanGaji', 'pejabat', 'golongan', 'pegawai', 'jumlahPegawai', 'pegawaiDalamBatch', 'kgbDalamBatch', 'jenisKerja', 'bidang', 'lokasiKerja'));
     }
 
     /**
@@ -648,14 +895,14 @@ class SamperinAdminKgbController extends Controller
                     | TMT
                     |--------------------------------------------------------------------------
                     */
-                    if (!$pegawai->user_tmt) {
-                        throw new \Exception("TMT pegawai {$pegawai->user_nama} belum tersedia.");
+                    if (!$pegawai->user_tmt_berkala) {
+                        throw new \Exception("TMT Berkala {$pegawai->user_nama} belum tersedia.");
                     }
 
-                    $tmt = Carbon::parse($pegawai->user_tmt);
+                    $tmt_berkala = Carbon::parse($pegawai->user_tmt_berkala);
 
-                    if ($tmt->greaterThan($tanggalMulaiBerlaku)) {
-                        throw new \Exception("TMT pegawai {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
+                    if ($tmt_berkala->greaterThan($tanggalMulaiBerlaku)) {
+                        throw new \Exception("TMT Berkala {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
                     }
 
                     /*
@@ -721,14 +968,14 @@ class SamperinAdminKgbController extends Controller
                     | Pastikan TMT
                     |--------------------------------------------------------------------------
                     */
-                    if (!$pegawai->user_tmt) {
-                        throw new \Exception("TMT pegawai {$pegawai->user_nama} belum tersedia.");
+                    if (!$pegawai->user_tmt_berkala) {
+                        throw new \Exception("TMT Berkala {$pegawai->user_nama} belum tersedia.");
                     }
 
-                    $tmt = Carbon::parse($pegawai->user_tmt);
+                    $tmt_berkala = Carbon::parse($pegawai->user_tmt_berkala);
 
-                    if ($tmt->greaterThan($tanggalMulaiBerlaku)) {
-                        throw new \Exception("TMT pegawai {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
+                    if ($tmt_berkala->greaterThan($tanggalMulaiBerlaku)) {
+                        throw new \Exception("TMT Berkala {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
                     }
 
                     /*
@@ -756,7 +1003,7 @@ class SamperinAdminKgbController extends Controller
                     | Masa Kerja
                     |--------------------------------------------------------------------------
                     */
-                    $masaKerja = $tmt->diff($tanggalMulaiBerlaku);
+                    $masaKerja = $tmt_berkala->diff($tanggalMulaiBerlaku);
 
                     /*
                     |--------------------------------------------------------------------------
@@ -816,14 +1063,14 @@ class SamperinAdminKgbController extends Controller
                     | TMT
                     |--------------------------------------------------------------------------
                     */
-                    if (!$pegawai->user_tmt) {
-                        throw new \Exception("TMT pegawai {$pegawai->user_nama} belum tersedia.");
+                    if (!$pegawai->user_tmt_berkala) {
+                        throw new \Exception("TMT Berkala {$pegawai->user_nama} belum tersedia.");
                     }
 
-                    $tmt = Carbon::parse($pegawai->user_tmt);
+                    $tmt_berkala = Carbon::parse($pegawai->user_tmt_berkala);
 
-                    if ($tmt->greaterThan($tanggalMulaiBerlaku)) {
-                        throw new \Exception("TMT pegawai {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
+                    if ($tmt_berkala->greaterThan($tanggalMulaiBerlaku)) {
+                        throw new \Exception("TMT Berkala {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
                     }
 
                     /*
@@ -842,7 +1089,7 @@ class SamperinAdminKgbController extends Controller
                     | Masa Kerja
                     |--------------------------------------------------------------------------
                     */
-                    $masaKerja = $tmt->diff($tanggalMulaiBerlaku);
+                    $masaKerja = $tmt_berkala->diff($tanggalMulaiBerlaku);
 
                     /*
                     |--------------------------------------------------------------------------

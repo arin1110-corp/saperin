@@ -294,15 +294,17 @@ class SimpegSyncService
         $pendidikan = $this->findPendidikan($this->getValue($row, 'pendidikan_terakhir'), $this->getValue($row, 'jurusan_pendidikan'));
 
         $jenisKerja = $this->findJenisKerja($this->getValue($row, 'status_pegawai'));
-        $jenisKerja = $this->findJenisKerja($this->getValue($row, 'status_pegawai'));
 
         $tmt = null;
 
         if ($jenisKerja) {
-            $tmtValue = match ((int) $jenisKerja->jenis_kerja_id) {
+            $tmtValue = match (strtoupper(trim($jenisKerja->jenis_kerja_kode))) {
                 'PNS' => $this->getValue($row, 'tmt_pns'),
-                'PPPK', 'PPPK Paruh Waktu' => $this->getValue($row, 'tmt_pppk'),
-                'Kontrak' => $this->getValue($row, 'tmt_non_pns'),
+
+                'PPPK', 'PPPK-PW' => $this->getValue($row, 'tmt_pppk'),
+
+                'PJLP' => $this->getValue($row, 'tmt_non_pns'),
+
                 default => null,
             };
 
@@ -316,7 +318,9 @@ class SimpegSyncService
 
             'user_nama' => $this->cleanString($this->getValue($row, 'nama')),
 
-            'user_tmt' => $this->normalizeDate($this->getValue($row, 'tmt_pppk')),
+            'user_tmt' => $tmt,
+
+            'user_tmt_berkala' => $tmt,
 
             'user_gelardepan' => $this->cleanString($this->getValue($row, 'gelar_depan')),
 

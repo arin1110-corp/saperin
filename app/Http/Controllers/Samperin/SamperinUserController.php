@@ -1343,6 +1343,8 @@ class SamperinUserController extends Controller
 
                 'user_tmt' => ['nullable', 'date'],
 
+                'user_tmt_berkala' => ['nullable', 'date'],
+
                 'user_spmt' => ['nullable', 'date'],
 
                 'user_npwp' => ['nullable', 'string', 'max:100'],
@@ -1417,7 +1419,7 @@ class SamperinUserController extends Controller
 
     private function preparePegawaiData(array $validated): array
     {
-        $fields = ['user_nip', 'user_nik', 'user_nama', 'user_gelardepan', 'user_gelarbelakang', 'user_tempatlahir', 'user_tgllahir', 'user_jk', 'user_jabatan_id', 'user_bidang_id', 'user_golongan_id', 'user_eselon_id', 'user_pendidikan_id', 'user_jenis_kerja_id', 'user_tmt', 'user_spmt', 'user_npwp', 'user_bpjs', 'user_norek_bpd', 'user_kelasjabatan', 'user_jmltanggungan', 'user_email', 'user_notelp', 'user_alamat', 'user_lokasikerja', 'user_keterangan', 'user_status'];
+        $fields = ['user_nip', 'user_nik', 'user_nama', 'user_gelardepan', 'user_gelarbelakang', 'user_tempatlahir', 'user_tgllahir', 'user_jk', 'user_jabatan_id', 'user_bidang_id', 'user_golongan_id', 'user_eselon_id', 'user_pendidikan_id', 'user_jenis_kerja_id', 'user_tmt', 'user_tmt_berkala', 'user_spmt', 'user_npwp', 'user_bpjs', 'user_norek_bpd', 'user_kelasjabatan', 'user_jmltanggungan', 'user_email', 'user_notelp', 'user_alamat', 'user_lokasikerja', 'user_keterangan', 'user_status'];
 
         $data = [];
 

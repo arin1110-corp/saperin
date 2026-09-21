@@ -679,44 +679,97 @@
                                     @php
 
                                         /*
-                                        |--------------------------------------------------------------------------
-                                        | TMT PEGAWAI
-                                        |--------------------------------------------------------------------------
-                                        */
+    |--------------------------------------------------------------------------
+    | TMT BERKALA PEGAWAI
+    |--------------------------------------------------------------------------
+    */
 
-                                        $tmt = null;
+                                        $tmtBerkala = null;
 
-                                        if ($kgb->user && $kgb->user->user_tmt) {
-                                            $tmt = \Carbon\Carbon::parse($kgb->user->user_tmt);
+                                        if ($kgb->user && $kgb->user->user_tmt_berkala) {
+                                            try {
+                                                $tmtBerkala = \Carbon\Carbon::parse($kgb->user->user_tmt_berkala);
+                                            } catch (\Throwable $e) {
+                                                $tmtBerkala = null;
+                                            }
                                         }
 
                                         /*
-                                        |--------------------------------------------------------------------------
-                                        | TANGGAL MULAI BERLAKU
-                                        |--------------------------------------------------------------------------
-                                        */
+    |--------------------------------------------------------------------------
+    | TANGGAL MULAI BERLAKU KGB
+    |--------------------------------------------------------------------------
+    */
 
                                         $mulaiBerlaku = null;
 
                                         if ($batch->kgb_batch_mulai_berlaku) {
-                                            $mulaiBerlaku = \Carbon\Carbon::parse($batch->kgb_batch_mulai_berlaku);
+                                            try {
+                                                $mulaiBerlaku = \Carbon\Carbon::parse($batch->kgb_batch_mulai_berlaku);
+                                            } catch (\Throwable $e) {
+                                                $mulaiBerlaku = null;
+                                            }
                                         }
 
                                         /*
-                                        |--------------------------------------------------------------------------
-                                        | MASA KERJA
-                                        |--------------------------------------------------------------------------
-                                        */
+    |--------------------------------------------------------------------------
+    | MASA KERJA
+    |--------------------------------------------------------------------------
+    */
 
                                         $masaKerjaTahun = 0;
                                         $masaKerjaBulan = 0;
 
-                                        if ($tmt && $mulaiBerlaku && $tmt->lessThanOrEqualTo($mulaiBerlaku)) {
-                                            $diff = $tmt->diff($mulaiBerlaku);
+                                        if (
+                                            $tmtBerkala &&
+                                            $mulaiBerlaku &&
+                                            $tmtBerkala->lessThanOrEqualTo($mulaiBerlaku)
+                                        ) {
+                                            $diff = $tmtBerkala->diff($mulaiBerlaku);
 
                                             $masaKerjaTahun = $diff->y;
                                             $masaKerjaBulan = $diff->m;
                                         }
+
+                                        /*
+    |--------------------------------------------------------------------------
+    | TARIF GAJI
+    |--------------------------------------------------------------------------
+    |
+    | Gaji tidak disimpan di tabel KGB.
+    |
+    | Sumber:
+    | Batch
+    |   ↓
+    | Peraturan Gaji
+    |   ↓
+    | Tarif Golongan
+    |
+    */
+
+                                        $tarifGaji = null;
+
+                                        if ($batch->peraturanGaji && $batch->peraturanGaji->golongan) {
+                                            $tarifGaji = $batch->peraturanGaji->golongan->firstWhere(
+                                                'golongan_id',
+                                                $kgb->kgb_golongan_id,
+                                            );
+                                        }
+
+                                        /*
+    |--------------------------------------------------------------------------
+    | GAJI LAMA
+    |--------------------------------------------------------------------------
+    */
+
+                                        $nilaiGajiLama = (int) ($tarifGaji?->peraturan_gaji_gaji_lama ?? 0);
+
+                                        /*
+    |--------------------------------------------------------------------------
+    | GAJI BARU
+    |--------------------------------------------------------------------------
+    */
+
+                                        $nilaiGajiBaru = (int) ($tarifGaji?->peraturan_gaji_gaji_baru ?? 0);
 
                                     @endphp
 
@@ -765,33 +818,33 @@
 
                                         {{-- GAJI LAMA --}}
                                         <td>
-
-                                            Rp
-                                            {{ number_format((int) $kgb->kgb_gaji_lama, 0, ',', '.') }}
-
+                                            @if ($nilaiGajiLama > 0)
+                                                Rp {{ number_format($nilaiGajiLama, 0, ',', '.') }}
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
 
 
                                         {{-- GAJI BARU --}}
                                         <td>
-
-                                            <strong>
-
-                                                Rp
-                                                {{ number_format((int) $kgb->kgb_gaji_baru, 0, ',', '.') }}
-
-                                            </strong>
-
+                                            @if ($nilaiGajiBaru > 0)
+                                                <strong>
+                                                    Rp {{ number_format($nilaiGajiBaru, 0, ',', '.') }}
+                                                </strong>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
 
 
                                         {{-- TMT --}}
                                         <td>
 
-                                            @if ($tmt)
+                                            @if ($tmtBerkala)
                                                 <span class="kgb-employee-tmt">
 
-                                                    {{ $tmt->format('d-m-Y') }}
+                                                    {{ $tmtBerkala->format('d-m-Y') }}
 
                                                 </span>
                                             @else
@@ -810,7 +863,7 @@
                                         {{-- MASA KERJA --}}
                                         <td>
 
-                                            @if ($tmt && $mulaiBerlaku && $tmt->lessThanOrEqualTo($mulaiBerlaku))
+                                            @if ($tmtBerkala && $mulaiBerlaku && $tmtBerkala->lessThanOrEqualTo($mulaiBerlaku))
                                                 <span class="kgb-badge-info">
 
                                                     {{ $masaKerjaTahun }}
@@ -820,7 +873,7 @@
                                                     Bulan
 
                                                 </span>
-                                            @elseif ($tmt && $mulaiBerlaku)
+                                            @elseif ($tmtBerkala && $mulaiBerlaku)
                                                 <span class="kgb-badge-danger">
 
                                                     TMT setelah tanggal berlaku

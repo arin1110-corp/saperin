@@ -83,6 +83,7 @@ class SamperinUser extends Model
         */
 
         'user_tmt',
+        'user_tmt_berkala',
         'user_spmt',
 
         'user_npwp',
@@ -146,6 +147,8 @@ class SamperinUser extends Model
         'user_tgllahir' => 'date:Y-m-d',
 
         'user_tmt' => 'date:Y-m-d',
+
+        'user_tmt_berkala' => 'date:Y-m-d',
 
         'user_spmt' => 'date:Y-m-d',
 

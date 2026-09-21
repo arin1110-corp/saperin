@@ -31,8 +31,7 @@ return new class extends Migration
             );
 
             $table->string('kgb_batch_oleh_pejabat', 255)
-                ->nullable()
-                ->after('kgb_batch_pejabat_id');
+                ->nullable();
 
             /*
             |--------------------------------------------------------------------------

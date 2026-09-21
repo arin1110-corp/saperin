@@ -1877,10 +1877,8 @@
                                         <div class="samperin-kgb-item-title">
 
                                             <i class="bi bi-file-earmark-text"></i>
-
-                                            KGB
-                                            {{ $kgb->kgb_mulai_berlaku ? \Carbon\Carbon::parse($kgb->kgb_mulai_berlaku)->format('Y') : '-' }}
-
+                                            {{ $kgb->batch->kgb_batch_nama }}
+                                       
                                         </div>
 
                                         <div class="samperin-kgb-item-subtitle">
@@ -1951,37 +1949,6 @@
 
                                     </div>
 
-
-                                    <div class="samperin-kgb-info">
-
-                                        <div class="samperin-kgb-label">
-                                            Gaji Lama
-                                        </div>
-
-                                        <div class="samperin-kgb-value">
-
-                                            Rp {{ $gajiLama }}
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <div class="samperin-kgb-info">
-
-                                        <div class="samperin-kgb-label">
-                                            Gaji Baru
-                                        </div>
-
-                                        <div class="samperin-kgb-value">
-
-                                            Rp {{ $gajiBaru }}
-
-                                        </div>
-
-                                    </div>
-
-
                                     <div class="samperin-kgb-info">
 
                                         <div class="samperin-kgb-label">
@@ -2006,21 +1973,6 @@
                                         <div class="samperin-kgb-value">
 
                                             {{ $mulaiBerlaku }}
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <div class="samperin-kgb-info">
-
-                                        <div class="samperin-kgb-label">
-                                            Pejabat
-                                        </div>
-
-                                        <div class="samperin-kgb-value">
-
-                                            {{ $kgb->pejabat?->user_nama ?? '-' }}
 
                                         </div>
 

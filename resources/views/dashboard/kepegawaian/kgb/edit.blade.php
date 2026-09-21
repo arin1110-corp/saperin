@@ -20,9 +20,7 @@
 
         .kgb-card-header {
             padding: 20px 24px;
-            background: linear-gradient(135deg,
-                    #0f172a,
-                    #1e293b);
+            background: linear-gradient(135deg, #0f172a, #1e293b);
             color: #fff;
         }
 
@@ -140,9 +138,7 @@
         }
 
         .btn-primary-custom {
-            background: linear-gradient(135deg,
-                    #2563eb,
-                    #1d4ed8);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             border: 0;
             color: #fff;
             border-radius: 10px;
@@ -248,6 +244,51 @@
             font-size: 13px;
         }
 
+        /* =========================================================
+           FILTER PEGAWAI DALAM BATCH
+        ========================================================= */
+
+        .batch-filter-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .batch-filter-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 14px;
+        }
+
+        .batch-filter-note {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .filter-reset {
+            min-height: 44px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .active-filter-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .filter-result-count {
+            font-size: 13px;
+            color: #64748b;
+        }
+
         code {
             color: #1d4ed8;
         }
@@ -268,11 +309,8 @@
             <div class="alert alert-danger error-box mb-4">
 
                 <div class="fw-bold mb-2">
-
                     <i class="bi bi-exclamation-triangle me-1"></i>
-
                     Terdapat kesalahan
-
                 </div>
 
                 <ul class="mb-0 ps-3">
@@ -295,6 +333,7 @@
         {{-- ========================================================= --}}
 
         @if (session('success'))
+
             <div class="alert alert-success error-box mb-4">
 
                 <i class="bi bi-check-circle me-1"></i>
@@ -302,6 +341,7 @@
                 {{ session('success') }}
 
             </div>
+
         @endif
 
 
@@ -314,17 +354,12 @@
             <div class="kgb-card-header">
 
                 <h5>
-
                     <i class="bi bi-info-circle me-2"></i>
-
                     Informasi Batch
-
                 </h5>
 
                 <small>
-
                     Informasi batch KGB yang sedang diedit.
-
                 </small>
 
             </div>
@@ -407,9 +442,13 @@
                             <div class="batch-info-value">
 
                                 @if ($batch->kgb_batch_nomor_akhir)
+
                                     {{ str_pad($batch->kgb_batch_nomor_akhir, 3, '0', STR_PAD_LEFT) }}
+
                                 @else
+
                                     -
+
                                 @endif
 
                             </div>
@@ -431,13 +470,17 @@
                             <div class="batch-info-value">
 
                                 @if ($batch->kgb_batch_status)
+
                                     <span class="badge bg-success">
                                         Aktif
                                     </span>
+
                                 @else
+
                                     <span class="badge bg-secondary">
                                         Nonaktif
                                     </span>
+
                                 @endif
 
                             </div>
@@ -457,7 +500,9 @@
         {{-- FORM UPDATE BATCH --}}
         {{-- ========================================================= --}}
 
-        <form method="POST" action="{{ route('samperin.admin.kgb.update', $batch->kgb_batch_id) }}" id="kgbEditForm">
+        <form method="POST"
+            action="{{ route('samperin.admin.kgb.update', $batch->kgb_batch_id) }}"
+            id="kgbEditForm">
 
             @csrf
 
@@ -469,17 +514,12 @@
                 <div class="kgb-card-header">
 
                     <h5>
-
                         <i class="bi bi-pencil-square me-2"></i>
-
                         Data Batch KGB
-
                     </h5>
 
                     <small>
-
                         Perubahan berikut akan digunakan pada batch ini.
-
                     </small>
 
                 </div>
@@ -500,9 +540,12 @@
 
                             </label>
 
-                            <input type="text" name="kgb_batch_nama" class="form-control"
+                            <input type="text"
+                                name="kgb_batch_nama"
+                                class="form-control"
                                 value="{{ old('kgb_batch_nama', $batch->kgb_batch_nama) }}"
-                                placeholder="Contoh: KGB Pegawai Tahun 2026" required>
+                                placeholder="Contoh: KGB Pegawai Tahun 2026"
+                                required>
 
                         </div>
 
@@ -518,17 +561,21 @@
 
                             </label>
 
-                            <select name="kgb_batch_peraturan_gaji_id" class="form-select" required>
+                            <select name="kgb_batch_peraturan_gaji_id"
+                                class="form-select"
+                                required>
 
                                 <option value="">
                                     -- Pilih Peraturan Gaji --
                                 </option>
 
                                 @foreach ($peraturanGaji as $item)
+
                                     <option value="{{ $item->peraturan_gaji_id }}"
-                                        {{ old('kgb_batch_peraturan_gaji_id', $batch->kgb_batch_peraturan_gaji_id) == $item->peraturan_gaji_id
-                                            ? 'selected'
-                                            : '' }}>
+                                        {{ old(
+                                            'kgb_batch_peraturan_gaji_id',
+                                            $batch->kgb_batch_peraturan_gaji_id
+                                        ) == $item->peraturan_gaji_id ? 'selected' : '' }}>
 
                                         {{ $item->peraturan_gaji_nama }}
 
@@ -541,6 +588,7 @@
                                         @endif
 
                                     </option>
+
                                 @endforeach
 
                             </select>
@@ -559,15 +607,21 @@
 
                             </label>
 
-                            <select name="kgb_batch_pejabat_id" class="form-select" required>
+                            <select name="kgb_batch_pejabat_id"
+                                class="form-select"
+                                required>
 
                                 <option value="">
                                     -- Pilih Pejabat --
                                 </option>
 
                                 @foreach ($pejabat as $item)
+
                                     <option value="{{ $item->user_id }}"
-                                        {{ old('kgb_batch_pejabat_id', $batch->kgb_batch_pejabat_id) == $item->user_id ? 'selected' : '' }}>
+                                        {{ old(
+                                            'kgb_batch_pejabat_id',
+                                            $batch->kgb_batch_pejabat_id
+                                        ) == $item->user_id ? 'selected' : '' }}>
 
                                         {{ $item->user_nama }}
 
@@ -576,26 +630,39 @@
                                         @endif
 
                                     </option>
+
                                 @endforeach
 
                             </select>
 
                         </div>
 
+
+                        {{-- OLEH PEJABAT --}}
                         <div class="col-md-6">
+
                             <label class="form-label">
                                 Oleh Pejabat
                             </label>
 
-                            <input type="text" name="kgb_batch_oleh_pejabat" class="form-control"
-                                value="{{ old('kgb_batch_oleh_pejabat', $batch->kgb_batch_oleh_pejabat) }}"
-                                placeholder="Contoh: Kepala BKPSDM Provinsi Bali" required>
+                            <input type="text"
+                                name="kgb_batch_oleh_pejabat"
+                                class="form-control"
+                                value="{{ old(
+                                    'kgb_batch_oleh_pejabat',
+                                    $batch->kgb_batch_oleh_pejabat
+                                ) }}"
+                                placeholder="Contoh: Kepala BKPSDM Provinsi Bali"
+                                required>
 
                             @error('kgb_batch_oleh_pejabat')
+
                                 <div class="text-danger small mt-1">
                                     {{ $message }}
                                 </div>
+
                             @enderror
+
                         </div>
 
 
@@ -610,12 +677,14 @@
 
                             </label>
 
-                            <input type="date" name="kgb_batch_tanggal" class="form-control"
+                            <input type="date"
+                                name="kgb_batch_tanggal"
+                                class="form-control"
                                 value="{{ old(
                                     'kgb_batch_tanggal',
                                     optional($batch->kgb_batch_tanggal)
                                         ? \Carbon\Carbon::parse($batch->kgb_batch_tanggal)->format('Y-m-d')
-                                        : now()->format('Y-m-d'),
+                                        : now()->format('Y-m-d')
                                 ) }}"
                                 required>
 
@@ -633,13 +702,15 @@
 
                             </label>
 
-                            <input type="date" name="kgb_batch_mulai_berlaku" id="kgb_batch_mulai_berlaku"
+                            <input type="date"
+                                name="kgb_batch_mulai_berlaku"
+                                id="kgb_batch_mulai_berlaku"
                                 class="form-control"
                                 value="{{ old(
                                     'kgb_batch_mulai_berlaku',
                                     optional($batch->kgb_batch_mulai_berlaku)
                                         ? \Carbon\Carbon::parse($batch->kgb_batch_mulai_berlaku)->format('Y-m-d')
-                                        : '',
+                                        : ''
                                 ) }}"
                                 required>
 
@@ -657,9 +728,15 @@
 
                             </label>
 
-                            <input type="text" name="kgb_batch_nomor_format" class="form-control"
-                                value="{{ old('kgb_batch_nomor_format', $batch->kgb_batch_nomor_format) }}"
-                                placeholder="{nomor}/KGB/DISBUD/{tahun}" required>
+                            <input type="text"
+                                name="kgb_batch_nomor_format"
+                                class="form-control"
+                                value="{{ old(
+                                    'kgb_batch_nomor_format',
+                                    $batch->kgb_batch_nomor_format
+                                ) }}"
+                                placeholder="{nomor}/KGB/DISBUD/{tahun}"
+                                required>
 
                             <div class="form-text">
 
@@ -685,8 +762,15 @@
 
                             </label>
 
-                            <input type="number" name="kgb_batch_nomor_awal" class="form-control" min="1"
-                                value="{{ old('kgb_batch_nomor_awal', $batch->kgb_batch_nomor_awal) }}" required>
+                            <input type="number"
+                                name="kgb_batch_nomor_awal"
+                                class="form-control"
+                                min="1"
+                                value="{{ old(
+                                    'kgb_batch_nomor_awal',
+                                    $batch->kgb_batch_nomor_awal
+                                ) }}"
+                                required>
 
                             <div class="form-text">
 
@@ -707,44 +791,264 @@
 
 
         {{-- ========================================================= --}}
-        {{-- PEGAWAI YANG SUDAH DALAM BATCH --}}
-        {{-- ========================================================= --}}
+{{-- PEGAWAI YANG SUDAH DALAM BATCH --}}
+{{-- ========================================================= --}}
 
-        <div class="card kgb-card mb-4">
+<div class="card kgb-card mb-4">
 
-            <div class="kgb-card-header">
+    <div class="kgb-card-header">
 
-                <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center w-100">
 
-                    <div>
+            <div>
 
-                        <h5>
+                <h5>
+                    <i class="bi bi-people-fill me-2"></i>
+                    Pegawai Dalam Batch
+                </h5>
 
-                            <i class="bi bi-people-fill me-2"></i>
+                <small>
+                    Pegawai yang sudah masuk dalam batch KGB ini.
+                </small>
 
-                            Pegawai Dalam Batch
+            </div>
 
-                        </h5>
+            <div class="text-end">
 
-                        <small>
+                <div class="fw-bold">
+                    {{ $kgbDalamBatch->total() }}
+                </div>
 
-                            Pegawai yang sudah masuk dalam batch KGB ini.
+                <small>
+                    Pegawai
+                </small>
 
-                        </small>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- FILTER PEGAWAI DALAM BATCH --}}
+    {{-- ========================================================= --}}
+
+    <div class="kgb-card-body">
+
+        <form method="GET"
+            action="{{ route('samperin.admin.kgb.edit', $batch->kgb_batch_id) }}">
+
+            <div class="filter-box">
+
+                <div class="mb-3">
+
+                    <div class="fw-bold mb-1" style="color:#1e3a5f;">
+
+                        <i class="bi bi-funnel me-1"></i>
+
+                        Filter Pegawai Dalam Batch
 
                     </div>
 
-                    <div class="text-end">
+                    <div class="section-note">
+                        Filter hanya berlaku untuk pegawai yang sudah
+                        masuk dalam batch KGB ini.
+                    </div>
 
-                        <div class="fw-bold">
+                </div>
 
-                            {{ $batch->kgb->count() }}
 
-                        </div>
+                <div class="row g-3">
 
-                        <small>
-                            Pegawai
-                        </small>
+                    {{-- ================================================= --}}
+                    {{-- JENIS KERJA --}}
+                    {{-- ================================================= --}}
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            Jenis Kerja
+                        </label>
+
+                        <select name="jenis_kerja_id" class="form-select">
+
+                            <option value="">
+                                -- Semua Jenis Kerja --
+                            </option>
+
+                            @foreach ($jenisKerja as $item)
+
+                                <option value="{{ $item->jenis_kerja_id }}"
+                                    {{ request('jenis_kerja_id') == $item->jenis_kerja_id ? 'selected' : '' }}>
+
+                                    {{ $item->jenis_kerja_nama }}
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- ================================================= --}}
+                    {{-- BIDANG --}}
+                    {{-- ================================================= --}}
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            Bidang
+                        </label>
+
+                        <select name="bidang_id" class="form-select">
+
+                            <option value="">
+                                -- Semua Bidang --
+                            </option>
+
+                            @foreach ($bidang as $item)
+
+                                <option value="{{ $item->bidang_id }}"
+                                    {{ request('bidang_id') == $item->bidang_id ? 'selected' : '' }}>
+
+                                    {{ $item->bidang_nama }}
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- ================================================= --}}
+                    {{-- LOKASI KERJA --}}
+                    {{-- ================================================= --}}
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            Lokasi Kerja
+                        </label>
+
+                        <select name="lokasi_kerja" class="form-select">
+
+                            <option value="">
+                                -- Semua Lokasi Kerja --
+                            </option>
+
+                            @foreach ($lokasiKerja as $lokasi)
+
+                                <option value="{{ $lokasi }}"
+                                    {{ request('lokasi_kerja') == $lokasi ? 'selected' : '' }}>
+
+                                    {{ $lokasi }}
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- ================================================= --}}
+                    {{-- MASA KERJA --}}
+                    {{-- ================================================= --}}
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            Masa Kerja
+                        </label>
+
+                        <select name="masa_kerja" class="form-select">
+
+                            <option value="">
+                                -- Semua Masa Kerja --
+                            </option>
+
+                            <option value="<2" {{ request('masa_kerja') == '<2' ? 'selected' : '' }}>
+                                < 2 Tahun
+                            </option>
+
+                            <option value="0-5"
+                                {{ request('masa_kerja') == '0-5' ? 'selected' : '' }}>
+                                0 - 5 Tahun
+                            </option>
+
+                            <option value="6-10"
+                                {{ request('masa_kerja') == '6-10' ? 'selected' : '' }}>
+                                6 - 10 Tahun
+                            </option>
+
+                            <option value="11-15"
+                                {{ request('masa_kerja') == '11-15' ? 'selected' : '' }}>
+                                11 - 15 Tahun
+                            </option>
+
+                            <option value="16-20"
+                                {{ request('masa_kerja') == '16-20' ? 'selected' : '' }}>
+                                16 - 20 Tahun
+                            </option>
+
+                            <option value="21-plus"
+                                {{ request('masa_kerja') == '21-plus' ? 'selected' : '' }}>
+                                Lebih dari 20 Tahun
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- ================================================= --}}
+                    {{-- SEARCH --}}
+                    {{-- ================================================= --}}
+
+                    <div class="col-md-9">
+
+                        <label class="form-label">
+                            Cari Pegawai
+                        </label>
+
+                        <input type="text"
+                            name="batch_search"
+                            class="form-control"
+                            value="{{ request('batch_search') }}"
+                            placeholder="Cari berdasarkan nama atau NIP...">
+
+                    </div>
+
+
+                    {{-- ================================================= --}}
+                    {{-- BUTTON --}}
+                    {{-- ================================================= --}}
+
+                    <div class="col-md-3 d-flex align-items-end gap-2">
+
+                        <button type="submit"
+                            class="btn btn-primary-custom flex-grow-1">
+
+                            <i class="bi bi-search me-1"></i>
+
+                            Terapkan Filter
+
+                        </button>
+
+
+                        <a href="{{ route('samperin.admin.kgb.edit', $batch->kgb_batch_id) }}"
+                            class="btn btn-outline-secondary btn-secondary-custom"
+                            title="Reset Filter">
+
+                            <i class="bi bi-arrow-counterclockwise"></i>
+
+                        </a>
 
                     </div>
 
@@ -752,225 +1056,518 @@
 
             </div>
 
+        </form>
 
-            <div class="kgb-card-body p-0">
 
-                @if ($batch->kgb->count())
+        {{-- ========================================================= --}}
+        {{-- FILTER AKTIF --}}
+        {{-- ========================================================= --}}
 
-                    <div class="table-responsive">
+        @if (
+            request()->filled('jenis_kerja_id') ||
+            request()->filled('bidang_id') ||
+            request()->filled('lokasi_kerja') ||
+            request()->filled('masa_kerja') ||
+            request()->filled('batch_search')
+        )
 
-                        <table class="table employee-table">
+            <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
 
-                            <thead>
+                <span class="selected-info">
+                    <i class="bi bi-funnel me-1"></i>
+                    Filter aktif:
+                </span>
 
-                                <tr>
 
-                                    <th width="60" class="text-center">
-                                        No
-                                    </th>
+                {{-- JENIS KERJA --}}
 
-                                    <th width="160">
-                                        NIP
-                                    </th>
+                @if (request('jenis_kerja_id'))
 
-                                    <th>
-                                        Nama Pegawai
-                                    </th>
+                    @php
+                        $jenisKerjaAktif = $jenisKerja->firstWhere(
+                            'jeniskerja_id',
+                            request('jenis_kerja_id')
+                        );
+                    @endphp
 
-                                    <th>
-                                        Jabatan
-                                    </th>
+                    <span class="badge-filter">
 
-                                    <th>
-                                        Bidang
-                                    </th>
+                        Jenis Kerja:
 
-                                    <th>
-                                        Golongan
-                                    </th>
+                        {{ $jenisKerjaAktif?->jeniskerja_nama ?? '-' }}
 
-                                    <th>
-                                        TMT
-                                    </th>
+                    </span>
 
-                                    <th>
-                                        Masa Kerja
-                                    </th>
+                @endif
 
-                                    <th width="90" class="text-center">
-                                        Aksi
-                                    </th>
 
-                                </tr>
+                {{-- BIDANG --}}
 
-                            </thead>
+                @if (request('bidang_id'))
 
-                            <tbody>
+                    @php
+                        $bidangAktif = $bidang->firstWhere(
+                            'bidang_id',
+                            request('bidang_id')
+                        );
+                    @endphp
 
-                                @foreach ($batch->kgb as $kgb)
-                                    @php
+                    <span class="badge-filter">
 
-                                        $pegawaiItem = $kgb->user;
+                        Bidang:
 
-                                        $tmt = $pegawaiItem?->user_tmt;
+                        {{ $bidangAktif?->bidang_nama ?? '-' }}
 
-                                        $mulaiBerlaku = $batch->kgb_batch_mulai_berlaku;
+                    </span>
 
-                                        $masaKerjaTahun = 0;
-                                        $masaKerjaBulan = 0;
+                @endif
 
-                                        if ($tmt && $mulaiBerlaku) {
-                                            try {
-                                                $tanggalTmt = \Carbon\Carbon::parse($tmt);
-                                                $tanggalBerlaku = \Carbon\Carbon::parse($mulaiBerlaku);
 
-                                                if ($tanggalTmt->lessThanOrEqualTo($tanggalBerlaku)) {
-                                                    $masaKerja = $tanggalTmt->diff($tanggalBerlaku);
+                {{-- LOKASI --}}
 
-                                                    $masaKerjaTahun = $masaKerja->y;
-                                                    $masaKerjaBulan = $masaKerja->m;
-                                                }
-                                            } catch (\Throwable $e) {
-                                                $masaKerjaTahun = $kgb->kgb_masa_kerja_tahun ?? 0;
-                                                $masaKerjaBulan = $kgb->kgb_masa_kerja_bulan ?? 0;
-                                            }
-                                        } else {
-                                            $masaKerjaTahun = $kgb->kgb_masa_kerja_tahun ?? 0;
-                                            $masaKerjaBulan = $kgb->kgb_masa_kerja_bulan ?? 0;
-                                        }
+                @if (request('lokasi_kerja'))
 
-                                    @endphp
+                    <span class="badge-filter">
 
-                                    <tr>
+                        Lokasi:
 
-                                        <td class="text-center">
-                                            {{ $loop->iteration }}
-                                        </td>
+                        {{ request('lokasi_kerja') }}
 
+                    </span>
 
-                                        <td>
+                @endif
 
-                                            <div class="employee-nip">
-                                                {{ $pegawaiItem?->user_nip ?? '-' }}
-                                            </div>
 
-                                        </td>
+                {{-- MASA KERJA --}}
 
+                @if (request('masa_kerja'))
 
-                                        <td>
+                    @php
 
-                                            <div class="employee-name">
-                                                {{ $pegawaiItem?->user_nama ?? '-' }}
-                                            </div>
+                        $masaKerjaLabel = match (request('masa_kerja')) {
+                            '0-5' => '0 - 5 Tahun',
+                            '6-10' => '6 - 10 Tahun',
+                            '11-15' => '11 - 15 Tahun',
+                            '16-20' => '16 - 20 Tahun',
+                            '21-plus' => 'Lebih dari 20 Tahun',
+                            default => '-',
+                        };
 
-                                        </td>
+                    @endphp
 
+                    <span class="badge-filter">
 
-                                        <td>
+                        Masa Kerja:
 
-                                            {{ optional($pegawaiItem?->jabatan)->jabatan_nama ?? '-' }}
+                        {{ $masaKerjaLabel }}
 
-                                        </td>
+                    </span>
 
+                @endif
 
-                                        <td>
 
-                                            {{ optional($pegawaiItem?->bidang)->bidang_nama ?? '-' }}
+                {{-- SEARCH --}}
 
-                                        </td>
+                @if (request('batch_search'))
 
+                    <span class="badge-filter">
 
-                                        <td>
+                        <i class="bi bi-search me-1"></i>
 
-                                            {{ optional($kgb->golongan)->golongan_nama ?? (optional($pegawaiItem?->golongan)->golongan_nama ?? '-') }}
+                        "{{ request('batch_search') }}"
 
-                                        </td>
-
-
-                                        <td>
-
-                                            @if ($tmt)
-                                                {{ \Carbon\Carbon::parse($tmt)->format('d-m-Y') }}
-                                            @else
-                                                <span class="text-danger">
-                                                    Belum ada TMT
-                                                </span>
-                                            @endif
-
-                                        </td>
-
-
-                                        <td>
-
-                                            <span class="masa-kerja">
-
-                                                {{ $masaKerjaTahun }}
-                                                Tahun
-                                                {{ $masaKerjaBulan }}
-                                                Bulan
-
-                                            </span>
-
-                                        </td>
-
-
-                                        <td class="text-center">
-
-                                            <form method="POST"
-                                                action="{{ route('samperin.admin.kgb.remove-pegawai', [
-                                                    'id' => $batch->kgb_batch_id,
-                                                    'kgbId' => $kgb->kgb_id,
-                                                ]) }}"
-                                                class="remove-form"
-                                                onsubmit="return confirm('Yakin ingin menghapus pegawai ini dari batch KGB? Data pegawai tidak akan dihapus dari sistem.');">
-
-                                                @csrf
-
-                                                @method('DELETE')
-
-                                                <button type="submit" class="btn btn-outline-danger btn-danger-custom"
-                                                    title="Hapus dari batch">
-
-                                                    <i class="bi bi-trash"></i>
-
-                                                </button>
-
-                                            </form>
-
-                                        </td>
-
-                                    </tr>
-                                @endforeach
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-                @else
-                    <div class="empty-employee">
-
-                        <i class="bi bi-person-x"></i>
-
-                        <h6 class="mt-3">
-                            Belum ada pegawai
-                        </h6>
-
-                        <p class="mb-0">
-                            Belum ada pegawai yang masuk dalam batch ini.
-                        </p>
-
-                    </div>
+                    </span>
 
                 @endif
 
             </div>
 
-        </div>
+        @endif
+
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- TABLE PEGAWAI DALAM BATCH --}}
+    {{-- ========================================================= --}}
+
+    <div class="kgb-card-body p-0">
+
+        @if ($kgbDalamBatch->count())
+
+            <div class="table-responsive">
+
+                <table class="table employee-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th width="60" class="text-center">
+                                No
+                            </th>
+
+                            <th width="160">
+                                NIP
+                            </th>
+
+                            <th>
+                                Nama Pegawai
+                            </th>
+
+                            <th>
+                                Jabatan
+                            </th>
+
+                            <th>
+                                Bidang
+                            </th>
+
+                            <th>
+                                Jenis Kerja
+                            </th>
+
+                            <th>
+                                Lokasi Kerja
+                            </th>
+
+                            <th>
+                                Golongan
+                            </th>
+
+                            <th>
+                                TMT
+                            </th>
+
+                            <th>
+                                Masa Kerja
+                            </th>
+
+                            <th width="90" class="text-center">
+                                Aksi
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach ($kgbDalamBatch as $kgb)
+
+                            @php
+
+                                $pegawaiItem = $kgb->user;
+
+                                $tmt = $pegawaiItem?->user_tmt;
+
+                                $mulaiBerlaku = $batch->kgb_batch_mulai_berlaku;
+
+                                $masaKerjaTahun = 0;
+                                $masaKerjaBulan = 0;
+
+                                if ($tmt && $mulaiBerlaku) {
+
+                                    try {
+
+                                        $tanggalTmt = \Carbon\Carbon::parse($tmt);
+
+                                        $tanggalBerlaku = \Carbon\Carbon::parse(
+                                            $mulaiBerlaku
+                                        );
+
+                                        if (
+                                            $tanggalTmt->lessThanOrEqualTo(
+                                                $tanggalBerlaku
+                                            )
+                                        ) {
+
+                                            $masaKerja = $tanggalTmt->diff(
+                                                $tanggalBerlaku
+                                            );
+
+                                            $masaKerjaTahun = $masaKerja->y;
+                                            $masaKerjaBulan = $masaKerja->m;
+
+                                        }
+
+                                    } catch (\Throwable $e) {
+
+                                        $masaKerjaTahun =
+                                            $kgb->kgb_masa_kerja_tahun ?? 0;
+
+                                        $masaKerjaBulan =
+                                            $kgb->kgb_masa_kerja_bulan ?? 0;
+
+                                    }
+
+                                } else {
+
+                                    $masaKerjaTahun =
+                                        $kgb->kgb_masa_kerja_tahun ?? 0;
+
+                                    $masaKerjaBulan =
+                                        $kgb->kgb_masa_kerja_bulan ?? 0;
+
+                                }
+
+                            @endphp
+
+
+                            <tr>
+
+                                {{-- NO --}}
+
+                                <td class="text-center">
+
+                                    {{ $kgbDalamBatch->firstItem() + $loop->index }}
+
+                                </td>
+
+
+                                {{-- NIP --}}
+
+                                <td>
+
+                                    <div class="employee-nip">
+
+                                        {{ $pegawaiItem?->user_nip ?? '-' }}
+
+                                    </div>
+
+                                </td>
+
+
+                                {{-- NAMA --}}
+
+                                <td>
+
+                                    <div class="employee-name">
+
+                                        {{ $pegawaiItem?->user_nama ?? '-' }}
+
+                                    </div>
+
+                                </td>
+
+
+                                {{-- JABATAN --}}
+
+                                <td>
+
+                                    {{ optional($pegawaiItem?->jabatan)->jabatan_nama ?? '-' }}
+
+                                </td>
+
+
+                                {{-- BIDANG --}}
+
+                                <td>
+
+                                    {{ optional($pegawaiItem?->bidang)->bidang_nama ?? '-' }}
+
+                                </td>
+
+
+                                {{-- JENIS KERJA --}}
+
+                                <td>
+
+                                    {{ optional($pegawaiItem?->jenisKerja)->jeniskerja_nama
+                                        ?? $pegawaiItem?->user_jenis_kerja
+                                        ?? '-' }}
+
+                                </td>
+
+
+                                {{-- LOKASI KERJA --}}
+
+                                <td>
+
+                                    {{ $pegawaiItem?->user_lokasikerja ?? '-' }}
+
+                                </td>
+
+
+                                {{-- GOLONGAN --}}
+
+                                <td>
+
+                                    {{ optional($kgb->golongan)->golongan_nama
+                                        ?? optional($pegawaiItem?->golongan)->golongan_nama
+                                        ?? '-' }}
+
+                                </td>
+
+
+                                {{-- TMT --}}
+
+                                <td>
+
+                                    @if ($tmt)
+
+                                        {{ \Carbon\Carbon::parse($tmt)->format('d-m-Y') }}
+
+                                    @else
+
+                                        <span class="text-danger">
+
+                                            Belum ada TMT
+
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
+                                {{-- MASA KERJA --}}
+
+                                <td>
+
+                                    <span class="masa-kerja">
+
+                                        {{ $masaKerjaTahun }}
+                                        Tahun
+                                        {{ $masaKerjaBulan }}
+                                        Bulan
+
+                                    </span>
+
+                                </td>
+
+
+                                {{-- AKSI --}}
+
+                                <td class="text-center">
+
+                                    <form method="POST"
+                                        action="{{ route('samperin.admin.kgb.remove-pegawai', [
+                                            'id' => $batch->kgb_batch_id,
+                                            'kgbId' => $kgb->kgb_id,
+                                        ]) }}"
+                                        class="remove-form"
+                                        onsubmit="return confirm('Yakin ingin menghapus pegawai ini dari batch KGB? Data pegawai tidak akan dihapus dari sistem.');">
+
+                                        @csrf
+
+                                        @method('DELETE')
+
+                                        <button type="submit"
+                                            class="btn btn-outline-danger btn-danger-custom"
+                                            title="Hapus dari batch">
+
+                                            <i class="bi bi-trash"></i>
+
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            {{-- ================================================= --}}
+            {{-- PAGINATION --}}
+            {{-- ================================================= --}}
+
+            <div class="px-4 py-3 border-top">
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                    <div class="text-muted small">
+
+                        Menampilkan
+
+                        <strong>
+                            {{ $kgbDalamBatch->firstItem() }}
+                        </strong>
+
+                        sampai
+
+                        <strong>
+                            {{ $kgbDalamBatch->lastItem() }}
+                        </strong>
+
+                        dari
+
+                        <strong>
+                            {{ $kgbDalamBatch->total() }}
+                        </strong>
+
+                        pegawai
+
+                    </div>
+
+
+                    <div>
+
+                        {{ $kgbDalamBatch->links('pagination::bootstrap-5') }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        @else
+
+            <div class="empty-employee">
+
+                <i class="bi bi-person-x"></i>
+
+                <h6 class="mt-3">
+                    Tidak ada pegawai
+                </h6>
+
+                <p class="mb-0">
+
+                    Tidak ada pegawai dalam batch yang sesuai
+                    dengan filter.
+
+                </p>
+
+                @if (
+                    request()->filled('jenis_kerja_id') ||
+                    request()->filled('bidang_id') ||
+                    request()->filled('lokasi_kerja') ||
+                    request()->filled('masa_kerja') ||
+                    request()->filled('batch_search')
+                )
+
+                    <a href="{{ route('samperin.admin.kgb.edit', $batch->kgb_batch_id) }}"
+                        class="btn btn-outline-secondary btn-sm mt-3">
+
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>
+
+                        Reset Filter
+
+                    </a>
+
+                @endif
+
+            </div>
+
+        @endif
+
+    </div>
+
+</div>
 
 
         {{-- ========================================================= --}}
         {{-- FILTER PEGAWAI UNTUK DITAMBAHKAN --}}
+        {{-- FITUR INI TETAP SEPERTI SEBELUMNYA
         {{-- ========================================================= --}}
 
         <div class="card kgb-card mb-4">
@@ -996,7 +1593,8 @@
 
             <div class="kgb-card-body">
 
-                <form method="GET" action="{{ route('samperin.admin.kgb.edit', $batch->kgb_batch_id) }}">
+                <form method="GET"
+                    action="{{ route('samperin.admin.kgb.edit', $batch->kgb_batch_id) }}">
 
                     <div class="filter-box">
 
@@ -1009,19 +1607,22 @@
                                     Golongan
                                 </label>
 
-                                <select name="golongan_id" class="form-select">
+                                <select name="golongan_id"
+                                    class="form-select">
 
                                     <option value="">
                                         -- Semua Golongan --
                                     </option>
 
                                     @foreach ($golongan as $item)
+
                                         <option value="{{ $item->golongan_id }}"
                                             {{ request('golongan_id') == $item->golongan_id ? 'selected' : '' }}>
 
                                             {{ $item->golongan_nama }}
 
                                         </option>
+
                                     @endforeach
 
                                 </select>
@@ -1036,8 +1637,11 @@
                                     Cari Pegawai
                                 </label>
 
-                                <input type="text" name="search" class="form-control"
-                                    value="{{ request('search') }}" placeholder="Cari nama atau NIP...">
+                                <input type="text"
+                                    name="search"
+                                    class="form-control"
+                                    value="{{ request('search') }}"
+                                    placeholder="Cari nama atau NIP...">
 
                             </div>
 
@@ -1045,7 +1649,8 @@
                             {{-- BUTTON --}}
                             <div class="col-md-3 d-flex align-items-end gap-2">
 
-                                <button type="submit" class="btn btn-primary-custom flex-grow-1">
+                                <button type="submit"
+                                    class="btn btn-primary-custom flex-grow-1">
 
                                     <i class="bi bi-search me-1"></i>
 
@@ -1054,7 +1659,10 @@
                                 </button>
 
 
-                                <a href="{{ route('samperin.admin.kgb.edit', $batch->kgb_batch_id) }}"
+                                <a href="{{ route(
+                                    'samperin.admin.kgb.edit',
+                                    $batch->kgb_batch_id
+                                ) }}"
                                     class="btn btn-outline-secondary btn-secondary-custom">
 
                                     <i class="bi bi-arrow-counterclockwise"></i>
@@ -1083,19 +1691,27 @@
             <div>
 
                 @if (request('golongan_id'))
+
                     <span class="badge-filter">
 
                         <i class="bi bi-funnel me-1"></i>
 
                         Golongan:
 
-                        {{ optional($golongan->firstWhere('golongan_id', request('golongan_id')))->golongan_nama ?? '-' }}
+                        {{ optional(
+                            $golongan->firstWhere(
+                                'golongan_id',
+                                request('golongan_id')
+                            )
+                        )->golongan_nama ?? '-' }}
 
                     </span>
+
                 @endif
 
 
                 @if (request('search'))
+
                     <span class="badge-filter ms-1">
 
                         <i class="bi bi-search me-1"></i>
@@ -1103,6 +1719,7 @@
                         "{{ request('search') }}"
 
                     </span>
+
                 @endif
 
             </div>
@@ -1183,7 +1800,9 @@
 
                     <div class="d-flex gap-2">
 
-                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnCheckAll">
+                        <button type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            id="btnCheckAll">
 
                             <i class="bi bi-check2-square me-1"></i>
 
@@ -1192,7 +1811,9 @@
                         </button>
 
 
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnUncheckAll">
+                        <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            id="btnUncheckAll">
 
                             <i class="bi bi-square me-1"></i>
 
@@ -1260,18 +1881,19 @@
                             <tbody>
 
                                 @foreach ($pegawai as $item)
+
                                     @php
 
-                                        $sudahDalamBatch = $pegawaiDalamBatch->contains($item->user_id);
+                                        $sudahDalamBatch =
+                                            $pegawaiDalamBatch->contains($item->user_id);
 
                                     @endphp
+
 
                                     <tr class="{{ $sudahDalamBatch ? 'already-row' : '' }}">
 
                                         <td class="text-center">
-
                                             {{ $loop->iteration }}
-
                                         </td>
 
 
@@ -1321,6 +1943,7 @@
                                         <td class="text-center">
 
                                             @if ($sudahDalamBatch)
+
                                                 <span class="badge-existing">
 
                                                     <i class="bi bi-check-circle me-1"></i>
@@ -1328,12 +1951,15 @@
                                                     Sudah Masuk
 
                                                 </span>
+
                                             @else
+
                                                 <span class="badge-warning-custom">
 
                                                     Belum Masuk
 
                                                 </span>
+
                                             @endif
 
                                         </td>
@@ -1342,17 +1968,29 @@
                                         <td class="text-center">
 
                                             @if ($sudahDalamBatch)
-                                                <input type="checkbox" class="form-check-input checkbox-large" disabled>
+
+                                                <input type="checkbox"
+                                                    class="form-check-input checkbox-large"
+                                                    disabled>
+
                                             @else
+
                                                 <input type="checkbox"
                                                     class="form-check-input checkbox-large pegawai-checkbox"
-                                                    name="pegawai[]" value="{{ $item->user_id }}" form="kgbEditForm"
-                                                    {{ in_array($item->user_id, old('pegawai', [])) ? 'checked' : '' }}>
+                                                    name="pegawai[]"
+                                                    value="{{ $item->user_id }}"
+                                                    form="kgbEditForm"
+                                                    {{ in_array(
+                                                        $item->user_id,
+                                                        old('pegawai', [])
+                                                    ) ? 'checked' : '' }}>
+
                                             @endif
 
                                         </td>
 
                                     </tr>
+
                                 @endforeach
 
                             </tbody>
@@ -1360,7 +1998,9 @@
                         </table>
 
                     </div>
+
                 @else
+
                     <div class="empty-employee">
 
                         <i class="bi bi-person-x"></i>
@@ -1417,7 +2057,10 @@
 
         <div class="d-flex justify-content-between align-items-center mt-4">
 
-            <a href="{{ route('samperin.admin.kgb.show', $batch->kgb_batch_id) }}"
+            <a href="{{ route(
+                'samperin.admin.kgb.show',
+                $batch->kgb_batch_id
+            ) }}"
                 class="btn btn-outline-secondary btn-secondary-custom">
 
                 <i class="bi bi-arrow-left me-1"></i>
@@ -1427,7 +2070,10 @@
             </a>
 
 
-            <button type="submit" form="kgbEditForm" class="btn btn-primary-custom" id="btnSubmit">
+            <button type="submit"
+                form="kgbEditForm"
+                class="btn btn-primary-custom"
+                id="btnSubmit">
 
                 <i class="bi bi-check-circle me-1"></i>
 
