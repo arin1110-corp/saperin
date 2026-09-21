@@ -30,6 +30,10 @@ return new class extends Migration
                 'kgb_batch_pejabat_id'
             );
 
+            $table->string('kgb_batch_oleh_pejabat', 255)
+                ->nullable()
+                ->after('kgb_batch_pejabat_id');
+
             /*
             |--------------------------------------------------------------------------
             | TANGGAL SURAT

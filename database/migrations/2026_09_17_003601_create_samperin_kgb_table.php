@@ -4,18 +4,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('samperin_kgb', function (Blueprint $table) {
-
             $table->bigIncrements('kgb_id');
 
-            $table->char(
-                'kgb_uid',
-                36
-            );
+            $table->char('kgb_uid', 36);
 
             /*
             |--------------------------------------------------------------------------
@@ -23,9 +18,7 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->unsignedBigInteger(
-                'kgb_batch_id'
-            );
+            $table->unsignedBigInteger('kgb_batch_id');
 
             /*
             |--------------------------------------------------------------------------
@@ -33,9 +26,7 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->unsignedBigInteger(
-                'kgb_user_id'
-            );
+            $table->unsignedBigInteger('kgb_user_id');
 
             /*
             |--------------------------------------------------------------------------
@@ -43,9 +34,7 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->unsignedBigInteger(
-                'kgb_golongan_id'
-            );
+            $table->unsignedBigInteger('kgb_golongan_id');
 
             /*
             |--------------------------------------------------------------------------
@@ -53,14 +42,9 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->string(
-                'kgb_nomor_surat',
-                255
-            );
+            $table->string('kgb_nomor_surat', 255);
 
-            $table->date(
-                'kgb_tanggal_surat'
-            );
+            $table->date('kgb_tanggal_surat');
 
             /*
             |--------------------------------------------------------------------------
@@ -68,44 +52,23 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->unsignedBigInteger(
-                'kgb_pejabat_id'
-            );
+            $table->unsignedBigInteger('kgb_pejabat_id');
 
             /*
-            |--------------------------------------------------------------------------
-            | GAJI
-            |--------------------------------------------------------------------------
-            |
-            | Snapshot dari peraturan saat KGB dibuat.
-            |
-            */
+|--------------------------------------------------------------------------
+| MASA KERJA
+|--------------------------------------------------------------------------
+|
+| Masa kerja merupakan data yang melekat pada KGB.
+| Nilai gaji tidak disimpan di tabel KGB,
+| tetapi diambil dari peraturan gaji berdasarkan
+| peraturan yang digunakan oleh batch dan golongan pegawai.
+|
+|--------------------------------------------------------------------------
+*/
+            $table->unsignedInteger('kgb_masa_kerja_tahun')->default(0);
 
-            $table->decimal(
-                'kgb_gaji_lama',
-                15,
-                2
-            )->nullable();
-
-            $table->decimal(
-                'kgb_gaji_baru',
-                15,
-                2
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | MASA KERJA
-            |--------------------------------------------------------------------------
-            */
-
-            $table->unsignedInteger(
-                'kgb_masa_kerja_tahun'
-            )->default(0);
-
-            $table->unsignedInteger(
-                'kgb_masa_kerja_bulan'
-            )->default(0);
+            $table->unsignedInteger('kgb_masa_kerja_bulan')->default(0);
 
             /*
             |--------------------------------------------------------------------------
@@ -113,23 +76,18 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->date(
-                'kgb_mulai_berlaku'
-            )->nullable();
+            $table->date('kgb_mulai_berlaku')->nullable();
 
             /*
             |--------------------------------------------------------------------------
             | NOMOR SK
             |--------------------------------------------------------------------------
             |
-            | Hanya pegawai yang mengisi.
+            | Diisi oleh pegawai.
             |
             */
 
-            $table->string(
-                'kgb_nomor_sk',
-                255
-            )->nullable();
+            $table->string('kgb_nomor_sk', 255)->nullable();
 
             /*
             |--------------------------------------------------------------------------
@@ -137,13 +95,10 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             |
             | Disiapkan untuk kebutuhan dokumen.
-            | Belum menjadi input pegawai.
             |
             */
 
-            $table->date(
-                'kgb_tanggal_sk'
-            )->nullable();
+            $table->date('kgb_tanggal_sk')->nullable();
 
             /*
             |--------------------------------------------------------------------------
@@ -151,17 +106,11 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->tinyInteger(
-                'kgb_status'
-            )->default(1);
+            $table->tinyInteger('kgb_status')->default(1);
 
-            $table->timestamp(
-                'kgb_created_at'
-            )->nullable();
+            $table->timestamp('kgb_created_at')->nullable();
 
-            $table->timestamp(
-                'kgb_updated_at'
-            )->nullable();
+            $table->timestamp('kgb_updated_at')->nullable();
 
             /*
             |--------------------------------------------------------------------------
@@ -169,18 +118,9 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->unique(
-                'kgb_uid',
-                'kgb_uid_unique'
-            );
+            $table->unique('kgb_uid', 'kgb_uid_unique');
 
-            $table->unique(
-                [
-                    'kgb_batch_id',
-                    'kgb_user_id'
-                ],
-                'kgb_batch_user_unique'
-            );
+            $table->unique(['kgb_batch_id', 'kgb_user_id'], 'kgb_batch_user_unique');
 
             /*
             |--------------------------------------------------------------------------
@@ -188,44 +128,18 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->foreign(
-                'kgb_batch_id',
-                'kgb_batch_batch_fk'
-            )
-                ->references('kgb_batch_id')
-                ->on('samperin_kgb_batch')
-                ->cascadeOnDelete();
+            $table->foreign('kgb_batch_id', 'kgb_batch_batch_fk')->references('kgb_batch_id')->on('samperin_kgb_batch')->cascadeOnDelete();
 
-            $table->foreign(
-                'kgb_user_id',
-                'kgb_user_fk'
-            )
-                ->references('user_id')
-                ->on('samperin_user')
-                ->restrictOnDelete();
+            $table->foreign('kgb_user_id', 'kgb_user_fk')->references('user_id')->on('samperin_user')->restrictOnDelete();
 
-            $table->foreign(
-                'kgb_golongan_id',
-                'kgb_golongan_fk'
-            )
-                ->references('golongan_id')
-                ->on('samperin_golongan')
-                ->restrictOnDelete();
+            $table->foreign('kgb_golongan_id', 'kgb_golongan_fk')->references('golongan_id')->on('samperin_golongan')->restrictOnDelete();
 
-            $table->foreign(
-                'kgb_pejabat_id',
-                'kgb_pejabat_fk'
-            )
-                ->references('user_id')
-                ->on('samperin_user')
-                ->restrictOnDelete();
+            $table->foreign('kgb_pejabat_id', 'kgb_pejabat_fk')->references('user_id')->on('samperin_user')->restrictOnDelete();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists(
-            'samperin_kgb'
-        );
+        Schema::dropIfExists('samperin_kgb');
     }
 };

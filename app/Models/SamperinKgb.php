@@ -13,7 +13,7 @@ class SamperinKgb extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['kgb_uid', 'kgb_batch_id', 'kgb_user_id', 'kgb_golongan_id', 'kgb_nomor_surat', 'kgb_tanggal_surat', 'kgb_pejabat_id', 'kgb_gaji_lama', 'kgb_gaji_baru', 'kgb_masa_kerja_tahun', 'kgb_masa_kerja_bulan', 'kgb_mulai_berlaku', 'kgb_nomor_sk', 'kgb_tanggal_sk', 'kgb_status', 'kgb_created_at', 'kgb_updated_at'];
+    protected $fillable = ['kgb_uid', 'kgb_batch_id', 'kgb_user_id', 'kgb_golongan_id', 'kgb_nomor_surat', 'kgb_tanggal_surat', 'kgb_pejabat_id', 'kgb_masa_kerja_tahun', 'kgb_masa_kerja_bulan', 'kgb_mulai_berlaku', 'kgb_nomor_sk', 'kgb_tanggal_sk', 'kgb_status', 'kgb_created_at', 'kgb_updated_at'];
 
     protected static function boot()
     {

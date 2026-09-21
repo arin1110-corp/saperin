@@ -447,6 +447,22 @@
 
                         </div>
 
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Oleh Pejabat
+                            </label>
+
+                            <input type="text" name="kgb_batch_oleh_pejabat" class="form-control"
+                                value="{{ old('kgb_batch_oleh_pejabat') }}"
+                                placeholder="Contoh: Kepala BKPSDM Provinsi Bali" required>
+
+                            @error('kgb_batch_oleh_pejabat')
+                                <div class="text-danger small mt-1">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
 
                         {{-- TANGGAL SURAT --}}
                         <div class="col-md-3">

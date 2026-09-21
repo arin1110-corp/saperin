@@ -8,9 +8,9 @@ use App\Models\SamperinKgb;
 use App\Models\SamperinKgbBatch;
 use App\Models\SamperinPeraturanGaji;
 use App\Models\SamperinUser;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -33,7 +33,9 @@ class SamperinAdminKgbController extends Controller
 
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('kgb_batch_nama', 'like', "%{$search}%")->orWhere('kgb_batch_nomor_format', 'like', "%{$search}%");
+                $q->where('kgb_batch_nama', 'like', "%{$search}%")
+                    ->orWhere('kgb_batch_nomor_format', 'like', "%{$search}%")
+                    ->orWhere('kgb_batch_oleh_pejabat', 'like', "%{$search}%");
                 });
             })
 
@@ -58,8 +60,6 @@ class SamperinAdminKgbController extends Controller
      * ============================================================
      * CREATE
      * ============================================================
-     *
-     * Filter pegawai langsung dari database.
      */
     public function create(Request $request)
     {
@@ -111,7 +111,7 @@ class SamperinAdminKgbController extends Controller
             $search = trim((string) $request->search);
 
             $pegawaiQuery->where(function ($query) use ($search) {
-                $query->where('user_nama', 'like', '%' . $search . '%')->orWhere('user_nip', 'like', '%' . $search . '%');
+                $query->where('user_nama', 'like', "%{$search}%")->orWhere('user_nip', 'like', "%{$search}%");
             });
         }
 
@@ -122,11 +122,6 @@ class SamperinAdminKgbController extends Controller
         */
         $pegawai = $pegawaiQuery->orderBy('user_nama')->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Jumlah Pegawai
-        |--------------------------------------------------------------------------
-        */
         $jumlahPegawai = $pegawai->count();
 
         return view('dashboard.kepegawaian.kgb.create', compact('peraturanGaji', 'pejabat', 'golongan', 'pegawai', 'jumlahPegawai'));
@@ -147,6 +142,8 @@ class SamperinAdminKgbController extends Controller
 
                 'kgb_batch_pejabat_id' => ['required', 'integer', 'exists:samperin_user,user_id'],
 
+                'kgb_batch_oleh_pejabat' => ['required', 'string', 'max:255'],
+
                 'kgb_batch_tanggal' => ['required', 'date'],
 
                 'kgb_batch_mulai_berlaku' => ['required', 'date'],
@@ -163,31 +160,29 @@ class SamperinAdminKgbController extends Controller
                 'pegawai.required' => 'Silakan pilih minimal satu pegawai.',
 
                 'pegawai.min' => 'Silakan pilih minimal satu pegawai.',
+
+                'kgb_batch_oleh_pejabat.required' => 'Oleh pejabat wajib diisi.',
             ],
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Validasi tanggal
-        |--------------------------------------------------------------------------
-        */
         $tanggalSurat = Carbon::parse($validated['kgb_batch_tanggal']);
 
         $mulaiBerlaku = Carbon::parse($validated['kgb_batch_mulai_berlaku']);
 
         /*
         |--------------------------------------------------------------------------
-        | Validasi TMT Pegawai
+        | Pegawai
         |--------------------------------------------------------------------------
-        |
-        | Semua pegawai yang dipilih harus memiliki TMT
-        | dan TMT tidak boleh lebih besar dari tanggal mulai berlaku.
-        |
         */
         $pegawaiIds = collect($validated['pegawai'])->unique()->values();
 
         $pegawaiTerpilih = SamperinUser::query()->whereIn('user_id', $pegawaiIds)->get();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Validasi TMT
+        |--------------------------------------------------------------------------
+        */
         foreach ($pegawaiTerpilih as $pegawai) {
             if (!$pegawai->user_tmt) {
                 throw ValidationException::withMessages([
@@ -200,6 +195,29 @@ class SamperinAdminKgbController extends Controller
             if ($tmt->greaterThan($mulaiBerlaku)) {
                 throw ValidationException::withMessages([
                     'pegawai' => "TMT pegawai {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.",
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Peraturan Gaji
+        |--------------------------------------------------------------------------
+        */
+        $peraturan = SamperinPeraturanGaji::query()->with('golongan')->findOrFail($validated['kgb_batch_peraturan_gaji_id']);
+
+        foreach ($pegawaiTerpilih as $pegawai) {
+            if (!$pegawai->user_golongan_id) {
+                throw ValidationException::withMessages([
+                    'pegawai' => "Pegawai {$pegawai->user_nama} belum memiliki golongan.",
+                ]);
+            }
+
+            $tarif = $peraturan->golongan->firstWhere('golongan_id', $pegawai->user_golongan_id);
+
+            if (!$tarif) {
+                throw ValidationException::withMessages([
+                    'pegawai' => "Tarif gaji untuk golongan pegawai {$pegawai->user_nama} belum diatur pada peraturan gaji yang dipilih.",
                 ]);
             }
         }
@@ -240,6 +258,8 @@ class SamperinAdminKgbController extends Controller
 
                     'kgb_batch_pejabat_id' => $validated['kgb_batch_pejabat_id'],
 
+                    'kgb_batch_oleh_pejabat' => $validated['kgb_batch_oleh_pejabat'],
+
                     'kgb_batch_tanggal' => $validated['kgb_batch_tanggal'],
 
                     'kgb_batch_mulai_berlaku' => $validated['kgb_batch_mulai_berlaku'],
@@ -248,12 +268,14 @@ class SamperinAdminKgbController extends Controller
 
                     'kgb_batch_nomor_awal' => $validated['kgb_batch_nomor_awal'],
 
+                    'kgb_batch_nomor_akhir' => null,
+
                     'kgb_batch_status' => 1,
                 ]);
 
                 /*
                 |--------------------------------------------------------------------------
-                | Generate detail KGB
+                | Generate Detail KGB
                 |--------------------------------------------------------------------------
                 */
                 $this->generateKgbRows($batch, $pegawaiIds);
@@ -285,34 +307,32 @@ class SamperinAdminKgbController extends Controller
         | Peraturan Gaji
         |--------------------------------------------------------------------------
         */
-        $peraturan = SamperinPeraturanGaji::query()
-            ->with(['golongan'])
-            ->findOrFail($batch->kgb_batch_peraturan_gaji_id);
+        $peraturan = SamperinPeraturanGaji::query()->with('golongan')->findOrFail($batch->kgb_batch_peraturan_gaji_id);
 
         /*
         |--------------------------------------------------------------------------
-        | Nomor awal
+        | Nomor Awal
         |--------------------------------------------------------------------------
         */
         $nomor = (int) $batch->kgb_batch_nomor_awal;
 
         /*
         |--------------------------------------------------------------------------
-        | Tahun surat
+        | Tahun Surat
         |--------------------------------------------------------------------------
         */
         $tahun = Carbon::parse($batch->kgb_batch_tanggal)->format('Y');
 
         /*
         |--------------------------------------------------------------------------
-        | Tanggal mulai berlaku
+        | Tanggal Mulai Berlaku
         |--------------------------------------------------------------------------
         */
         $tanggalMulaiBerlaku = Carbon::parse($batch->kgb_batch_mulai_berlaku);
 
         /*
         |--------------------------------------------------------------------------
-        | Generate satu per satu
+        | Generate Satu Per Satu
         |--------------------------------------------------------------------------
         */
         foreach ($pegawaiIds as $pegawaiId) {
@@ -333,50 +353,43 @@ class SamperinAdminKgbController extends Controller
             |--------------------------------------------------------------------------
             */
             if (!$pegawai->user_tmt) {
-                throw new \Exception("Pegawai {$pegawai->user_nama} belum memiliki TMT.");
+                throw new \Exception("TMT pegawai {$pegawai->user_nama} belum tersedia.");
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Hitung Masa Kerja
-            |--------------------------------------------------------------------------
-            |
-            | TMT -> Tanggal Mulai Berlaku KGB
-            |
-            */
             $tmt = Carbon::parse($pegawai->user_tmt);
 
             if ($tmt->greaterThan($tanggalMulaiBerlaku)) {
                 throw new \Exception("TMT pegawai {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
             }
 
-            $masaKerja = $tmt->diff($tanggalMulaiBerlaku);
-
             /*
             |--------------------------------------------------------------------------
-            | Cari Tarif Gaji
+            | Pastikan Tarif Gaji Tersedia
             |--------------------------------------------------------------------------
             */
             $tarif = $peraturan->golongan->firstWhere('golongan_id', $pegawai->user_golongan_id);
 
             if (!$tarif) {
-                throw new \Exception('Tarif gaji untuk golongan pegawai ' . $pegawai->user_nama . ' belum diatur pada peraturan gaji yang dipilih.');
+                throw new \Exception("Tarif gaji untuk golongan pegawai {$pegawai->user_nama} belum diatur pada peraturan gaji yang dipilih.");
             }
 
             /*
             |--------------------------------------------------------------------------
-            | Generate Nomor Surat
+            | Masa Kerja
             |--------------------------------------------------------------------------
-            |
-            | {nomor} -> 001
-            | {tahun} -> 2026
-            |
             */
-            $nomorSurat = str_replace(['{nomor}', '{tahun}'], [str_pad($nomor, 3, '0', STR_PAD_LEFT), $tahun], $batch->kgb_batch_nomor_format);
+            $masaKerja = $tmt->diff($tanggalMulaiBerlaku);
 
             /*
             |--------------------------------------------------------------------------
-            | Buat Detail KGB
+            | Nomor Surat
+            |--------------------------------------------------------------------------
+            */
+            $nomorSurat = $this->generateNomorSurat($batch, $nomor);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Simpan Detail KGB
             |--------------------------------------------------------------------------
             */
             SamperinKgb::create([
@@ -394,64 +407,42 @@ class SamperinAdminKgbController extends Controller
 
                 'kgb_pejabat_id' => $batch->kgb_batch_pejabat_id,
 
-                /*
-                |--------------------------------------------------------------------------
-                | Snapshot Gaji
-                |--------------------------------------------------------------------------
-                */
-                'kgb_gaji_lama' => $tarif->peraturan_gaji_gaji_lama,
-
-                'kgb_gaji_baru' => $tarif->peraturan_gaji_gaji_baru,
-
-                /*
-                |--------------------------------------------------------------------------
-                | Snapshot Masa Kerja
-                |--------------------------------------------------------------------------
-                */
                 'kgb_masa_kerja_tahun' => $masaKerja->y,
 
                 'kgb_masa_kerja_bulan' => $masaKerja->m,
 
-                /*
-                |--------------------------------------------------------------------------
-                | Mulai Berlaku
-                |--------------------------------------------------------------------------
-                */
                 'kgb_mulai_berlaku' => $batch->kgb_batch_mulai_berlaku,
 
-                /*
-                |--------------------------------------------------------------------------
-                | Nomor SK
-                |--------------------------------------------------------------------------
-                */
                 'kgb_nomor_sk' => null,
 
                 'kgb_tanggal_sk' => null,
 
-                /*
-                |--------------------------------------------------------------------------
-                | Status
-                |--------------------------------------------------------------------------
-                */
                 'kgb_status' => 1,
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Nomor berikutnya
-            |--------------------------------------------------------------------------
-            */
             $nomor++;
         }
 
         /*
         |--------------------------------------------------------------------------
-        | Simpan nomor akhir
+        | Simpan Nomor Akhir
         |--------------------------------------------------------------------------
         */
         $batch->update([
             'kgb_batch_nomor_akhir' => $nomor - 1,
         ]);
+    }
+
+    /**
+     * ============================================================
+     * GENERATE NOMOR SURAT
+     * ============================================================
+     */
+    private function generateNomorSurat(SamperinKgbBatch $batch, int $nomor): string
+    {
+        $tahun = Carbon::parse($batch->kgb_batch_tanggal)->format('Y');
+
+        return str_replace(['{nomor}', '{tahun}'], [str_pad($nomor, 3, '0', STR_PAD_LEFT), $tahun], $batch->kgb_batch_nomor_format);
     }
 
     /**
@@ -514,35 +505,78 @@ class SamperinAdminKgbController extends Controller
      * ============================================================
      * UPDATE
      * ============================================================
+     *
+     * Saat batch diubah, seluruh detail KGB yang sudah tersimpan
+     * ikut disinkronkan dengan data batch.
+     *
+     * Yang disinkronkan:
+     *
+     * - Nomor surat
+     * - Tanggal surat
+     * - Pejabat
+     * - Masa kerja
+     * - Mulai berlaku
+     * - Golongan pegawai
+     *
+     * Data yang tetap milik detail:
+     *
+     * - Nomor SK
+     * - Tanggal SK
      */
     public function update(Request $request, $id)
     {
         $batch = SamperinKgbBatch::query()->with('kgb')->findOrFail($id);
 
-        $validated = $request->validate([
-            'kgb_batch_nama' => ['required', 'string', 'max:255'],
+        $validated = $request->validate(
+            [
+                'kgb_batch_nama' => ['required', 'string', 'max:255'],
 
-            'kgb_batch_peraturan_gaji_id' => ['required', 'integer', 'exists:samperin_peraturan_gaji,peraturan_gaji_id'],
+                'kgb_batch_peraturan_gaji_id' => ['required', 'integer', 'exists:samperin_peraturan_gaji,peraturan_gaji_id'],
 
-            'kgb_batch_pejabat_id' => ['required', 'integer', 'exists:samperin_user,user_id'],
+                'kgb_batch_pejabat_id' => ['required', 'integer', 'exists:samperin_user,user_id'],
 
-            'kgb_batch_tanggal' => ['required', 'date'],
+                'kgb_batch_oleh_pejabat' => ['required', 'string', 'max:255'],
 
-            'kgb_batch_mulai_berlaku' => ['required', 'date'],
+                'kgb_batch_tanggal' => ['required', 'date'],
 
-            'pegawai' => ['nullable', 'array'],
+                'kgb_batch_mulai_berlaku' => ['required', 'date'],
 
-            'pegawai.*' => ['integer', 'exists:samperin_user,user_id'],
-        ]);
+                'kgb_batch_nomor_format' => ['required', 'string', 'max:255'],
+
+                'kgb_batch_nomor_awal' => ['required', 'integer', 'min:1'],
+
+                'pegawai' => ['nullable', 'array'],
+
+                'pegawai.*' => ['integer', 'exists:samperin_user,user_id'],
+            ],
+            [
+                'kgb_batch_oleh_pejabat.required' => 'Oleh pejabat wajib diisi.',
+            ],
+        );
 
         try {
             DB::transaction(function () use ($validated, $batch) {
                 /*
-            |--------------------------------------------------------------------------
-            | DATA BATCH
-            |--------------------------------------------------------------------------
-            */
+                |--------------------------------------------------------------------------
+                | DATA BATCH BARU
+                |--------------------------------------------------------------------------
+                */
+                $tanggalSurat = Carbon::parse($validated['kgb_batch_tanggal']);
 
+                $tanggalMulaiBerlaku = Carbon::parse($validated['kgb_batch_mulai_berlaku']);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Peraturan Gaji Baru
+                |--------------------------------------------------------------------------
+                */
+                $peraturan = SamperinPeraturanGaji::query()->with('golongan')->findOrFail($validated['kgb_batch_peraturan_gaji_id']);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Batch
+                |--------------------------------------------------------------------------
+                */
                 $batch->update([
                     'kgb_batch_nama' => $validated['kgb_batch_nama'],
 
@@ -550,80 +584,70 @@ class SamperinAdminKgbController extends Controller
 
                     'kgb_batch_pejabat_id' => $validated['kgb_batch_pejabat_id'],
 
+                    'kgb_batch_oleh_pejabat' => $validated['kgb_batch_oleh_pejabat'],
+
                     'kgb_batch_tanggal' => $validated['kgb_batch_tanggal'],
 
                     'kgb_batch_mulai_berlaku' => $validated['kgb_batch_mulai_berlaku'],
+
+                    'kgb_batch_nomor_format' => $validated['kgb_batch_nomor_format'],
+
+                    'kgb_batch_nomor_awal' => $validated['kgb_batch_nomor_awal'],
                 ]);
 
                 /*
-            |--------------------------------------------------------------------------
-            | PERATURAN GAJI
-            |--------------------------------------------------------------------------
-            */
-
-                $peraturan = SamperinPeraturanGaji::query()->with('golongan')->findOrFail($validated['kgb_batch_peraturan_gaji_id']);
-
-                /*
-            |--------------------------------------------------------------------------
-            | PEGAWAI YANG SUDAH ADA
-            |--------------------------------------------------------------------------
-            */
-
+                |--------------------------------------------------------------------------
+                | Pegawai Lama
+                |--------------------------------------------------------------------------
+                */
                 $pegawaiLama = SamperinKgb::query()->where('kgb_batch_id', $batch->kgb_batch_id)->pluck('kgb_user_id');
 
                 /*
-            |--------------------------------------------------------------------------
-            | PEGAWAI YANG DIPILIH
-            |--------------------------------------------------------------------------
-            */
-
+                |--------------------------------------------------------------------------
+                | Pegawai Baru
+                |--------------------------------------------------------------------------
+                */
                 $pegawaiBaru = collect($validated['pegawai'] ?? [])
                     ->unique()
                     ->values();
 
                 /*
-            |--------------------------------------------------------------------------
-            | HANYA TAMBAHKAN YANG BELUM ADA
-            |--------------------------------------------------------------------------
-            */
-
+                |--------------------------------------------------------------------------
+                | Pegawai Yang Ditambahkan
+                |--------------------------------------------------------------------------
+                */
                 $pegawaiYangDitambahkan = $pegawaiBaru->diff($pegawaiLama)->values();
 
                 /*
-            |--------------------------------------------------------------------------
-            | TANGGAL BERLAKU
-            |--------------------------------------------------------------------------
-            */
-
-                $tanggalMulaiBerlaku = Carbon::parse($validated['kgb_batch_mulai_berlaku']);
-
-                /*
-            |--------------------------------------------------------------------------
-            | NOMOR BERIKUTNYA
-            |--------------------------------------------------------------------------
-            */
-
-                $nomor = (int) $batch->kgb_batch_nomor_awal;
-
-                $jumlahKgb = SamperinKgb::query()->where('kgb_batch_id', $batch->kgb_batch_id)->count();
-
-                $nomor += $jumlahKgb;
-
-                $tahun = Carbon::parse($validated['kgb_batch_tanggal'])->format('Y');
+                |--------------------------------------------------------------------------
+                | Jika tidak ada input pegawai dari form,
+                | gunakan pegawai yang sudah ada.
+                |--------------------------------------------------------------------------
+                */
+                $semuaPegawaiIds = $pegawaiLama->merge($pegawaiYangDitambahkan)->unique()->values();
 
                 /*
-            |--------------------------------------------------------------------------
-            | TAMBAHKAN PEGAWAI
-            |--------------------------------------------------------------------------
-            */
+                |--------------------------------------------------------------------------
+                | Validasi seluruh pegawai dalam batch
+                |--------------------------------------------------------------------------
+                */
+                $pegawaiDalamBatch = SamperinUser::query()->whereIn('user_id', $semuaPegawaiIds)->get();
 
-                foreach ($pegawaiYangDitambahkan as $pegawaiId) {
-                    $pegawai = SamperinUser::query()->with('golongan')->findOrFail($pegawaiId);
-
+                foreach ($pegawaiDalamBatch as $pegawai) {
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Golongan
+                    |--------------------------------------------------------------------------
+                    */
                     if (!$pegawai->user_golongan_id) {
                         throw new \Exception("Pegawai {$pegawai->user_nama} belum memiliki golongan.");
                     }
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | TMT
+                    |--------------------------------------------------------------------------
+                    */
                     if (!$pegawai->user_tmt) {
                         throw new \Exception("TMT pegawai {$pegawai->user_nama} belum tersedia.");
                     }
@@ -635,11 +659,92 @@ class SamperinAdminKgbController extends Controller
                     }
 
                     /*
+                    |--------------------------------------------------------------------------
+                    | Tarif Gaji
+                    |--------------------------------------------------------------------------
+                    */
+                    $tarif = $peraturan->golongan->firstWhere('golongan_id', $pegawai->user_golongan_id);
+
+                    if (!$tarif) {
+                        throw new \Exception("Tarif gaji untuk golongan pegawai {$pegawai->user_nama} belum diatur pada peraturan gaji yang dipilih.");
+                    }
+                }
+
+                /*
                 |--------------------------------------------------------------------------
-                | TARIF
+                | Cek Pegawai Baru Yang Sudah Memiliki KGB Aktif
                 |--------------------------------------------------------------------------
                 */
+                if ($pegawaiYangDitambahkan->isNotEmpty()) {
+                    $pegawaiSudahAda = SamperinKgb::query()
+                        ->whereIn('kgb_user_id', $pegawaiYangDitambahkan)
+                        ->where('kgb_batch_id', '!=', $batch->kgb_batch_id)
+                        ->whereHas('batch', function ($query) {
+                            $query->where('kgb_batch_status', 1);
+                        })
+                        ->pluck('kgb_user_id');
 
+                    if ($pegawaiSudahAda->isNotEmpty()) {
+                        $nama = SamperinUser::query()->whereIn('user_id', $pegawaiSudahAda)->pluck('user_nama')->implode(', ');
+
+                        throw new \Exception("Pegawai berikut masih memiliki KGB aktif: {$nama}");
+                    }
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | NOMOR AWAL
+                |--------------------------------------------------------------------------
+                */
+                $nomor = (int) $batch->kgb_batch_nomor_awal;
+
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE KGB LAMA
+                |--------------------------------------------------------------------------
+                |
+                | Semua data batch yang disalin ke KGB
+                | harus disinkronkan kembali.
+                |
+                */
+                $kgbList = SamperinKgb::query()->with('user')->where('kgb_batch_id', $batch->kgb_batch_id)->orderBy('kgb_id')->get();
+
+                foreach ($kgbList as $kgb) {
+                    if (!$kgb->user) {
+                        continue;
+                    }
+
+                    $pegawai = $kgb->user;
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Pastikan TMT
+                    |--------------------------------------------------------------------------
+                    */
+                    if (!$pegawai->user_tmt) {
+                        throw new \Exception("TMT pegawai {$pegawai->user_nama} belum tersedia.");
+                    }
+
+                    $tmt = Carbon::parse($pegawai->user_tmt);
+
+                    if ($tmt->greaterThan($tanggalMulaiBerlaku)) {
+                        throw new \Exception("TMT pegawai {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Pastikan Golongan
+                    |--------------------------------------------------------------------------
+                    */
+                    if (!$pegawai->user_golongan_id) {
+                        throw new \Exception("Pegawai {$pegawai->user_nama} belum memiliki golongan.");
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Pastikan Tarif
+                    |--------------------------------------------------------------------------
+                    */
                     $tarif = $peraturan->golongan->firstWhere('golongan_id', $pegawai->user_golongan_id);
 
                     if (!$tarif) {
@@ -647,27 +752,110 @@ class SamperinAdminKgbController extends Controller
                     }
 
                     /*
-                |--------------------------------------------------------------------------
-                | MASA KERJA
-                |--------------------------------------------------------------------------
-                */
-
+                    |--------------------------------------------------------------------------
+                    | Masa Kerja
+                    |--------------------------------------------------------------------------
+                    */
                     $masaKerja = $tmt->diff($tanggalMulaiBerlaku);
 
                     /*
-                |--------------------------------------------------------------------------
-                | NOMOR SURAT
-                |--------------------------------------------------------------------------
-                */
-
-                    $nomorSurat = str_replace(['{nomor}', '{tahun}'], [str_pad($nomor, 3, '0', STR_PAD_LEFT), $tahun], $batch->kgb_batch_nomor_format);
+                    |--------------------------------------------------------------------------
+                    | Nomor Surat
+                    |--------------------------------------------------------------------------
+                    */
+                    $nomorSurat = $this->generateNomorSurat($batch, $nomor);
 
                     /*
+                    |--------------------------------------------------------------------------
+                    | Update Detail KGB
+                    |--------------------------------------------------------------------------
+                    */
+                    $kgb->update([
+                        'kgb_golongan_id' => $pegawai->user_golongan_id,
+
+                        'kgb_nomor_surat' => $nomorSurat,
+
+                        'kgb_tanggal_surat' => $validated['kgb_batch_tanggal'],
+
+                        'kgb_pejabat_id' => $validated['kgb_batch_pejabat_id'],
+
+                        'kgb_masa_kerja_tahun' => $masaKerja->y,
+
+                        'kgb_masa_kerja_bulan' => $masaKerja->m,
+
+                        'kgb_mulai_berlaku' => $validated['kgb_batch_mulai_berlaku'],
+                    ]);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Nomor Berikutnya
+                    |--------------------------------------------------------------------------
+                    */
+                    $nomor++;
+                }
+
+                /*
                 |--------------------------------------------------------------------------
-                | SIMPAN KGB
+                | TAMBAHKAN PEGAWAI BARU
                 |--------------------------------------------------------------------------
                 */
+                foreach ($pegawaiYangDitambahkan as $pegawaiId) {
+                    $pegawai = SamperinUser::query()->with('golongan')->findOrFail($pegawaiId);
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Golongan
+                    |--------------------------------------------------------------------------
+                    */
+                    if (!$pegawai->user_golongan_id) {
+                        throw new \Exception("Pegawai {$pegawai->user_nama} belum memiliki golongan.");
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | TMT
+                    |--------------------------------------------------------------------------
+                    */
+                    if (!$pegawai->user_tmt) {
+                        throw new \Exception("TMT pegawai {$pegawai->user_nama} belum tersedia.");
+                    }
+
+                    $tmt = Carbon::parse($pegawai->user_tmt);
+
+                    if ($tmt->greaterThan($tanggalMulaiBerlaku)) {
+                        throw new \Exception("TMT pegawai {$pegawai->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Tarif Gaji
+                    |--------------------------------------------------------------------------
+                    */
+                    $tarif = $peraturan->golongan->firstWhere('golongan_id', $pegawai->user_golongan_id);
+
+                    if (!$tarif) {
+                        throw new \Exception("Tarif gaji untuk golongan pegawai {$pegawai->user_nama} belum diatur pada peraturan gaji yang dipilih.");
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Masa Kerja
+                    |--------------------------------------------------------------------------
+                    */
+                    $masaKerja = $tmt->diff($tanggalMulaiBerlaku);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Nomor Surat
+                    |--------------------------------------------------------------------------
+                    */
+                    $nomorSurat = $this->generateNomorSurat($batch, $nomor);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Simpan KGB Baru
+                    |--------------------------------------------------------------------------
+                    */
                     SamperinKgb::create([
                         'kgb_uid' => (string) Str::uuid(),
 
@@ -682,10 +870,6 @@ class SamperinAdminKgbController extends Controller
                         'kgb_tanggal_surat' => $validated['kgb_batch_tanggal'],
 
                         'kgb_pejabat_id' => $validated['kgb_batch_pejabat_id'],
-
-                        'kgb_gaji_lama' => $tarif->peraturan_gaji_gaji_lama,
-
-                        'kgb_gaji_baru' => $tarif->peraturan_gaji_gaji_baru,
 
                         'kgb_masa_kerja_tahun' => $masaKerja->y,
 
@@ -704,60 +888,20 @@ class SamperinAdminKgbController extends Controller
                 }
 
                 /*
-            |--------------------------------------------------------------------------
-            | UPDATE DATA DETAIL YANG SUDAH ADA
-            |--------------------------------------------------------------------------
-            |
-            | Tanggal, pejabat dan masa kerja mengikuti
-            | perubahan batch.
-            |
-            | Gaji lama / baru TIDAK diubah.
-            | Karena merupakan snapshot KGB.
-            |
-            */
-
-                $kgbList = SamperinKgb::query()->with('user')->where('kgb_batch_id', $batch->kgb_batch_id)->get();
-
-                foreach ($kgbList as $kgb) {
-                    if (!$kgb->user || !$kgb->user->user_tmt) {
-                        continue;
-                    }
-
-                    $tmt = Carbon::parse($kgb->user->user_tmt);
-
-                    if ($tmt->greaterThan($tanggalMulaiBerlaku)) {
-                        throw new \Exception("TMT pegawai {$kgb->user->user_nama} lebih besar dari tanggal mulai berlaku KGB.");
-                    }
-
-                    $masaKerja = $tmt->diff($tanggalMulaiBerlaku);
-
-                    $kgb->update([
-                        'kgb_tanggal_surat' => $validated['kgb_batch_tanggal'],
-
-                        'kgb_pejabat_id' => $validated['kgb_batch_pejabat_id'],
-
-                        'kgb_masa_kerja_tahun' => $masaKerja->y,
-
-                        'kgb_masa_kerja_bulan' => $masaKerja->m,
-
-                        'kgb_mulai_berlaku' => $validated['kgb_batch_mulai_berlaku'],
-                    ]);
-                }
-
-                /*
-            |--------------------------------------------------------------------------
-            | NOMOR AKHIR
-            |--------------------------------------------------------------------------
-            */
-
-                $nomorTerakhir = SamperinKgb::query()->where('kgb_batch_id', $batch->kgb_batch_id)->count();
+                |--------------------------------------------------------------------------
+                | UPDATE NOMOR AKHIR
+                |--------------------------------------------------------------------------
+                */
+                $jumlahKgb = SamperinKgb::query()->where('kgb_batch_id', $batch->kgb_batch_id)->count();
 
                 $batch->update([
-                    'kgb_batch_nomor_akhir' => $nomorTerakhir > 0 ? (int) $batch->kgb_batch_nomor_awal + $nomorTerakhir - 1 : null,
+                    'kgb_batch_nomor_akhir' => $jumlahKgb > 0 ? (int) $batch->kgb_batch_nomor_awal + $jumlahKgb - 1 : null,
                 ]);
             });
 
             return redirect()->route('samperin.admin.kgb.show', $batch->kgb_batch_id)->with('success', 'Batch KGB berhasil diperbarui.');
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Throwable $e) {
             report($e);
 
@@ -773,8 +917,6 @@ class SamperinAdminKgbController extends Controller
      * ============================================================
      * UPDATE NOMOR SK
      * ============================================================
-     *
-     * Pegawai hanya mengisi Nomor SK.
      */
     public function updateNomorSk(Request $request, $id)
     {
@@ -822,40 +964,33 @@ class SamperinAdminKgbController extends Controller
 
         DB::transaction(function () use ($batch, $kgb) {
             /*
-        |--------------------------------------------------------------------------
-        | Hapus detail KGB
-        |--------------------------------------------------------------------------
-        */
+                |--------------------------------------------------------------------------
+                | Hapus Detail KGB
+                |--------------------------------------------------------------------------
+                */
             $kgb->delete();
 
             /*
-        |--------------------------------------------------------------------------
-        | Ambil sisa KGB berdasarkan urutan nomor
-        |--------------------------------------------------------------------------
-        */
+                |--------------------------------------------------------------------------
+                | Ambil Sisa KGB
+                |--------------------------------------------------------------------------
+                */
             $kgbList = SamperinKgb::query()->where('kgb_batch_id', $batch->kgb_batch_id)->orderBy('kgb_id')->get();
 
             /*
-        |--------------------------------------------------------------------------
-        | Nomor awal
-        |--------------------------------------------------------------------------
-        */
+                |--------------------------------------------------------------------------
+                | Nomor Awal
+                |--------------------------------------------------------------------------
+                */
             $nomor = (int) $batch->kgb_batch_nomor_awal;
 
             /*
-        |--------------------------------------------------------------------------
-        | Tahun surat
-        |--------------------------------------------------------------------------
-        */
-            $tahun = Carbon::parse($batch->kgb_batch_tanggal)->format('Y');
-
-            /*
-        |--------------------------------------------------------------------------
-        | Generate ulang nomor surat
-        |--------------------------------------------------------------------------
-        */
+                |--------------------------------------------------------------------------
+                | Generate Ulang Nomor Surat
+                |--------------------------------------------------------------------------
+                */
             foreach ($kgbList as $item) {
-                $nomorSurat = str_replace(['{nomor}', '{tahun}'], [str_pad($nomor, 3, '0', STR_PAD_LEFT), $tahun], $batch->kgb_batch_nomor_format);
+                $nomorSurat = $this->generateNomorSurat($batch, $nomor);
 
                 $item->update([
                     'kgb_nomor_surat' => $nomorSurat,
@@ -865,10 +1000,10 @@ class SamperinAdminKgbController extends Controller
             }
 
             /*
-        |--------------------------------------------------------------------------
-        | Update nomor akhir
-        |--------------------------------------------------------------------------
-        */
+                |--------------------------------------------------------------------------
+                | Update Nomor Akhir
+                |--------------------------------------------------------------------------
+                */
             $batch->update([
                 'kgb_batch_nomor_akhir' => $kgbList->isNotEmpty() ? $nomor - 1 : null,
             ]);
@@ -876,6 +1011,12 @@ class SamperinAdminKgbController extends Controller
 
         return back()->with('success', "{$namaPegawai} berhasil dihapus dari batch KGB.");
     }
+
+    /**
+     * ============================================================
+     * PDF SATU KGB
+     * ============================================================
+     */
     public function pdf($id, $kgbId)
     {
         $batch = SamperinKgbBatch::query()
@@ -883,7 +1024,7 @@ class SamperinAdminKgbController extends Controller
             ->findOrFail($id);
 
         $kgb = SamperinKgb::query()
-            ->with(['user.jabatan', 'user.bidang', 'user.golongan', 'golongan', 'pejabat', 'batch'])
+            ->with(['user.jabatan', 'user.bidang', 'user.golongan', 'golongan', 'pejabat', 'batch.peraturanGaji.golongan'])
             ->where('kgb_id', $kgbId)
             ->where('kgb_batch_id', $batch->kgb_batch_id)
             ->firstOrFail();
@@ -892,10 +1033,16 @@ class SamperinAdminKgbController extends Controller
             ->setPaper('A4', 'portrait')
             ->stream('KGB-' . ($kgb->user->user_nama ?? $kgb->kgb_id) . '.pdf');
     }
+
+    /**
+     * ============================================================
+     * PDF SEMUA KGB
+     * ============================================================
+     */
     public function pdfAll($id)
     {
         $batch = SamperinKgbBatch::query()
-            ->with(['peraturanGaji', 'pejabat', 'kgb.user.jabatan', 'kgb.user.bidang', 'kgb.user.golongan', 'kgb.golongan', 'kgb.pejabat'])
+            ->with(['peraturanGaji.golongan', 'pejabat', 'kgb.user.jabatan', 'kgb.user.bidang', 'kgb.user.golongan', 'kgb.golongan', 'kgb.pejabat'])
             ->findOrFail($id);
 
         if ($batch->kgb->isEmpty()) {

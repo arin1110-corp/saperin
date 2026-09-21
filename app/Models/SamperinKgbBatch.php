@@ -13,7 +13,7 @@ class SamperinKgbBatch extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['kgb_batch_uid', 'kgb_batch_nama', 'kgb_batch_peraturan_gaji_id', 'kgb_batch_pejabat_id', 'kgb_batch_tanggal', 'kgb_batch_mulai_berlaku', 'kgb_batch_nomor_format', 'kgb_batch_nomor_awal', 'kgb_batch_nomor_akhir', 'kgb_batch_status', 'kgb_batch_created_at', 'kgb_batch_updated_at'];
+    protected $fillable = ['kgb_batch_uid', 'kgb_batch_nama', 'kgb_batch_peraturan_gaji_id', 'kgb_batch_pejabat_id', 'kgb_batch_tanggal', 'kgb_batch_oleh_pejabat', 'kgb_batch_mulai_berlaku', 'kgb_batch_nomor_format', 'kgb_batch_nomor_awal', 'kgb_batch_nomor_akhir', 'kgb_batch_status', 'kgb_batch_created_at', 'kgb_batch_updated_at'];
 
     protected static function boot()
     {

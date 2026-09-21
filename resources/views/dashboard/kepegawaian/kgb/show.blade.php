@@ -436,6 +436,16 @@
 
                         </div>
 
+                        {{-- Oleh Pejabat --}}
+                        <div class="kgb-info-item">
+                            <div class="kgb-info-label">
+                                Oleh Pejabat
+                            </div>
+                            <div class="kgb-info-value">
+                                {{ $batch->kgb_batch_oleh_pejabat ?? '-' }}
+                            </div>
+                        </div>
+
 
                         {{-- TANGGAL SURAT --}}
                         <div class="kgb-info-item">
