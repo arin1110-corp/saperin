@@ -74,8 +74,8 @@
         ========================================================= */
 
         .tanggal-surat {
-            left: 167mm;
-            top: 55mm;
+            left: 141mm;
+            top: 231.6mm;
         }
 
         /* =========================================================
@@ -84,12 +84,12 @@
 
         .nomor-surat {
             left: 60.5mm;
-            top: 60.9mm;
+            top: 55.4mm;
         }
 
         .lampiran {
             left: 60.5mm;
-            top: 65.2mm;
+            top: 59.2mm;
         }
 
         /* =========================================================
@@ -109,38 +109,38 @@
 
         .nama {
             left: 117.5mm;
-            top: 125mm;
+            top: 119.1mm;
             width: 85mm;
             white-space: nowrap;
         }
 
         .nama-atas {
             left: 117.5mm;
-            top: 121mm;
+            top: 115.1mm;
             width: 85mm;
             white-space: nowrap;
         }
 
         .nama-bawah {
             left: 117.5mm;
-            top: 125mm;
+            top: 119.1mm;
             width: 85mm;
             white-space: nowrap;
         }
 
         .tempat-tgl-lahir {
             left: 117.5mm;
-            top: 129.1mm;
+            top: 123.8mm;
         }
 
         .nip {
             left: 117.5mm;
-            top: 133.6mm;
+            top: 128.4mm;
         }
 
         .jabatan {
             left: 117.5mm;
-            top: 138.2mm;
+            top: 132.8mm;
             white-space: normal;
             width: 70mm;
             line-height: 1.05;
@@ -148,7 +148,7 @@
 
         .tempat-kerja {
             left: 117.5mm;
-            top: 142.6mm;
+            top: 136.8mm;
             white-space: normal;
             width: 90mm;
             line-height: 1.05;
@@ -160,7 +160,7 @@
 
         .gaji-lama {
             left: 125mm;
-            top: 147mm;
+            top: 141.5mm;
         }
 
         /* =========================================================
@@ -169,7 +169,7 @@
 
         .oleh-pejabat {
             left: 117.5mm;
-            top: 156mm;
+            top: 150.5mm;
             white-space: normal;
             width: 70mm;
             line-height: 1.05;
@@ -177,12 +177,12 @@
 
         .nomor-sk {
             left: 117.5mm;
-            top: 160.8mm;
+            top: 154.8mm;
         }
 
         .tanggal-berlaku {
             left: 117.5mm;
-            top: 165.5mm;
+            top: 159.5mm;
         }
 
         /* =========================================================
@@ -191,12 +191,12 @@
 
         .masa-kerja-tahun {
             left: 117.5mm;
-            top: 170mm;
+            top: 164.3mm;
         }
 
         .masa-kerja-bulan {
             left: 150mm;
-            top: 170mm;
+            top: 164.3mm;
         }
 
         /* =========================================================
@@ -205,7 +205,7 @@
 
         .gaji-baru {
             left: 125mm;
-            top: 183mm;
+            top: 177.5mm;
         }
 
         /* =========================================================
@@ -214,7 +214,7 @@
 
         .terbilang {
             left: 117.5mm;
-            top: 187.6mm;
+            top: 181.8mm;
             white-space: normal;
             width: 90mm;
             line-height: 1.05;
@@ -226,12 +226,12 @@
 
         .berdasarkan-tahun {
             left: 117.5mm;
-            top: 196.8mm;
+            top: 191.5mm;
         }
 
         .berdasarkan-bulan {
             left: 150mm;
-            top: 196.8mm;
+            top: 191.5mm;
         }
 
         /* =========================================================
@@ -240,7 +240,7 @@
 
         .golongan {
             left: 117.5mm;
-            top: 201.6mm;
+            top: 196mm;
         }
 
         /* =========================================================
@@ -249,7 +249,7 @@
 
         .mulai-tanggal {
             left: 117.5mm;
-            top: 206mm;
+            top: 200.6mm;
         }
 
         /* =========================================================
@@ -258,35 +258,7 @@
 
         .berkedudukan {
             left: 117.5mm;
-            top: 210.7mm;
-        }
-
-        /* =========================================================
-           PEJABAT PENANDATANGAN
-        ========================================================= */
-
-        .pejabat-nama {
-            left: 120.5mm;
-            top: 256mm;
-            font-weight: bold;
-        }
-
-        .pejabat-golongan {
-            left: 120.5mm;
-            top: 261mm;
-        }
-
-        .pejabat-nip {
-            left: 120.5mm;
-            top: 265.3mm;
-        }
-
-        .text-underline {
-            text-decoration: underline;
-        }
-
-        .wrap {
-            white-space: normal;
+            top: 204.7mm;
         }
     </style>
 </head>
@@ -1011,7 +983,7 @@
              TEMPLATE GAMBAR
         ====================================================== --}}
 
-        <img src="{{ public_path('assets/images/template-surat.png') }}" class="template" alt="">
+        <img src="{{ public_path('assets/images/template-surat-tte.png') }}" class="template" alt="">
 
 
         {{-- =====================================================
@@ -1264,35 +1236,6 @@
         @if ($berkedudukan !== '')
             <div class="field berkedudukan">
                 {{ $berkedudukan }}
-            </div>
-        @endif
-
-
-        {{-- =====================================================
-             PEJABAT PENANDATANGAN
-        ====================================================== --}}
-
-        @if ($pejabatNama !== '')
-            <div class="field pejabat-nama text-underline">
-                {{ $pejabatNama }}
-            </div>
-        @endif
-
-
-        @if ($pejabatGolongan !== '')
-            <div class="field pejabat-golongan">
-                {{ $pejabatGolongan }}
-            </div>
-        @endif
-
-
-        @if ($pejabatNip !== '')
-            <div class="field pejabat-nip">
-                NIP.
-                {{ substr($pejabatNip, 0, 8) }}
-                {{ substr($pejabatNip, 8, 6) }}
-                {{ substr($pejabatNip, 14, 1) }}
-                {{ substr($pejabatNip, 15, 3) }}
             </div>
         @endif
 

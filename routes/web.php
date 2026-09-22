@@ -645,6 +645,10 @@ Route::middleware('samperin.auth')->group(function () {
 
             Route::get('/{id}/pegawai/{kgbId}/pdf', 'pdf')->name('pdf');
 
-            Route::get('/{id}/pdf', 'pdfAll')->name('pdf-all');
+        Route::get('/{id}/pegawai/{kgbId}/pdf/tte', 'pdf_tte')->name('pdf.tte');
+
+        Route::get('/{id}/pdf', 'pdfAll')->name('pdf-all');
+
+        Route::get('/{id}/pdf/tte', 'pdfAll_tte')->name('pdf-all.tte');
         });
 });

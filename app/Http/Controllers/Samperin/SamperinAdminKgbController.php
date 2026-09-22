@@ -1282,6 +1282,23 @@ class SamperinAdminKgbController extends Controller
             ->stream('KGB-' . ($kgb->user->user_nama ?? $kgb->kgb_id) . '.pdf');
     }
 
+    public function pdf_tte($id, $kgbId)
+    {
+        $batch = SamperinKgbBatch::query()
+            ->with(['peraturanGaji', 'pejabat'])
+            ->findOrFail($id);
+
+        $kgb = SamperinKgb::query()
+            ->with(['user.jabatan', 'user.bidang', 'user.golongan', 'golongan', 'pejabat', 'batch.peraturanGaji.golongan'])
+            ->where('kgb_id', $kgbId)
+            ->where('kgb_batch_id', $batch->kgb_batch_id)
+            ->firstOrFail();
+
+        return Pdf::loadView('dashboard.kepegawaian.kgb.pdf_tte', compact('batch', 'kgb'))
+            ->setPaper('A4', 'portrait')
+            ->stream('KGB-' . ($kgb->user->user_nama ?? $kgb->kgb_id) . '.pdf');
+    }
+
     /**
      * ============================================================
      * PDF SEMUA KGB
@@ -1309,6 +1326,42 @@ class SamperinAdminKgbController extends Controller
 
         $pdf = Pdf::loadView(
             'dashboard.kepegawaian.kgb.pdf-all',
+            compact('batch')
+        );
+
+        // F4 Portrait
+        $pdf->setPaper([0, 0, 609.45, 935.43], 'portrait');
+
+        // Kalau server punya RAM cukup
+        $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
+
+        return $pdf->stream(
+            'KGB-' . $batch->kgb_batch_nama . '.pdf'
+        );
+    }
+
+    public function pdfAll_tte($id)
+    {
+        $batch = SamperinKgbBatch::query()
+            ->with([
+                'peraturanGaji.golongan',
+                'pejabat',
+                'kgb.user.jabatan',
+                'kgb.user.bidang',
+                'kgb.user.golongan',
+                'kgb.golongan',
+                'kgb.pejabat',
+            ])
+            ->findOrFail($id);
+
+        if ($batch->kgb->isEmpty()) {
+            return back()->withErrors([
+                'pegawai' => 'Batch KGB belum memiliki pegawai.',
+            ]);
+        }
+
+        $pdf = Pdf::loadView(
+            'dashboard.kepegawaian.kgb.pdf-all_tte',
             compact('batch')
         );
 

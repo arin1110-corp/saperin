@@ -44,7 +44,7 @@
         }
 
         /* =========================================================
-           TEMPLATE
+           TEMPLATE WORD / JPG
         ========================================================= */
 
         .template {
@@ -65,12 +65,10 @@
             z-index: 10;
             margin: 0;
             padding: 0;
-
             font-family: Arial, Helvetica, sans-serif;
             font-size: 12pt;
             line-height: 1;
             color: #000;
-
             white-space: nowrap;
         }
 
@@ -79,8 +77,8 @@
         ========================================================= */
 
         .tanggal-surat {
-            left: 167mm;
-            top: 55mm;
+            left: 141mm;
+            top: 231.6mm;
         }
 
         /* =========================================================
@@ -89,12 +87,12 @@
 
         .nomor-surat {
             left: 60.5mm;
-            top: 60.9mm;
+            top: 55.4mm;
         }
 
         .lampiran {
             left: 60.5mm;
-            top: 65.2mm;
+            top: 59.2mm;
         }
 
         /* =========================================================
@@ -103,48 +101,48 @@
 
         .nama {
             left: 117.5mm;
-            top: 125mm;
+            top: 119.1mm;
             width: 85mm;
             white-space: nowrap;
         }
 
         .nama-atas {
             left: 117.5mm;
-            top: 121mm;
+            top: 115.1mm;
             width: 85mm;
             white-space: nowrap;
         }
 
         .nama-bawah {
             left: 117.5mm;
-            top: 125mm;
+            top: 119.1mm;
             width: 85mm;
             white-space: nowrap;
         }
 
         .tempat-tgl-lahir {
             left: 117.5mm;
-            top: 129.1mm;
+            top: 123.8mm;
         }
 
         .nip {
             left: 117.5mm;
-            top: 133.6mm;
+            top: 128.4mm;
         }
 
         .jabatan {
             left: 117.5mm;
-            top: 138.2mm;
-            width: 70mm;
+            top: 132.8mm;
             white-space: normal;
+            width: 70mm;
             line-height: 1.05;
         }
 
         .tempat-kerja {
             left: 117.5mm;
-            top: 142.6mm;
-            width: 90mm;
+            top: 136.8mm;
             white-space: normal;
+            width: 90mm;
             line-height: 1.05;
         }
 
@@ -154,7 +152,7 @@
 
         .gaji-lama {
             left: 125mm;
-            top: 147mm;
+            top: 141.5mm;
         }
 
         /* =========================================================
@@ -163,20 +161,20 @@
 
         .oleh-pejabat {
             left: 117.5mm;
-            top: 156mm;
-            width: 70mm;
+            top: 150.5mm;
             white-space: normal;
+            width: 70mm;
             line-height: 1.05;
         }
 
         .nomor-sk {
             left: 117.5mm;
-            top: 160.8mm;
+            top: 154.8mm;
         }
 
         .tanggal-berlaku {
             left: 117.5mm;
-            top: 165.5mm;
+            top: 159.5mm;
         }
 
         /* =========================================================
@@ -185,12 +183,12 @@
 
         .masa-kerja-tahun {
             left: 117.5mm;
-            top: 170mm;
+            top: 164.3mm;
         }
 
         .masa-kerja-bulan {
             left: 150mm;
-            top: 170mm;
+            top: 164.3mm;
         }
 
         /* =========================================================
@@ -199,7 +197,7 @@
 
         .gaji-baru {
             left: 125mm;
-            top: 183mm;
+            top: 177.5mm;
         }
 
         /* =========================================================
@@ -208,9 +206,9 @@
 
         .terbilang {
             left: 117.5mm;
-            top: 187.6mm;
-            width: 90mm;
+            top: 181.8mm;
             white-space: normal;
+            width: 90mm;
             line-height: 1.05;
         }
 
@@ -220,12 +218,12 @@
 
         .berdasarkan-tahun {
             left: 117.5mm;
-            top: 196.8mm;
+            top: 191.5mm;
         }
 
         .berdasarkan-bulan {
             left: 150mm;
-            top: 196.8mm;
+            top: 191.5mm;
         }
 
         /* =========================================================
@@ -234,7 +232,7 @@
 
         .golongan {
             left: 117.5mm;
-            top: 201.6mm;
+            top: 196mm;
         }
 
         /* =========================================================
@@ -243,7 +241,7 @@
 
         .mulai-tanggal {
             left: 117.5mm;
-            top: 206mm;
+            top: 200.6mm;
         }
 
         /* =========================================================
@@ -252,31 +250,7 @@
 
         .berkedudukan {
             left: 117.5mm;
-            top: 210.7mm;
-        }
-
-        /* =========================================================
-           PEJABAT PENANDATANGAN
-        ========================================================= */
-
-        .pejabat-nama {
-            left: 120.5mm;
-            top: 256mm;
-            font-weight: bold;
-        }
-
-        .pejabat-golongan {
-            left: 120.5mm;
-            top: 261mm;
-        }
-
-        .pejabat-nip {
-            left: 120.5mm;
-            top: 265.3mm;
-        }
-
-        .text-underline {
-            text-decoration: underline;
+            top: 204.7mm;
         }
     </style>
 </head>
@@ -285,6 +259,7 @@
 
     {{-- =========================================================
          LOOP SEMUA KGB DALAM BATCH
+         SATU KGB = SATU HALAMAN PDF
     ========================================================== --}}
 
     @foreach ($batch->kgb as $kgb)
@@ -322,6 +297,15 @@
                         continue;
                     }
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Jika mengandung titik:
+                    | S.Pd
+                    | M.Si
+                    | Dr.
+                    |--------------------------------------------------------------------------
+                    */
+
                     if (str_contains($part, '.')) {
                         $result[] = strtoupper($part);
                     } else {
@@ -330,80 +314,6 @@
                 }
 
                 return implode(' ', $result);
-            };
-
-            /*
-            |--------------------------------------------------------------------------
-            | FORMAT NIP
-            |--------------------------------------------------------------------------
-            |
-            | Contoh:
-            |
-            | 199510112020121001
-            |
-            | menjadi:
-            |
-            | 19951011 202012 1 001
-            |
-            */
-
-            $formatNip = function ($nip) {
-                $nip = preg_replace('/\D/', '', trim((string) $nip));
-
-                if ($nip === '') {
-                    return '';
-                }
-
-                if (strlen($nip) === 18) {
-                    return substr($nip, 0, 8) .
-                        ' ' .
-                        substr($nip, 8, 6) .
-                        ' ' .
-                        substr($nip, 14, 1) .
-                        ' ' .
-                        substr($nip, 15, 3);
-                }
-
-                return trim($nip);
-            };
-
-            /*
-            |--------------------------------------------------------------------------
-            | FORMAT TANGGAL INDONESIA
-            |--------------------------------------------------------------------------
-            */
-
-            $bulanIndonesia = [
-                1 => 'Januari',
-                2 => 'Februari',
-                3 => 'Maret',
-                4 => 'April',
-                5 => 'Mei',
-                6 => 'Juni',
-                7 => 'Juli',
-                8 => 'Agustus',
-                9 => 'September',
-                10 => 'Oktober',
-                11 => 'November',
-                12 => 'Desember',
-            ];
-
-            $formatTanggal = function ($tanggal) use ($bulanIndonesia) {
-                if (!$tanggal) {
-                    return '';
-                }
-
-                try {
-                    $tanggal = \Carbon\Carbon::parse($tanggal);
-
-                    return $tanggal->format('d') .
-                        ' ' .
-                        $bulanIndonesia[(int) $tanggal->format('m')] .
-                        ' ' .
-                        $tanggal->format('Y');
-                } catch (\Throwable $e) {
-                    return '';
-                }
             };
 
             /*
@@ -432,11 +342,17 @@
             $namaBawah = '';
             $namaDuaBaris = false;
 
+            /*
+            |--------------------------------------------------------------------------
+            | LEBAR MAKSIMAL
+            |--------------------------------------------------------------------------
+            */
+
             $maxNamaWidth = 75;
 
             /*
             |--------------------------------------------------------------------------
-            | HITUNG LEBAR NAMA
+            | HITUNG PERKIRAAN LEBAR NAMA
             |--------------------------------------------------------------------------
             */
 
@@ -446,30 +362,66 @@
                 $chars = preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY);
 
                 foreach ($chars as $char) {
+                    /*
+                    |--------------------------------------------------------------------------
+                    | SPASI
+                    |--------------------------------------------------------------------------
+                    */
+
                     if ($char === ' ') {
                         $lebar += 1.05;
                         continue;
                     }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | KARAKTER SEMPIT
+                    |--------------------------------------------------------------------------
+                    */
 
                     if (in_array($char, ['i', 'I', 'l', 'j', 't', 'f', 'r', 'J', '.', ',', "'", ':'], true)) {
                         $lebar += 1.0;
                         continue;
                     }
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | KARAKTER LEBAR
+                    |--------------------------------------------------------------------------
+                    */
+
                     if (in_array($char, ['W', 'M', 'O', 'Q', 'G', 'D', 'B', 'C', 'H', 'N', 'U'], true)) {
                         $lebar += 3.2;
                         continue;
                     }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | HURUF BESAR
+                    |--------------------------------------------------------------------------
+                    */
 
                     if (ctype_upper($char)) {
                         $lebar += 2.5;
                         continue;
                     }
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ANGKA
+                    |--------------------------------------------------------------------------
+                    */
+
                     if (ctype_digit($char)) {
                         $lebar += 2.1;
                         continue;
                     }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | HURUF NORMAL
+                    |--------------------------------------------------------------------------
+                    */
 
                     $lebar += 2.2;
                 }
@@ -486,6 +438,12 @@
             if ($nama !== '') {
                 $lebarNama = $hitungLebarNama($nama);
 
+                /*
+                |--------------------------------------------------------------------------
+                | NAMA MASIH MUAT
+                |--------------------------------------------------------------------------
+                */
+
                 if ($lebarNama <= $maxNamaWidth) {
                     $namaDuaBaris = false;
 
@@ -493,11 +451,18 @@
 
                     $namaBawah = $nama;
                 } else {
+                    /*
+                    |--------------------------------------------------------------------------
+                    | NAMA 2 BARIS
+                    |--------------------------------------------------------------------------
+                    */
+
                     $namaDuaBaris = true;
 
                     $kataNama = preg_split('/\s+/', $nama, -1, PREG_SPLIT_NO_EMPTY);
 
                     $barisAtas = [];
+
                     $barisBawah = [];
 
                     $lebarBarisAtas = 0;
@@ -509,11 +474,23 @@
 
                         $sisaKata = count($kataNama) - $index - 1;
 
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Masih muat baris atas
+                        |--------------------------------------------------------------------------
+                        */
+
                         if ($lebarBarisAtas + $lebarKata <= $maxNamaWidth && $sisaKata >= 1) {
                             $barisAtas[] = $kata;
 
                             $lebarBarisAtas += $lebarKata;
                         } else {
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Kata masuk baris bawah
+                            |--------------------------------------------------------------------------
+                            */
+
                             $barisBawah[] = $kata;
 
                             for ($i = $index + 1; $i < count($kataNama); $i++) {
@@ -523,6 +500,12 @@
                             break;
                         }
                     }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Jika baris atas kosong
+                    |--------------------------------------------------------------------------
+                    */
 
                     if (empty($barisAtas)) {
                         $barisAtas[] = array_shift($kataNama);
@@ -535,6 +518,51 @@
                     $namaBawah = implode(' ', $barisBawah);
                 }
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | BULAN INDONESIA
+            |--------------------------------------------------------------------------
+            */
+
+            $bulanIndonesia = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember',
+            ];
+
+            /*
+            |--------------------------------------------------------------------------
+            | FORMAT TANGGAL
+            |--------------------------------------------------------------------------
+            */
+
+            $formatTanggal = function ($tanggal) use ($bulanIndonesia) {
+                if (!$tanggal) {
+                    return '';
+                }
+
+                try {
+                    $tanggal = \Carbon\Carbon::parse($tanggal);
+
+                    return $tanggal->format('d') .
+                        ' ' .
+                        $bulanIndonesia[(int) $tanggal->format('m')] .
+                        ' ' .
+                        $tanggal->format('Y');
+                } catch (\Throwable $e) {
+                    return '';
+                }
+            };
 
             /*
             |--------------------------------------------------------------------------
@@ -649,13 +677,13 @@
             /*
             |--------------------------------------------------------------------------
             | MASA KERJA GOLONGAN
-            |--------------------------------------------------------------------------
             |
             | TMT BERKALA - TMT AWAL
-            |
+            |--------------------------------------------------------------------------
             */
 
             $masaKerjaTahun_Berkala = 0;
+
             $masaKerjaBulan_Berkala = 0;
 
             $tmtAwal_Berkala = $pegawai?->user_tmt_awal ?? null;
@@ -674,8 +702,7 @@
                         $masaKerjaBulan_Berkala = $diff->m;
                     }
                 } catch (\Throwable $e) {
-                    $masaKerjaTahun_Berkala = 0;
-                    $masaKerjaBulan_Berkala = 0;
+                    //
                 }
             }
 
@@ -880,12 +907,6 @@
 
             $pejabat = $kgb->pejabat ?? ($batch->pejabat ?? null);
 
-            /*
-            |--------------------------------------------------------------------------
-            | NAMA PEJABAT
-            |--------------------------------------------------------------------------
-            */
-
             $pejabatNama = $formatNama($pejabat?->user_nama);
 
             $pejabatGelar = trim((string) ($pejabat?->user_gelarbelakang ?? ''));
@@ -896,13 +917,7 @@
 
             $pejabatNama = trim($pejabatNama);
 
-            /*
-            |--------------------------------------------------------------------------
-            | NIP PEJABAT
-            |--------------------------------------------------------------------------
-            */
-
-            $pejabatNip = $formatNip($pejabat?->user_nip);
+            $pejabatNip = trim((string) ($pejabat?->user_nip ?? ''));
 
             /*
             |--------------------------------------------------------------------------
@@ -919,14 +934,6 @@
             if ($pejabatGolongan !== '' && $pejabatPangkat !== '') {
                 $pejabatGolongan .= ' (' . $pejabatPangkat . ')';
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | NIP PEGAWAI
-            |--------------------------------------------------------------------------
-            */
-
-            $pegawaiNip = $formatNip($pegawai?->user_nip);
         @endphp
 
 
@@ -936,11 +943,12 @@
 
         <div class="page">
 
+
             {{-- =====================================================
-                 TEMPLATE SURAT
+                 TEMPLATE
             ====================================================== --}}
 
-            <img src="{{ public_path('assets/images/template-surat.png') }}" class="template" alt="">
+            <img src="{{ public_path('assets/images/template-surat-tte.png') }}" class="template" alt="">
 
 
             {{-- =====================================================
@@ -1007,12 +1015,15 @@
 
 
             {{-- =====================================================
-                 3. NIP PEGAWAI
+                 3. NIP
             ====================================================== --}}
 
-            @if ($pegawaiNip !== '')
+            @if ($pegawai?->user_nip)
                 <div class="field nip">
-                    {{ $pegawaiNip }}
+                    {{ substr($pegawai->user_nip, 0, 8) }}
+                    {{ substr($pegawai->user_nip, 8, 6) }}
+                    {{ substr($pegawai->user_nip, 14, 1) }}
+                    {{ substr($pegawai->user_nip, 15, 3) }}
                 </div>
             @endif
 
@@ -1164,31 +1175,6 @@
             @if ($berkedudukan !== '')
                 <div class="field berkedudukan">
                     {{ $berkedudukan }}
-                </div>
-            @endif
-
-
-            {{-- =====================================================
-                 PEJABAT PENANDATANGAN
-            ====================================================== --}}
-
-            @if ($pejabatNama !== '')
-                <div class="field pejabat-nama text-underline">
-                    {{ $pejabatNama }}
-                </div>
-            @endif
-
-
-            @if ($pejabatGolongan !== '')
-                <div class="field pejabat-golongan">
-                    {{ $pejabatGolongan }}
-                </div>
-            @endif
-
-
-            @if ($pejabatNip !== '')
-                <div class="field pejabat-nip">
-                    NIP. {{ $pejabatNip }}
                 </div>
             @endif
 

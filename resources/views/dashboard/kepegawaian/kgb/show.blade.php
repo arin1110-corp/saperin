@@ -294,6 +294,63 @@
                 width: 100%;
             }
         }
+
+        /* =========================================================
+                       MODAL PILIH CETAK KGB
+                    ========================================================= */
+
+        .kgb-print-option {
+            display: block;
+            height: 100%;
+            padding: 20px;
+            border: 1px solid #e8ebf0;
+            border-radius: 14px;
+            background: #fff;
+            text-decoration: none;
+            text-align: center;
+            transition: .2s ease;
+        }
+
+        .kgb-print-option:hover {
+            border-color: #df8339;
+            background: #fafbfc;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 18px rgba(20, 34, 59, .08);
+        }
+
+        .kgb-print-icon {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 14px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 27px;
+        }
+
+        .kgb-print-icon-tte {
+            background: #eaf8ef;
+            color: #198754;
+        }
+
+        .kgb-print-icon-manual {
+            background: #eef4ff;
+            color: #3b6fd8;
+        }
+
+        .kgb-print-title {
+            margin-bottom: 7px;
+            color: #14223b;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .kgb-print-description {
+            color: #7a8495;
+            font-size: 12px;
+            line-height: 1.5;
+        }
     </style>
 @endsection
 
@@ -343,14 +400,14 @@
                         Edit Batch
                     </a>
 
-                    <a href="{{ route('samperin.admin.kgb.pdf-all', $batch->kgb_batch_id) }}" target="_blank"
-                        class="btn btn-primary-custom">
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                        data-bs-target="#modalPilihCetakKgb">
 
                         <i class="bi bi-file-earmark-pdf me-1"></i>
 
                         Cetak Semua KGB
 
-                    </a>
+                    </button>
 
                 </div>
 
@@ -934,18 +991,121 @@
                                         </td>
 
                                         <td>
-                                            <a href="{{ route('samperin.admin.kgb.pdf', [
-                                                'id' => $batch->kgb_batch_id,
-                                                'kgbId' => $kgb->kgb_id,
-                                            ]) }}"
-                                                target="_blank" class="btn btn-sm btn-outline-danger" title="Cetak KGB">
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalPilihCetakKgb{{ $kgb->kgb_id }}" title="Cetak KGB">
 
                                                 <i class="bi bi-file-earmark-pdf"></i>
 
-                                            </a>
+                                            </button>
                                         </td>
 
                                     </tr>
+                                    <div class="modal fade" id="modalPilihCetakKgb{{ $kgb->kgb_id }}" tabindex="-1"
+                                        aria-hidden="true">
+
+                                        <div class="modal-dialog modal-dialog-centered">
+
+                                            <div class="modal-content"
+                                                style="border: none; border-radius: 16px; overflow: hidden;">
+
+                                                {{-- HEADER --}}
+                                                <div class="modal-header" style="background: #14223b; color: #fff;">
+
+                                                    <div>
+                                                        <h5 class="modal-title mb-1">
+                                                            <i class="bi bi-printer me-2"></i>
+                                                            Pilih Format KGB
+                                                        </h5>
+
+                                                        <small style="opacity: .8;">
+                                                            {{ $kgb->user->user_nama ?? '-' }}
+                                                        </small>
+                                                    </div>
+
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                        data-bs-dismiss="modal">
+                                                    </button>
+
+                                                </div>
+
+                                                {{-- BODY --}}
+                                                <div class="modal-body" style="padding: 25px;">
+
+                                                    <div class="row g-3">
+
+                                                        {{-- TTE --}}
+                                                        <div class="col-md-6">
+
+                                                            <a href="{{ route('samperin.admin.kgb.pdf.tte', [
+                                                                'id' => $batch->kgb_batch_id,
+                                                                'kgbId' => $kgb->kgb_id,
+                                                            ]) }}"
+                                                                target="_blank" class="kgb-print-option">
+
+                                                                <div class="kgb-print-icon kgb-print-icon-tte">
+                                                                    <i class="bi bi-patch-check-fill"></i>
+                                                                </div>
+
+                                                                <div class="kgb-print-title">
+                                                                    KGB TTE
+                                                                </div>
+
+                                                                <div class="kgb-print-description">
+                                                                    Cetak KGB dengan format
+                                                                    <strong>Tanda Tangan Elektronik</strong>.
+                                                                </div>
+
+                                                            </a>
+
+                                                        </div>
+
+                                                        {{-- MANUAL --}}
+                                                        <div class="col-md-6">
+
+                                                            <a href="{{ route('samperin.admin.kgb.pdf', [
+                                                                'id' => $batch->kgb_batch_id,
+                                                                'kgbId' => $kgb->kgb_id,
+                                                            ]) }}"
+                                                                target="_blank" class="kgb-print-option">
+
+                                                                <div class="kgb-print-icon kgb-print-icon-manual">
+                                                                    <i class="bi bi-file-earmark-text-fill"></i>
+                                                                </div>
+
+                                                                <div class="kgb-print-title">
+                                                                    KGB Manual
+                                                                </div>
+
+                                                                <div class="kgb-print-description">
+                                                                    Cetak KGB untuk
+                                                                    <strong>tanda tangan manual</strong>.
+                                                                </div>
+
+                                                            </a>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                                {{-- FOOTER --}}
+                                                <div class="modal-footer" style="border-top: 1px solid #edf0f4;">
+
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+
+                                                        Batal
+
+                                                    </button>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
 
                                 @empty
 
@@ -1001,5 +1161,117 @@
         </div>
 
     </div>
+    {{-- ================================================= --}}
+    {{-- MODAL PILIH FORMAT CETAK KGB --}}
+    {{-- ================================================= --}}
 
+    <div class="modal fade" id="modalPilihCetakKgb" tabindex="-1" aria-labelledby="modalPilihCetakKgbLabel"
+        aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content" style="border: none; border-radius: 16px; overflow: hidden;">
+
+                {{-- HEADER --}}
+                <div class="modal-header" style="background: #14223b; color: #fff;">
+
+                    <div>
+
+                        <h5 class="modal-title mb-1" id="modalPilihCetakKgbLabel">
+
+                            <i class="bi bi-printer me-2"></i>
+                            Pilih Format KGB
+                        </h5>
+
+                        <small style="opacity: .8;">
+                            Pilih jenis dokumen yang ingin dicetak
+                        </small>
+
+                    </div>
+
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+
+                </div>
+
+
+                {{-- BODY --}}
+                <div class="modal-body" style="padding: 25px;">
+
+                    <div class="row g-3">
+
+                        {{-- ========================================= --}}
+                        {{-- KGB TTE --}}
+                        {{-- ========================================= --}}
+
+                        <div class="col-md-6">
+
+                            <button type="button" class="kgb-print-option w-100 border-0"
+                                onclick="window.open('{{ route('samperin.admin.kgb.pdf-all.tte', $batch->kgb_batch_id) }}', '_blank')">
+
+                                <div class="kgb-print-icon kgb-print-icon-tte">
+                                    <i class="bi bi-patch-check-fill"></i>
+                                </div>
+
+                                <div class="kgb-print-title">
+                                    KGB TTE
+                                </div>
+
+                                <div class="kgb-print-description">
+                                    Cetak KGB dengan format
+                                    <strong>Tanda Tangan Elektronik</strong>.
+                                </div>
+
+                            </button>
+
+                        </div>
+
+
+                        {{-- ========================================= --}}
+                        {{-- KGB MANUAL --}}
+                        {{-- ========================================= --}}
+
+                        <div class="col-md-6">
+
+                            <button type="button" class="kgb-print-option w-100 border-0"
+                                onclick="window.open('{{ route('samperin.admin.kgb.pdf-all', $batch->kgb_batch_id) }}', '_blank')">
+
+                                <div class="kgb-print-icon kgb-print-icon-manual">
+                                    <i class="bi bi-file-earmark-text-fill"></i>
+                                </div>
+
+                                <div class="kgb-print-title">
+                                    KGB Manual
+                                </div>
+
+                                <div class="kgb-print-description">
+                                    Cetak KGB untuk
+                                    <strong>tanda tangan manual</strong>.
+                                </div>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {{-- FOOTER --}}
+                <div class="modal-footer" style="border-top: 1px solid #edf0f4;">
+
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+
+                        Batal
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 @endsection
