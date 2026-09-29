@@ -1980,7 +1980,6 @@
 
                                 </div>
 
-
                                 {{-- NOMOR SK --}}
 
                                 <div class="samperin-kgb-sk">
