@@ -21,7 +21,6 @@ use App\Http\Controllers\Samperin\SamperinRekapBerkasController;
 use App\Http\Controllers\Samperin\SamperinPermintaanBerkasController;
 use App\Http\Controllers\Samperin\SamperinAdminPeraturanGajiController;
 use App\Http\Controllers\Samperin\SamperinAdminKgbController;
-
 use App\Http\Controllers\SamperinUser\SamperinPegawaiController;
 
 /*
@@ -49,8 +48,11 @@ Route::get('/', function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN / KEPEGAWAIAN
+    | ADMINISTRATOR / KEPEGAWAIAN
     |--------------------------------------------------------------------------
+    |
+    | Keduanya menggunakan dashboard utama.
+    |
     */
 
     return redirect()->route('samperin.dashboard');
@@ -78,7 +80,7 @@ Route::post('/logout', [SamperinLoginController::class, 'logout'])->name('samper
 
 /*
 |--------------------------------------------------------------------------
-| LUPA PASSWORD
+| LUPA PASSWORD SAMPERIN
 |--------------------------------------------------------------------------
 */
 
@@ -91,7 +93,6 @@ Route::post('/password/forgot/send', [SamperinLoginController::class, 'sendReset
 Route::get('/password/reset/{token}', [SamperinLoginController::class, 'formReset'])->name('password.reset');
 
 Route::post('/password/reset', [SamperinLoginController::class, 'savePassword'])->name('password.update');
-
 /*
 |--------------------------------------------------------------------------
 | INTERNAL SYSTEM
@@ -117,8 +118,11 @@ Route::middleware('samperin.auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | PEGAWAI
+    | UI PEGAWAI
     |--------------------------------------------------------------------------
+    |
+    | Halaman khusus role Pegawai.
+    |
     */
 
     Route::prefix('pegawai')
@@ -126,7 +130,7 @@ Route::middleware('samperin.auth')->group(function () {
         ->group(function () {
         /*
             |--------------------------------------------------------------------------
-            | DASHBOARD PEGAWAI
+            | DASHBOARD / BERANDA PEGAWAI
             |--------------------------------------------------------------------------
             */
 
@@ -134,7 +138,7 @@ Route::middleware('samperin.auth')->group(function () {
 
         /*
             |--------------------------------------------------------------------------
-            | PROFIL
+            | PROFIL PEGAWAI
             |--------------------------------------------------------------------------
             */
 
@@ -142,24 +146,21 @@ Route::middleware('samperin.auth')->group(function () {
 
         /*
             |--------------------------------------------------------------------------
-            | BERKAS
+            | BERKAS PEGAWAI
             |--------------------------------------------------------------------------
             */
 
         Route::get('/berkas', [SamperinPegawaiController::class, 'berkas'])->name('berkas');
 
         /*
-            |--------------------------------------------------------------------------
-            | UPLOAD BERKAS
-            |--------------------------------------------------------------------------
-            |
-            | Contoh URL:
-            |
-            | /pegawai/berkas/upload/UUID
-            |
-            */
+|--------------------------------------------------------------------------
+| UPLOAD BERKAS PEGAWAI
+|--------------------------------------------------------------------------
+*/
 
-        Route::post('/berkas/upload/{permintaanUid}', [SamperinPegawaiController::class, 'upload'])->name('berkas.upload');
+        Route::post('/akun/berkas/upload/{permintaanUid}', [SamperinPegawaiController::class, 'upload'])->name('berkas.upload');
+
+        Route::put('/kgb/{id}/nomor-sk', [SamperinAdminKgbController::class, 'updateNomorSk'])->name('kgb.update-nomor-sk');
         });
 
     /*
@@ -234,6 +235,10 @@ Route::middleware('samperin.auth')->group(function () {
     |--------------------------------------------------------------------------
     | KEPEGAWAIAN
     |--------------------------------------------------------------------------
+    |
+    | Tidak ada dashboard khusus Kepegawaian.
+    | Kepegawaian tetap memakai samperin.dashboard.
+    |
     */
 
     Route::prefix('kepegawaian')
@@ -248,54 +253,64 @@ Route::middleware('samperin.auth')->group(function () {
         Route::prefix('pegawai')
             ->name('pegawai.')
             ->group(function () {
-            /*
-                    | DAFTAR
+                /*
+                    |--------------------------------------------------------------------------
+                    | DAFTAR PEGAWAI
+                    |--------------------------------------------------------------------------
                     */
 
-            Route::get('/', [SamperinUserController::class, 'index'])->name('index');
+                Route::get('/', [SamperinUserController::class, 'index'])->name('index');
 
             /*
-                    | TAMBAH
+                    |--------------------------------------------------------------------------
+                    | TAMBAH PEGAWAI
+                    |--------------------------------------------------------------------------
                     */
 
             Route::post('/', [SamperinUserController::class, 'store'])->name('store');
 
             /*
-                    | IMPORT
+                    |--------------------------------------------------------------------------
+                    | IMPORT PEGAWAI
+                    |--------------------------------------------------------------------------
                     */
 
             Route::get('/import', [SamperinUserController::class, 'import'])->name('import');
 
             Route::post('/import', [SamperinUserController::class, 'importProcess'])->name('import.process');
 
-            /*
-                    | SINKRON SIMPEG
-                    */
-
             Route::get('/sinkron/simpeg', [SamperinUserController::class, 'formSinkronSimpeg'])->name('sinkron.simpeg');
 
             Route::post('/sinkron/simpeg/process', [SamperinUserController::class, 'sinkronSimpegProcess'])->name('sinkron-simpeg.process');
 
             /*
-                    | UPDATE
+                    |--------------------------------------------------------------------------
+                    | UPDATE PEGAWAI
+                    |--------------------------------------------------------------------------
                     */
 
             Route::put('/{uid}', [SamperinUserController::class, 'update'])->name('update');
 
             /*
-                    | STATUS
+                    |--------------------------------------------------------------------------
+                    | TOGGLE STATUS
+                    |--------------------------------------------------------------------------
                     */
 
             Route::patch('/{uid}/status', [SamperinUserController::class, 'toggleStatus'])->name('status');
 
             /*
-                    | HAPUS
+                    |--------------------------------------------------------------------------
+                    | HAPUS PEGAWAI
+                    |--------------------------------------------------------------------------
                     */
 
             Route::delete('/{uid}', [SamperinUserController::class, 'destroy'])->name('destroy');
 
             /*
+                    |--------------------------------------------------------------------------
                     | IMPORT FOTO
+                    |--------------------------------------------------------------------------
                     */
 
             Route::get('/import-foto', [SamperinFotoImportController::class, 'index'])->name('import-foto');
@@ -305,7 +320,7 @@ Route::middleware('samperin.auth')->group(function () {
 
         /*
             |--------------------------------------------------------------------------
-            | BERKAS PEGAWAI - KEPEGAWAIAN
+            | BERKAS PEGAWAI
             |--------------------------------------------------------------------------
             */
 
@@ -314,7 +329,7 @@ Route::middleware('samperin.auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | MASTER DATA
+    | DATA MASTER
     |--------------------------------------------------------------------------
     */
 
@@ -324,7 +339,7 @@ Route::middleware('samperin.auth')->group(function () {
         ->group(function () {
         /*
             |--------------------------------------------------------------------------
-            | BIDANG
+            | MASTER BIDANG
             |--------------------------------------------------------------------------
             */
 
@@ -348,7 +363,7 @@ Route::middleware('samperin.auth')->group(function () {
 
         /*
             |--------------------------------------------------------------------------
-            | JABATAN
+            | MASTER JABATAN
             |--------------------------------------------------------------------------
             */
 
@@ -372,7 +387,7 @@ Route::middleware('samperin.auth')->group(function () {
 
         /*
             |--------------------------------------------------------------------------
-            | GOLONGAN
+            | MASTER GOLONGAN
             |--------------------------------------------------------------------------
             */
 
@@ -396,7 +411,7 @@ Route::middleware('samperin.auth')->group(function () {
 
         /*
             |--------------------------------------------------------------------------
-            | ESELON
+            | MASTER ESELON
             |--------------------------------------------------------------------------
             */
 
@@ -420,7 +435,7 @@ Route::middleware('samperin.auth')->group(function () {
 
         /*
             |--------------------------------------------------------------------------
-            | PENDIDIKAN
+            | MASTER PENDIDIKAN
             |--------------------------------------------------------------------------
             */
 
@@ -444,7 +459,7 @@ Route::middleware('samperin.auth')->group(function () {
 
         /*
             |--------------------------------------------------------------------------
-            | JENIS KERJA
+            | MASTER JENIS KERJA
             |--------------------------------------------------------------------------
             */
 
@@ -464,7 +479,7 @@ Route::middleware('samperin.auth')->group(function () {
 
         /*
             |--------------------------------------------------------------------------
-            | STATUS PEGAWAI
+            | MASTER STATUS PEGAWAI
             |--------------------------------------------------------------------------
             */
 
@@ -527,7 +542,7 @@ Route::middleware('samperin.auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN - IMPORT BERKAS
+    | ADMIN - IMPORT BERKAS & PEMBERKASAN
     |--------------------------------------------------------------------------
     */
 
@@ -576,10 +591,10 @@ Route::middleware('samperin.auth')->group(function () {
         });
 
     /*
-    |--------------------------------------------------------------------------
-    | ADMIN - PERATURAN GAJI
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | ADMIN - PERATURAN GAJI
+        |--------------------------------------------------------------------------
+        */
 
     Route::prefix('admin/peraturan-gaji')
         ->name('samperin.admin.peraturan-gaji.')
@@ -603,12 +618,6 @@ Route::middleware('samperin.auth')->group(function () {
 
             Route::post('/{id}/toggle-status', 'toggleStatus')->name('toggle-status');
         });
-
-    /*
-    |--------------------------------------------------------------------------
-    | ADMIN - KGB
-    |--------------------------------------------------------------------------
-    */
 
     Route::prefix('admin/kgb')
         ->name('samperin.admin.kgb.')
