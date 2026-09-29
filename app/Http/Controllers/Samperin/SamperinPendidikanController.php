@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Throwable;
 
 class SamperinPendidikanController extends Controller
@@ -750,6 +751,332 @@ class SamperinPendidikanController extends Controller
 
             return back()->withErrors([
                 'import' => 'Import Excel gagal: ' . $e->getMessage(),
+            ]);
+        }
+    }
+    /*
+|--------------------------------------------------------------------------
+| IMPORT PENDIDIKAN DARI EXCEL SIMPEG
+|--------------------------------------------------------------------------
+*/
+
+    /*
+|--------------------------------------------------------------------------
+| IMPORT PENDIDIKAN DARI EXCEL SIMPEG
+|--------------------------------------------------------------------------
+*/
+
+    /*
+|--------------------------------------------------------------------------
+| IMPORT PENDIDIKAN DARI EXCEL SIMPEG
+|--------------------------------------------------------------------------
+*/
+
+    public function importSimpeg(Request $request)
+    {
+        $request->validate(
+            [
+                'file' => ['required', 'file', 'mimes:xls,xlsx', 'max:10240'],
+            ],
+            [
+                'file.required' => 'File Excel wajib dipilih.',
+                'file.file' => 'File Excel tidak valid.',
+                'file.mimes' => 'File harus berupa XLS atau XLSX.',
+                'file.max' => 'Ukuran file maksimal 10 MB.',
+            ],
+        );
+
+        $file = $request->file('file');
+
+        try {
+            /*
+        |--------------------------------------------------------------------------
+        | LOAD EXCEL
+        |--------------------------------------------------------------------------
+        */
+
+            $spreadsheet = IOFactory::load($file->getRealPath());
+
+            $sheet = $spreadsheet->getActiveSheet();
+
+            $rows = $sheet->toArray(null, true, true, true);
+
+            if (count($rows) < 2) {
+                return back()->withErrors([
+                    'import' => 'File Excel tidak memiliki data.',
+                ]);
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | HEADER
+        |--------------------------------------------------------------------------
+        */
+
+            $header = array_shift($rows);
+
+            $header = array_map(function ($value) {
+                return strtolower(trim((string) $value));
+            }, $header);
+
+            $columnMap = [];
+
+            foreach ($header as $key => $name) {
+                $columnMap[$name] = $key;
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | VALIDASI KOLOM
+        |--------------------------------------------------------------------------
+        */
+
+            if (!isset($columnMap['pendidikan terakhir']) || !isset($columnMap['jurusan pendidikan'])) {
+                return back()->withErrors([
+                    'import' => 'Excel wajib memiliki kolom PENDIDIKAN TERAKHIR dan JURUSAN PENDIDIKAN.',
+                ]);
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | MAPPING JENJANG
+        |--------------------------------------------------------------------------
+        */
+
+            $jenjangMap = [
+                'SEKOLAH DASAR' => 'SD',
+                'SD' => 'SD',
+
+                'SEKOLAH MENENGAH PERTAMA' => 'SMP',
+                'SLTP' => 'SMP',
+                'SMP' => 'SMP',
+
+                'SEKOLAH MENENGAH ATAS' => 'SMA',
+                'SEKOLAH MENENGAH KEJURUAN' => 'SMA',
+                'SLTA' => 'SMA',
+                'SMA' => 'SMA',
+                'SMK' => 'SMA',
+
+                'DIPLOMA I' => 'D1',
+                'D1' => 'D1',
+
+                'DIPLOMA II' => 'D2',
+                'D2' => 'D2',
+
+                'DIPLOMA III' => 'D3',
+                'D3' => 'D3',
+
+                'DIPLOMA IV' => 'D4',
+                'D4' => 'D4',
+
+                'STRATA I' => 'S1',
+                'SARJANA' => 'S1',
+                'S1' => 'S1',
+
+                'STRATA II' => 'S2',
+                'PASCA SARJANA' => 'S2',
+                'MAGISTER' => 'S2',
+                'S2' => 'S2',
+
+                'STRATA III' => 'S3',
+                'DOKTOR' => 'S3',
+                'S3' => 'S3',
+            ];
+
+            /*
+        |--------------------------------------------------------------------------
+        | COUNTER
+        |--------------------------------------------------------------------------
+        */
+
+            $inserted = 0;
+
+            $skipped = 0;
+
+            $empty = 0;
+
+            /*
+        |--------------------------------------------------------------------------
+        | ID BERIKUTNYA
+        |--------------------------------------------------------------------------
+        */
+
+            $nextId = ((int) DB::table('samperin_pendidikan')->max('pendidikan_id')) + 1;
+
+            /*
+        |--------------------------------------------------------------------------
+        | PROSES DATA
+        |--------------------------------------------------------------------------
+        */
+
+            foreach ($rows as $row) {
+                /*
+            |--------------------------------------------------------------------------
+            | AMBIL DATA
+            |--------------------------------------------------------------------------
+            */
+
+                $jenjang = trim((string) ($row[$columnMap['pendidikan terakhir']] ?? ''));
+
+                $jurusan = trim((string) ($row[$columnMap['jurusan pendidikan']] ?? ''));
+
+                /*
+            |--------------------------------------------------------------------------
+            | DATA KOSONG
+            |--------------------------------------------------------------------------
+            */
+
+                if ($jenjang === '') {
+                    $empty++;
+
+                    continue;
+                }
+
+                /*
+            |--------------------------------------------------------------------------
+            | NORMALISASI AWAL
+            |--------------------------------------------------------------------------
+            |
+            | Digunakan untuk proses mapping dan pengecekan duplikat.
+            |
+            */
+
+                $jenjang = strtoupper($jenjang);
+
+                $jurusan = strtoupper($jurusan);
+
+                /*
+            |--------------------------------------------------------------------------
+            | NORMALISASI SPASI
+            |--------------------------------------------------------------------------
+            */
+
+                $jenjang = preg_replace('/\s+/', ' ', $jenjang);
+
+                $jurusan = preg_replace('/\s+/', ' ', $jurusan);
+
+                /*
+            |--------------------------------------------------------------------------
+            | NORMALISASI JENJANG
+            |--------------------------------------------------------------------------
+            */
+
+                $jenjang = $jenjangMap[$jenjang] ?? $jenjang;
+
+                /*
+            |--------------------------------------------------------------------------
+            | FORMAT JURUSAN
+            |--------------------------------------------------------------------------
+            |
+            | Contoh:
+            |
+            | TEKNIK INFORMATIKA
+            | menjadi
+            | Teknik Informatika
+            |
+            */
+
+                $jurusan = ucwords(strtolower($jurusan));
+
+                /*
+            |--------------------------------------------------------------------------
+            | CEK DUPLIKAT
+            |--------------------------------------------------------------------------
+            |
+            | Pengecekan dilakukan terhadap:
+            |
+            | pendidikan_jenjang
+            | +
+            | pendidikan_jurusan
+            |
+            | Case insensitive.
+            |
+            */
+
+                $exists = DB::table('samperin_pendidikan')
+                    ->whereRaw('UPPER(TRIM(pendidikan_jenjang)) = ?', [strtoupper($jenjang)])
+                    ->whereRaw('UPPER(TRIM(pendidikan_jurusan)) = ?', [strtoupper($jurusan)])
+                    ->exists();
+
+                if ($exists) {
+                    $skipped++;
+
+                    continue;
+                }
+
+                /*
+            |--------------------------------------------------------------------------
+            | GENERATE KODE
+            |--------------------------------------------------------------------------
+            */
+
+                $kode = 'PEND-' . str_pad((string) $nextId, 3, '0', STR_PAD_LEFT);
+
+                /*
+            |--------------------------------------------------------------------------
+            | PASTIKAN KODE TIDAK DUPLIKAT
+            |--------------------------------------------------------------------------
+            */
+
+                while (DB::table('samperin_pendidikan')->where('pendidikan_kode', $kode)->exists()) {
+                    $nextId++;
+
+                    $kode = 'PEND-' . str_pad((string) $nextId, 3, '0', STR_PAD_LEFT);
+                }
+
+                /*
+            |--------------------------------------------------------------------------
+            | INSERT
+            |--------------------------------------------------------------------------
+            */
+
+                DB::table('samperin_pendidikan')->insert([
+                    'pendidikan_uid' => (string) Str::uuid(),
+
+                    'pendidikan_kode' => $kode,
+
+                    'pendidikan_jenjang' => $jenjang,
+
+                    'pendidikan_jurusan' => $jurusan,
+
+                    'pendidikan_status' => 1,
+                ]);
+
+                $inserted++;
+
+                $nextId++;
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | UPDATE AUTO INCREMENT
+        |--------------------------------------------------------------------------
+        */
+
+            $maxId = DB::table('samperin_pendidikan')->max('pendidikan_id');
+
+            if ($maxId) {
+                DB::statement('ALTER TABLE samperin_pendidikan AUTO_INCREMENT = ' . ((int) $maxId + 1));
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | HASIL
+        |--------------------------------------------------------------------------
+        */
+
+            return back()->with('success', "Import pendidikan berhasil. {$inserted} data baru ditambahkan, {$skipped} data dilewati karena sudah ada.");
+        } catch (Throwable $e) {
+            Log::error('SAMPERIN IMPORT PENDIDIKAN SIMPEG', [
+                'message' => $e->getMessage(),
+
+                'file' => $e->getFile(),
+
+                'line' => $e->getLine(),
+            ]);
+
+            return back()->withErrors([
+                'import' => 'Import pendidikan gagal: ' . $e->getMessage(),
             ]);
         }
     }

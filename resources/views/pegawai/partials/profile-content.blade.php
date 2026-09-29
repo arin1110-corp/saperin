@@ -1274,7 +1274,7 @@
     ========================================================== --}}
     <div class="samperin-profile-edit-action">
         <button href="#" class="samperin-profile-edit-btn" data-bs-toggle="modal"
-            data-bs-target="#modalEditProfil">
+            data-bs-target="#modalEditProfil" disabled>
             <i class="bi bi-pencil-square"></i>
             <span>Edit Data Profil</span>
         </button>

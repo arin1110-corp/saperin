@@ -442,7 +442,8 @@ Route::middleware('samperin.auth')->group(function () {
         Route::prefix('pendidikan')
             ->name('pendidikan.')
             ->group(function () {
-                Route::get('/', [SamperinPendidikanController::class, 'index'])->name('index');
+            // ROUTE
+            Route::get('/', [SamperinPendidikanController::class, 'index'])->name('index');
 
             Route::post('/', [SamperinPendidikanController::class, 'store'])->name('store');
 
@@ -454,7 +455,11 @@ Route::middleware('samperin.auth')->group(function () {
 
             Route::get('/import', [SamperinPendidikanController::class, 'import'])->name('import');
 
-                Route::post('/import/process', [SamperinPendidikanController::class, 'importProcess'])->name('import.process');
+            Route::post('/import/process', [SamperinPendidikanController::class, 'importProcess'])->name('import.process');
+
+            Route::post('/import-simpeg', [SamperinPendidikanController::class, 'importSimpeg'])->name('import-simpeg');
+
+                // END ROUTE
             });
 
         /*
