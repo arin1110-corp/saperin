@@ -1085,7 +1085,7 @@
 
                     @php
                         $jenisKerjaAktif = $jenisKerja->firstWhere(
-                            'jeniskerja_id',
+                            'jenis_kerja_id',
                             request('jenis_kerja_id')
                         );
                     @endphp
@@ -1094,7 +1094,7 @@
 
                         Jenis Kerja:
 
-                        {{ $jenisKerjaAktif?->jeniskerja_nama ?? '-' }}
+                        {{ $jenisKerjaAktif?->jenis_kerja_nama ?? '-' }}
 
                     </span>
 
@@ -1374,7 +1374,7 @@
 
                                 <td>
 
-                                    {{ optional($pegawaiItem?->jenisKerja)->jeniskerja_nama
+                                    {{ optional($pegawaiItem?->jenisKerja)->jenis_kerja_nama
                                         ?? $pegawaiItem?->user_jenis_kerja
                                         ?? '-' }}
 

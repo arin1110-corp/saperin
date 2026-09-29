@@ -664,6 +664,10 @@
                                             Golongan
                                         </th>
 
+                                        <th>
+                                            TMT Berkala
+                                        </th>
+
                                         <th width="80" class="text-center">
                                             Pilih
                                         </th>
@@ -719,6 +723,11 @@
 
                                                 {{ optional($item->golongan)->golongan_nama ?? '-' }}
 
+                                            </td>
+
+
+                                            <td>
+                                                {{ $item->user_tmt_berkala ? \Carbon\Carbon::parse($item->user_tmt_berkala)->translatedFormat('d F Y') : '-' }}
                                             </td>
 
 
