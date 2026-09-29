@@ -665,6 +665,10 @@
                                         </th>
 
                                         <th>
+                                            Jenis Kerja
+                                        </th>
+
+                                        <th>
                                             TMT Berkala
                                         </th>
 
@@ -725,6 +729,9 @@
 
                                             </td>
 
+                                            <td>
+                                                {{ optional($item->jenisKerja)->jenis_kerja_nama ?? '-' }}
+                                            </td>
 
                                             <td>
                                                 {{ $item->user_tmt_berkala ? \Carbon\Carbon::parse($item->user_tmt_berkala)->translatedFormat('d F Y') : '-' }}
