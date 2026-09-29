@@ -209,7 +209,7 @@
         .terbilang {
             left: 117.5mm;
             top: 187.6mm;
-            width: 90mm;
+            width: 80mm;
             white-space: normal;
             line-height: 1.05;
         }
@@ -253,6 +253,21 @@
         .berkedudukan {
             left: 117.5mm;
             top: 210.7mm;
+        }
+
+        /* =========================================================
+           PENUTUPAN
+        ========================================================= */
+
+        .penutupan {
+            left: 35mm;
+            top: 215.5mm;
+            width: 157mm;
+            white-space: normal;
+            line-height: 1.15;
+
+            text-align: justify;
+            text-indent: 10mm;
         }
 
         /* =========================================================
@@ -749,6 +764,14 @@
 
             /*
             |--------------------------------------------------------------------------
+            | PENUTUPAN
+            |--------------------------------------------------------------------------
+            */
+
+            $penutupan = trim((string) ($batch->peraturanGaji->peraturan_gaji_nomor ?? ''));
+
+            /*
+            |--------------------------------------------------------------------------
             | TERBILANG
             |--------------------------------------------------------------------------
             */
@@ -1164,6 +1187,17 @@
             @if ($berkedudukan !== '')
                 <div class="field berkedudukan">
                     {{ $berkedudukan }}
+                </div>
+            @endif
+
+            {{-- =====================================================
+                 PENUTUPAN
+            ====================================================== --}}
+
+            @if ($penutupan !== '')
+                <div class="field penutupan">
+                    Diharapkan agar sesuai dengan {{ $penutupan }},
+                    kepada Pegawai tersebut dapat dibayarkan penghasilannya berdasarkan gaji pokok yang baru.
                 </div>
             @endif
 

@@ -216,7 +216,7 @@
             left: 117.5mm;
             top: 181.8mm;
             white-space: normal;
-            width: 90mm;
+            width: 80mm;
             line-height: 1.05;
         }
 
@@ -259,6 +259,21 @@
         .berkedudukan {
             left: 117.5mm;
             top: 204.7mm;
+        }
+
+        /* =========================================================
+           PENUTUPAN
+        ========================================================= */
+
+        .penutupan {
+            left: 34mm;
+            top: 210.5mm;
+            width: 157mm;
+            white-space: normal;
+            line-height: 1.15;
+
+            text-align: justify;
+            text-indent: 10mm;
         }
     </style>
 </head>
@@ -815,6 +830,14 @@
         }
 
         /*
+            |--------------------------------------------------------------------------
+            | PENUTUPAN
+            |--------------------------------------------------------------------------
+            */
+
+        $penutupan = trim((string) ($kgb->batch?->peraturanGaji?->peraturan_gaji_nomor ?? ''));
+
+        /*
         |--------------------------------------------------------------------------
         | TERBILANG
         |--------------------------------------------------------------------------
@@ -1236,6 +1259,17 @@
         @if ($berkedudukan !== '')
             <div class="field berkedudukan">
                 {{ $berkedudukan }}
+            </div>
+        @endif
+
+        {{-- =====================================================
+                 PENUTUPAN
+            ====================================================== --}}
+
+        @if ($penutupan !== '')
+            <div class="field penutupan">
+                Diharapkan agar sesuai dengan {{ $penutupan }},
+                kepada Pegawai tersebut dapat dibayarkan penghasilannya berdasarkan gaji pokok yang baru.
             </div>
         @endif
 
