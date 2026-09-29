@@ -282,18 +282,18 @@
 
         .pejabat-nama {
             left: 120.5mm;
-            top: 256mm;
+            top: 260mm;
             font-weight: bold;
         }
 
         .pejabat-golongan {
             left: 120.5mm;
-            top: 261mm;
+            top: 265mm;
         }
 
         .pejabat-nip {
             left: 120.5mm;
-            top: 265.3mm;
+            top: 269.3mm;
         }
 
         .text-underline {
