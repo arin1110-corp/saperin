@@ -200,7 +200,7 @@ class SamperinPermintaanBerkasController extends Controller
             }
         });
 
-        return redirect()->route('dashboard.admin.rekap.berkas.index')->with('success', 'Permintaan berkas berhasil dibuat.');
+        return redirect()->route('admin.rekap.berkas.index')->with('success', 'Permintaan berkas berhasil dibuat.');
     }
     public function update(Request $request, $permintaanUid)
     {
