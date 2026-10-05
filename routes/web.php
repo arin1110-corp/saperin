@@ -442,8 +442,8 @@ Route::middleware('samperin.auth')->group(function () {
         Route::prefix('pendidikan')
             ->name('pendidikan.')
             ->group(function () {
-            // ROUTE
-            Route::get('/', [SamperinPendidikanController::class, 'index'])->name('index');
+                // ROUTE
+                Route::get('/', [SamperinPendidikanController::class, 'index'])->name('index');
 
             Route::post('/', [SamperinPendidikanController::class, 'store'])->name('store');
 
@@ -655,5 +655,9 @@ Route::middleware('samperin.auth')->group(function () {
         Route::get('/{id}/pdf', 'pdfAll')->name('pdf-all');
 
         Route::get('/{id}/pdf/tte', 'pdfAll_tte')->name('pdf-all.tte');
+
+        Route::post('/{id}/pegawai/{kgbId}/send-email', 'sendEmail')->name('send-email');
+
+        Route::post('/{id}/send-email-all', 'sendEmailAll')->name('send-email-all');
         });
 });

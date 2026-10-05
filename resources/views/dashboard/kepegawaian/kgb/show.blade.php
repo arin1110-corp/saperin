@@ -296,8 +296,8 @@
         }
 
         /* =========================================================
-                       MODAL PILIH CETAK KGB
-                    ========================================================= */
+                                   MODAL PILIH CETAK KGB
+                                ========================================================= */
 
         .kgb-print-option {
             display: block;
@@ -399,6 +399,18 @@
                         <i class="bi bi-pencil-square"></i>
                         Edit Batch
                     </a>
+
+                    <form method="POST" action="{{ route('samperin.admin.kgb.send-email-all', $batch->kgb_batch_id) }}"
+                        class="d-inline"
+                        onsubmit="return confirm('Kirim pengingat kepada semua pegawai yang belum mengisi Nomor SK?');">
+                        @csrf
+
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-envelope-fill me-1"></i>
+                            Ingatkan Nomor SK
+                        </button>
+
+                    </form>
 
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                         data-bs-target="#modalPilihCetakKgb">
@@ -991,13 +1003,32 @@
                                         </td>
 
                                         <td>
+
+                                            {{-- KIRIM EMAIL --}}
+                                            @if ($kgb->user?->user_email)
+                                                <button type="button" class="btn btn-sm btn-outline-success"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalEmailKgb{{ $kgb->kgb_id }}" title="Kirim Email">
+                                                    <i class="bi bi-envelope"></i>
+                                                </button>
+                                            @else
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled
+                                                    title="Email belum tersedia">
+                                                    <i class="bi bi-envelope-x"></i>
+                                                </button>
+                                            @endif
+
+
+                                            {{-- CETAK KGB --}}
                                             <button type="button" class="btn btn-sm btn-outline-danger"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#modalPilihCetakKgb{{ $kgb->kgb_id }}" title="Cetak KGB">
+                                                data-bs-target="#modalPilihCetakKgb{{ $kgb->kgb_id }}"
+                                                title="Cetak KGB">
 
                                                 <i class="bi bi-file-earmark-pdf"></i>
 
                                             </button>
+
                                         </td>
 
                                     </tr>
@@ -1274,4 +1305,117 @@
         </div>
 
     </div>
+
+
+
+    {{-- ================================================= --}}
+    {{-- MODAL EMAIL KGB --}}
+    {{-- ================================================= --}}
+
+    @foreach ($batch->kgb as $kgb)
+        <div class="modal fade" id="modalEmailKgb{{ $kgb->kgb_id }}" tabindex="-1" aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content">
+
+                    <form method="POST"
+                        action="{{ route('samperin.admin.kgb.send-email', [
+                            'id' => $batch->kgb_batch_id,
+                            'kgbId' => $kgb->kgb_id,
+                        ]) }}">
+
+                        @csrf
+
+                        <div class="modal-header">
+
+                            <h5 class="modal-title">
+
+                                <i class="bi bi-envelope me-2"></i>
+
+                                Kirim Email KGB
+
+                            </h5>
+
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                        </div>
+
+
+                        <div class="modal-body">
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    Pegawai
+                                </label>
+
+                                <input type="text" class="form-control" value="{{ $kgb->user?->user_nama ?? '-' }}"
+                                    readonly>
+
+                            </div>
+
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    Email Tujuan
+                                </label>
+
+                                <input type="text" class="form-control" value="{{ $kgb->user?->user_email ?? '-' }}"
+                                    readonly>
+
+                                <div class="form-text">
+                                    Email diambil dari data pegawai SAMPERIN.
+                                </div>
+
+                            </div>
+
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    Catatan
+                                    <span class="text-muted">
+                                        (opsional)
+                                    </span>
+                                </label>
+
+                                <textarea name="catatan" class="form-control" rows="5" maxlength="5000"
+                                    placeholder="Tulis catatan tambahan untuk pegawai..."></textarea>
+
+                                <div class="form-text">
+                                    Catatan tidak disimpan ke database.
+                                    Catatan hanya dikirim dalam email ini.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="modal-footer">
+
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                                Batal
+                            </button>
+
+                            <button type="submit" class="btn btn-success">
+
+                                <i class="bi bi-send me-1"></i>
+
+                                Kirim Email
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+    @endforeach
 @endsection

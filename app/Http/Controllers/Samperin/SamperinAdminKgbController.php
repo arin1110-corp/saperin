@@ -17,6 +17,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class SamperinAdminKgbController extends Controller
 {
@@ -1373,6 +1375,364 @@ class SamperinAdminKgbController extends Controller
 
         return $pdf->stream(
             'KGB-' . $batch->kgb_batch_nama . '.pdf'
+        );
+    }
+
+    public function sendEmail(Request $request, int $id, int $kgbId)
+    {
+        $batch = SamperinKgbBatch::findOrFail($id);
+
+        $kgb = SamperinKgb::query()
+            ->with([
+                'user',
+                'golongan',
+                'pejabat',
+                'batch',
+            ])
+            ->where('kgb_id', $kgbId)
+            ->where('kgb_batch_id', $batch->kgb_batch_id)
+            ->firstOrFail();
+
+        /*
+    |--------------------------------------------------------------------------
+    | VALIDASI CATATAN
+    |--------------------------------------------------------------------------
+    */
+
+        $validated = $request->validate([
+            'catatan' => [
+                'nullable',
+                'string',
+                'max:5000',
+            ],
+        ], [
+            'catatan.max' => 'Catatan maksimal 5.000 karakter.',
+        ]);
+
+        $catatan = trim(
+            (string) ($validated['catatan'] ?? '')
+        );
+
+        /*
+    |--------------------------------------------------------------------------
+    | AMBIL EMAIL DARI USER
+    |--------------------------------------------------------------------------
+    */
+
+        $email = trim(
+            (string) ($kgb->user?->user_email ?? '')
+        );
+
+        /*
+    |--------------------------------------------------------------------------
+    | CEK EMAIL
+    |--------------------------------------------------------------------------
+    */
+
+        if ($email === '') {
+
+            return back()->withErrors([
+                'email' =>
+                'Email pegawai ' .
+                    ($kgb->user?->user_nama ?? '-') .
+                    ' belum terdaftar.',
+            ]);
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+            return back()->withErrors([
+                'email' =>
+                'Alamat email pegawai ' .
+                    ($kgb->user?->user_nama ?? '-') .
+                    ' tidak valid.',
+            ]);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | KIRIM EMAIL
+    |--------------------------------------------------------------------------
+    */
+
+        try {
+
+            Mail::send(
+                'emails.kgb_notification',
+                [
+                    'kgb' => $kgb,
+                    'user' => $kgb->user,
+                    'catatan' => $catatan,
+                ],
+                function ($mail) use ($email) {
+
+                    $mail->to($email);
+
+                    $mail->subject(
+                        'Pemberitahuan Kenaikan Gaji Berkala'
+                    );
+                }
+            );
+        } catch (\Throwable $e) {
+
+            $msg = $e->getMessage();
+
+            /*
+        |--------------------------------------------------------------------------
+        | DAILY LIMIT
+        |--------------------------------------------------------------------------
+        */
+
+            if (
+                str_contains(
+                    strtolower($msg),
+                    'daily user sending limit exceeded'
+                ) ||
+                str_contains(
+                    strtolower($msg),
+                    'sending limit'
+                )
+            ) {
+
+                return back()->withErrors([
+                    'email' =>
+                    'Batas pengiriman email hari ini sudah tercapai. '
+                        . 'Silakan coba kembali besok.',
+                ]);
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | EMAIL TIDAK VALID / DITOLAK SERVER
+        |--------------------------------------------------------------------------
+        */
+
+            if (
+                str_contains($msg, '550') ||
+                str_contains($msg, '551') ||
+                str_contains($msg, '552') ||
+                str_contains($msg, '553') ||
+                str_contains(
+                    strtolower($msg),
+                    'mailbox unavailable'
+                ) ||
+                str_contains(
+                    strtolower($msg),
+                    'recipient address rejected'
+                )
+            ) {
+
+                return back()->withErrors([
+                    'email' =>
+                    'Email pegawai tidak aktif atau tidak dapat menerima pesan. '
+                        . 'Silakan periksa alamat email pegawai.',
+                ]);
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | ERROR UMUM
+        |--------------------------------------------------------------------------
+        */
+
+            Log::error(
+                'Gagal mengirim email KGB',
+                [
+                    'kgb_id' => $kgb->kgb_id,
+                    'user_id' => $kgb->kgb_user_id,
+                    'email' => $email,
+                    'error' => $msg,
+                ]
+            );
+
+            return back()->withErrors([
+                'email' =>
+                'Gagal mengirim email KGB. '
+                    . 'Silakan coba kembali.',
+            ]);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | BERHASIL
+    |--------------------------------------------------------------------------
+    */
+
+        return back()->with(
+            'success',
+            'Email KGB berhasil dikirim ke '
+                . $email
+                . '.'
+        );
+    }
+    public function sendEmailAll(Request $request, int $id)
+    {
+        $batch = SamperinKgbBatch::findOrFail($id);
+
+        $kgbList = SamperinKgb::query()
+            ->with([
+                'user',
+                'golongan',
+                'pejabat',
+                'batch',
+            ])
+            ->where('kgb_batch_id', $batch->kgb_batch_id)
+            ->where('kgb_status', true)
+            ->get();
+
+        /*
+    |--------------------------------------------------------------------------
+    | HANYA PEGAWAI YANG BELUM MENGISI NOMOR SK
+    |--------------------------------------------------------------------------
+    */
+
+        $kgbBelumSk = $kgbList->filter(function ($kgb) {
+            return trim((string) ($kgb->kgb_nomor_sk ?? '')) === '';
+        });
+
+        if ($kgbBelumSk->isEmpty()) {
+
+            return back()->with(
+                'warning',
+                'Tidak ada pegawai yang belum mengisi Nomor SK.'
+            );
+        }
+
+        $berhasil = 0;
+        $tanpaEmail = 0;
+        $emailTidakValid = 0;
+        $gagal = 0;
+
+        /*
+    |--------------------------------------------------------------------------
+    | CATATAN OTOMATIS
+    |--------------------------------------------------------------------------
+    */
+
+        $catatan = 'Belum Mengisi Nomor SK. Segera dilengkapi!!!';
+
+        /*
+    |--------------------------------------------------------------------------
+    | KIRIM EMAIL
+    |--------------------------------------------------------------------------
+    */
+
+        foreach ($kgbBelumSk as $kgb) {
+
+            $email = trim(
+                (string) ($kgb->user?->user_email ?? '')
+            );
+
+            /*
+        |--------------------------------------------------------------------------
+        | EMAIL KOSONG
+        |--------------------------------------------------------------------------
+        */
+
+            if ($email === '') {
+
+                $tanpaEmail++;
+
+                continue;
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | EMAIL TIDAK VALID
+        |--------------------------------------------------------------------------
+        */
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+                $emailTidakValid++;
+
+                continue;
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | KIRIM EMAIL
+        |--------------------------------------------------------------------------
+        */
+
+            try {
+
+                Mail::send(
+                    'emails.kgb_notification',
+                    [
+                        'kgb' => $kgb,
+                        'user' => $kgb->user,
+                        'catatan' => $catatan,
+                    ],
+                    function ($mail) use ($email) {
+
+                        $mail->to($email);
+
+                        $mail->subject(
+                            'Pemberitahuan Kenaikan Gaji Berkala'
+                        );
+                    }
+                );
+
+                $berhasil++;
+            } catch (\Throwable $e) {
+
+                $gagal++;
+
+                Log::error(
+                    'Gagal mengirim email KGB ALL',
+                    [
+                        'batch_id' => $batch->kgb_batch_id,
+                        'kgb_id' => $kgb->kgb_id,
+                        'user_id' => $kgb->kgb_user_id,
+                        'email' => $email,
+                        'error' => $e->getMessage(),
+                    ]
+                );
+            }
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | HASIL
+    |--------------------------------------------------------------------------
+    */
+
+        $pesan =
+            'Pengiriman email selesai. '
+            . $berhasil
+            . ' email berhasil dikirim kepada pegawai '
+            . 'yang belum mengisi Nomor SK.';
+
+        if ($tanpaEmail > 0) {
+
+            $pesan .=
+                ' '
+                . $tanpaEmail
+                . ' pegawai belum memiliki email.';
+        }
+
+        if ($emailTidakValid > 0) {
+
+            $pesan .=
+                ' '
+                . $emailTidakValid
+                . ' email tidak valid.';
+        }
+
+        if ($gagal > 0) {
+
+            $pesan .=
+                ' '
+                . $gagal
+                . ' email gagal dikirim.';
+        }
+
+        return back()->with(
+            $gagal > 0 || $tanpaEmail > 0 || $emailTidakValid > 0
+                ? 'warning'
+                : 'success',
+            $pesan
         );
     }
 }
