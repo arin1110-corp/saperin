@@ -465,6 +465,541 @@ class SamperinRekapBerkasController extends Controller
      * UPLOAD BERKAS BARU
      * ============================================================
      */
+
+    /**
+     * ============================================================
+     * SINKRONISASI BERKAS DARI ARINDRIVE
+     * ============================================================
+     */
+    public function sync(string $permintaanUid)
+    {
+        set_time_limit(0);
+
+        /*
+    |--------------------------------------------------------------------------
+    | PERMINTAAN
+    |--------------------------------------------------------------------------
+    */
+
+        $permintaan = SamperinPermintaanBerkas::query()
+            ->with([
+                'jenisBerkas',
+                'target.folder',
+                'target.jenisKerja',
+            ])
+            ->where('permintaan_uid', $permintaanUid)
+            ->where('permintaan_status', true)
+            ->firstOrFail();
+
+        /*
+    |--------------------------------------------------------------------------
+    | TARGET AKTIF
+    |--------------------------------------------------------------------------
+    */
+
+        $targets = $permintaan->target()
+            ->with(['folder', 'jenisKerja'])
+            ->where('target_status', true)
+            ->get();
+
+        if ($targets->isEmpty()) {
+            return back()->with(
+                'error',
+                'Permintaan ini belum memiliki target pegawai.'
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | PEGAWAI TARGET
+    |--------------------------------------------------------------------------
+    */
+
+        $targetJenisKerjaIds = $targets
+            ->filter(function ($target) {
+                return strtoupper(trim((string) $target->target_tipe)) === 'JENIS_KERJA';
+            })
+            ->pluck('target_jenis_kerja_id')
+            ->filter()
+            ->map(fn($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $targetSemua = $targets->contains(function ($target) {
+            return strtoupper(trim((string) $target->target_tipe)) === 'SEMUA';
+        });
+
+        $pegawaiQuery = SamperinUser::query()
+            ->where('user_status', 1);
+
+        if ($targetSemua) {
+
+            // Semua pegawai aktif menjadi target.
+
+        } elseif ($targetJenisKerjaIds->isNotEmpty()) {
+
+            $pegawaiQuery->whereIn(
+                'user_jenis_kerja_id',
+                $targetJenisKerjaIds
+            );
+        } else {
+
+            return back()->with(
+                'error',
+                'Tidak ditemukan target jenis kerja yang valid.'
+            );
+        }
+
+        $pegawai = $pegawaiQuery
+            ->orderBy('user_nama')
+            ->get([
+                'user_id',
+                'user_uid',
+                'user_nip',
+                'user_nik',
+                'user_nama',
+                'user_jenis_kerja_id',
+                'user_status',
+            ]);
+
+        /*
+    |--------------------------------------------------------------------------
+    | BERKAS YANG SUDAH ADA DI DATABASE
+    |--------------------------------------------------------------------------
+    |
+    | Record yang sudah ada TIDAK disentuh.
+    |
+    */
+
+        $existing = SamperinPengumpulanBerkas::query()
+            ->where(
+                'pengumpulan_berkas_permintaan_id',
+                $permintaan->permintaan_id
+            )
+            ->get([
+                'pengumpulan_berkas_user_uid',
+            ])
+            ->pluck('pengumpulan_berkas_user_uid')
+            ->flip();
+
+        /*
+    |--------------------------------------------------------------------------
+    | HANYA PEGAWAI YANG BELUM ADA RECORD
+    |--------------------------------------------------------------------------
+    */
+
+        $belumAda = $pegawai->filter(function ($user) use ($existing) {
+            return !$existing->has($user->user_uid);
+        })->values();
+
+        if ($belumAda->isEmpty()) {
+            return back()->with(
+                'success',
+                'Tidak ada berkas yang perlu disinkronkan. Semua pegawai target sudah memiliki record.'
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | API ARINDRIVE
+    |--------------------------------------------------------------------------
+    */
+
+        $api = SamperinApi::query()
+            ->where('api_kode', 'ARINDRIVE')
+            ->where('api_status', true)
+            ->first();
+
+        if (!$api) {
+            return back()->with(
+                'error',
+                'API ArinDrive belum dikonfigurasi.'
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | KELOMPOKKAN PEGAWAI BERDASARKAN FOLDER
+    |--------------------------------------------------------------------------
+    */
+
+        $grouped = collect();
+
+        foreach ($belumAda as $user) {
+
+            /*
+        |--------------------------------------------------------------------------
+        | CARI TARGET
+        |--------------------------------------------------------------------------
+        */
+
+            $target = null;
+
+            // Prioritas 1:
+            // target khusus jenis kerja pegawai.
+            if ($user->user_jenis_kerja_id) {
+
+                $target = $targets->first(function ($item) use ($user) {
+
+                    return strtoupper(trim((string) $item->target_tipe)) === 'JENIS_KERJA'
+                        && (int) $item->target_jenis_kerja_id === (int) $user->user_jenis_kerja_id;
+                });
+            }
+
+            // Prioritas 2:
+            // target SEMUA.
+            if (!$target && $targetSemua) {
+
+                $target = $targets->first(function ($item) {
+
+                    return strtoupper(trim((string) $item->target_tipe)) === 'SEMUA';
+                });
+            }
+
+            if (!$target || !$target->folder) {
+                continue;
+            }
+
+            $folderId = trim((string) $target->folder->folder_drive_id);
+
+            if ($folderId === '') {
+                continue;
+            }
+
+            if (!$grouped->has($folderId)) {
+                $grouped->put($folderId, collect());
+            }
+
+            $grouped->get($folderId)->push([
+                'user' => $user,
+                'target' => $target,
+                'folder' => $target->folder,
+            ]);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | COUNTER
+    |--------------------------------------------------------------------------
+    */
+
+        $added = 0;
+        $notFound = 0;
+        $noNip = 0;
+        $noFolder = 0;
+        $apiError = 0;
+
+        /*
+    |--------------------------------------------------------------------------
+    | PROSES PER FOLDER
+    |--------------------------------------------------------------------------
+    */
+
+        foreach ($grouped as $folderId => $items) {
+
+            /*
+        |--------------------------------------------------------------------------
+        | REQUEST KE ARINDRIVE
+        |--------------------------------------------------------------------------
+        */
+
+            try {
+
+                $response = Http::withToken($api->api_token)
+                    ->acceptJson()
+                    ->timeout(120)
+                    ->post(
+                        rtrim($api->api_url, '/') . '/api/list-drive-files',
+                        [
+                            'folder_id' => $folderId,
+                        ]
+                    );
+
+                if (!$response->successful()) {
+                    $apiError++;
+                    continue;
+                }
+
+                $result = $response->json();
+
+                if (!data_get($result, 'success')) {
+                    $apiError++;
+                    continue;
+                }
+
+                $driveFiles = collect(
+                    data_get($result, 'data.files', [])
+                );
+            } catch (\Throwable $e) {
+
+                $apiError++;
+                continue;
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | INDEX FILE BERDASARKAN NIP
+        |--------------------------------------------------------------------------
+        |
+        | Contoh:
+        |
+        | 1987654321_nama_berkas.pdf
+        |
+        */
+
+            $filesByNip = [];
+
+            foreach ($driveFiles as $driveFile) {
+
+                $filename = trim(
+                    (string) data_get($driveFile, 'name')
+                );
+
+                if ($filename === '') {
+                    continue;
+                }
+
+                /*
+            |--------------------------------------------------------------------------
+            | NIP HARUS DI AWAL NAMA FILE
+            |--------------------------------------------------------------------------
+            */
+
+                if (!preg_match('/^([0-9]+)_/', $filename, $matches)) {
+                    continue;
+                }
+
+                $nip = trim($matches[1]);
+
+                if ($nip === '') {
+                    continue;
+                }
+
+                /*
+            |--------------------------------------------------------------------------
+            | JIKA ADA LEBIH DARI SATU FILE,
+            | AMBIL YANG TERBARU
+            |--------------------------------------------------------------------------
+            */
+
+                $modifiedTime = data_get(
+                    $driveFile,
+                    'modified_time'
+                );
+
+                if (
+                    !isset($filesByNip[$nip])
+                    || strtotime((string) $modifiedTime)
+                    > strtotime(
+                        (string) data_get(
+                            $filesByNip[$nip],
+                            'modified_time'
+                        )
+                    )
+                ) {
+                    $filesByNip[$nip] = $driveFile;
+                }
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | COCOKKAN PEGAWAI
+        |--------------------------------------------------------------------------
+        */
+
+            foreach ($items as $item) {
+
+                $user = $item['user'];
+
+                $nip = trim((string) $user->user_nip);
+
+                /*
+            |--------------------------------------------------------------------------
+            | TANPA NIP
+            |--------------------------------------------------------------------------
+            |
+            | Sesuai aturan sync:
+            | pencocokan dilakukan berdasarkan NIP.
+            |
+            */
+
+                if ($nip === '') {
+                    $noNip++;
+                    continue;
+                }
+
+                /*
+            |--------------------------------------------------------------------------
+            | CARI FILE
+            |--------------------------------------------------------------------------
+            */
+
+                $driveFile = $filesByNip[$nip] ?? null;
+
+                if (!$driveFile) {
+                    $notFound++;
+                    continue;
+                }
+
+                /*
+            |--------------------------------------------------------------------------
+            | CEK DB LAGI
+            |--------------------------------------------------------------------------
+            |
+            | Pengaman tambahan jika ada proses lain berjalan
+            | bersamaan dengan sync.
+            |
+            */
+
+                $alreadyExists = SamperinPengumpulanBerkas::query()
+                    ->where(
+                        'pengumpulan_berkas_user_uid',
+                        $user->user_uid
+                    )
+                    ->where(
+                        'pengumpulan_berkas_permintaan_id',
+                        $permintaan->permintaan_id
+                    )
+                    ->exists();
+
+                if ($alreadyExists) {
+                    continue;
+                }
+
+                /*
+            |--------------------------------------------------------------------------
+            | DATA FILE
+            |--------------------------------------------------------------------------
+            */
+
+                $googleFileId = data_get(
+                    $driveFile,
+                    'google_file_id'
+                );
+
+                $filename = data_get(
+                    $driveFile,
+                    'name'
+                ) ?: 'Berkas';
+
+                $mime = data_get(
+                    $driveFile,
+                    'mime_type'
+                );
+
+                $size = data_get(
+                    $driveFile,
+                    'size'
+                );
+
+                $url = data_get(
+                    $driveFile,
+                    'web_view_link'
+                );
+
+                /*
+            |--------------------------------------------------------------------------
+            | FALLBACK URL
+            |--------------------------------------------------------------------------
+            */
+
+                if (!$url && $googleFileId) {
+                    $url = 'https://drive.google.com/file/d/'
+                        . $googleFileId
+                        . '/view';
+                }
+
+                /*
+            |--------------------------------------------------------------------------
+            | TANGGAL
+            |--------------------------------------------------------------------------
+            */
+
+                $tanggal = data_get(
+                    $driveFile,
+                    'modified_time'
+                );
+
+                try {
+                    $tanggal = $tanggal
+                        ? \Carbon\Carbon::parse($tanggal)
+                        : now();
+                } catch (\Throwable $e) {
+                    $tanggal = now();
+                }
+
+                /*
+            |--------------------------------------------------------------------------
+            | INSERT
+            |--------------------------------------------------------------------------
+            */
+
+                SamperinPengumpulanBerkas::create([
+                    'pengumpulan_berkas_uid' => (string) Str::uuid(),
+
+                    'pengumpulan_berkas_user_uid' => $user->user_uid,
+
+                    'pengumpulan_berkas_permintaan_id' =>
+                    $permintaan->permintaan_id,
+
+                    'pengumpulan_berkas_file' => $url,
+
+                    'pengumpulan_berkas_nama' => $filename,
+
+                    'pengumpulan_berkas_mime' => $mime,
+
+                    'pengumpulan_berkas_size' => $size,
+
+                    'pengumpulan_berkas_tanggal' => $tanggal,
+
+                    'pengumpulan_berkas_status' => 'terkirim',
+
+                    'pengumpulan_berkas_keterangan' =>
+                    'Berkas disinkronkan dari ArinDrive.',
+
+                    'pengumpulan_berkas_sumber' => 'ARINDRIVE',
+
+                    'pengumpulan_berkas_sumber_id' => $googleFileId,
+
+                    'pengumpulan_berkas_created_at' => now(),
+
+                    'pengumpulan_berkas_updated_at' => now(),
+                ]);
+
+                $added++;
+            }
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | HASIL
+    |--------------------------------------------------------------------------
+    */
+
+        $message = "Sinkronisasi selesai. "
+            . "Berhasil: {$added}.";
+
+        if ($notFound > 0) {
+            $message .= " File tidak ditemukan: {$notFound}.";
+        }
+
+        if ($noNip > 0) {
+            $message .= " Tanpa NIP: {$noNip}.";
+        }
+
+        if ($apiError > 0) {
+            $message .= " Folder gagal dibaca: {$apiError}.";
+        }
+
+        return redirect()
+            ->route('admin.rekap.berkas.index', [
+                'permintaanUid' => $permintaan->permintaan_uid,
+            ])
+            ->with(
+                $added > 0 ? 'success' : 'error',
+                $message
+            );
+    }
     public function store(Request $request, string $permintaanUid, string $userUid)
     {
         set_time_limit(0);

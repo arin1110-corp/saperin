@@ -578,6 +578,8 @@ Route::middleware('samperin.auth')->group(function () {
 
         Route::post('/rekap-berkas/edit/{uid}', [SamperinRekapBerkasController::class, 'update'])->name('rekap.berkas.update');
 
+        Route::post('/rekap-berkas/{permintaanUid}/sync', [SamperinRekapBerkasController::class, 'sync'])->name('rekap.berkas.sync');
+
         /*
             |--------------------------------------------------------------------------
             | PERMINTAAN BERKAS

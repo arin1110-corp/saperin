@@ -132,8 +132,25 @@
 
             <div class="request-progress">
 
-                <div class="progress-label">
-                    Tingkat Pengumpulan
+                <div class="progress-head">
+                    <div class="progress-title">
+                        <span class="progress-title-icon">
+                            <i class="bi bi-bar-chart-fill"></i>
+                        </span>
+
+                        <span>Tingkat Pengumpulan</span>
+                    </div>
+
+                    <form action="{{ route('admin.rekap.berkas.sync', $permintaanUid) }}" method="POST" class="sync-form"
+                        onsubmit="return handleSyncSubmit(this);">
+                        @csrf
+
+                        <button type="submit" class="btn-sync-drive">
+                            <i class="bi bi-arrow-repeat sync-icon"></i>
+                            <span class="sync-text">Sinkronkan Drive</span>
+                            <span class="sync-loading">Menyinkronkan...</span>
+                        </button>
+                    </form>
                 </div>
 
                 <div class="progress-percent">
@@ -141,10 +158,7 @@
                 </div>
 
                 <div class="hero-progress">
-
-                    <div class="hero-progress-bar" style="width: {{ min(100, max(0, $persentase)) }}%;">
-                    </div>
-
+                    <div class="hero-progress-bar" style="width: {{ min(100, max(0, $persentase)) }}%;"></div>
                 </div>
 
             </div>
@@ -1082,13 +1096,33 @@
             }
 
         });
+
+        function handleSyncSubmit(form) {
+            const button = form.querySelector('.btn-sync-drive');
+
+            if (!button) {
+                return true;
+            }
+
+            const confirmed = confirm(
+                'Sinkronkan berkas yang belum tercatat dengan ArinDrive?'
+            );
+
+            if (!confirmed) {
+                return false;
+            }
+
+            button.classList.add('is-loading');
+
+            return true;
+        }
     </script>
 
 
     <style>
         /* =========================================================
-                           PAGE
-                        ========================================================== */
+                                                   PAGE
+                                                ========================================================== */
 
         .rekap-page {
             max-width: 1500px;
@@ -1097,8 +1131,8 @@
 
 
         /* =========================================================
-                           HEADER
-                        ========================================================== */
+                                                   HEADER
+                                                ========================================================== */
 
         .page-header {
             display: flex;
@@ -1145,8 +1179,8 @@
 
 
         /* =========================================================
-                           BUTTON KEMBALI
-                        ========================================================== */
+                                                   BUTTON KEMBALI
+                                                ========================================================== */
 
         .btn-kembali {
             min-height: 40px;
@@ -1173,8 +1207,8 @@
 
 
         /* =========================================================
-                           HERO
-                        ========================================================== */
+                                                   HERO
+                                                ========================================================== */
 
         .request-hero {
             background: #fff;
@@ -1233,9 +1267,129 @@
         }
 
         .request-progress {
-            width: 190px;
+            width: 300px;
             flex-shrink: 0;
+        }
+
+        .progress-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .progress-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: #718096;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .progress-title-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 7px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(242, 140, 40, .10);
+            color: #f28c28;
+            font-size: 11px;
+        }
+
+        .sync-form {
+            margin: 0;
+        }
+
+        .btn-sync-drive {
+            min-height: 34px;
+            padding: 0 11px;
+            border: 1px solid #e4e8ee;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all .2s ease;
+        }
+
+        .btn-sync-drive:hover {
+            background: #fff7ed;
+            border-color: #f28c28;
+            color: #ea7d16;
+            transform: translateY(-1px);
+        }
+
+        .btn-sync-drive:active {
+            transform: translateY(0);
+        }
+
+        .btn-sync-drive .sync-icon {
+            font-size: 12px;
+        }
+
+        .sync-loading {
+            display: none;
+        }
+
+        .btn-sync-drive.is-loading {
+            pointer-events: none;
+            opacity: .7;
+        }
+
+        .btn-sync-drive.is-loading .sync-icon {
+            animation: syncSpin .8s linear infinite;
+        }
+
+        .btn-sync-drive.is-loading .sync-text {
+            display: none;
+        }
+
+        .btn-sync-drive.is-loading .sync-loading {
+            display: inline;
+        }
+
+        @keyframes syncSpin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .progress-percent {
+            color: #f28c28;
+            font-size: 38px;
+            line-height: 1;
+            font-weight: 700;
             text-align: right;
+            margin-top: 3px;
+        }
+
+        .hero-progress {
+            height: 8px;
+            background: #edf1f5;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .hero-progress-bar {
+            height: 100%;
+            background: #f28c28;
+            border-radius: 99px;
+            transition: width .4s ease;
         }
 
         .progress-label {
@@ -1267,8 +1421,8 @@
 
 
         /* =========================================================
-                           SUMMARY
-                        ========================================================== */
+                                                   SUMMARY
+                                                ========================================================== */
 
         .summary-grid {
             display: grid;
@@ -1308,8 +1462,8 @@
 
 
         /* =========================================================
-                           REKAP JENIS KERJA
-                        ========================================================== */
+                                                   REKAP JENIS KERJA
+                                                ========================================================== */
 
         .rekap-jenis-card {
             background: #fff;
@@ -1473,8 +1627,8 @@
 
 
         /* =========================================================
-                           FILTER
-                        ========================================================== */
+                                                   FILTER
+                                                ========================================================== */
 
         .filter-card {
             background: #fff;
@@ -1590,8 +1744,8 @@
 
 
         /* =========================================================
-                           TABLE CARD
-                        ========================================================== */
+                                                   TABLE CARD
+                                                ========================================================== */
 
         .pegawai-card {
             background: #fff;
@@ -1636,8 +1790,8 @@
 
 
         /* =========================================================
-                           TABLE
-                        ========================================================== */
+                                                   TABLE
+                                                ========================================================== */
 
         .pegawai-table {
             min-width: 1000px;
@@ -1671,8 +1825,8 @@
 
 
         /* =========================================================
-                           NUMBER
-                        ========================================================== */
+                                                   NUMBER
+                                                ========================================================== */
 
         .row-number {
             width: 30px;
@@ -1689,8 +1843,8 @@
 
 
         /* =========================================================
-                           PEGAWAI
-                        ========================================================== */
+                                                   PEGAWAI
+                                                ========================================================== */
 
         .pegawai-info {
             display: flex;
@@ -1750,8 +1904,8 @@
 
 
         /* =========================================================
-                           JENIS KERJA
-                        ========================================================== */
+                                                   JENIS KERJA
+                                                ========================================================== */
 
         .jenis-badge {
             display: inline-block;
@@ -1766,8 +1920,8 @@
 
 
         /* =========================================================
-                           STATUS
-                        ========================================================== */
+                                                   STATUS
+                                                ========================================================== */
 
         .status-badge {
             display: inline-flex;
@@ -1794,8 +1948,8 @@
 
 
         /* =========================================================
-                           BERKAS
-                        ========================================================== */
+                                                   BERKAS
+                                                ========================================================== */
 
         .berkas-info {
             display: flex;
@@ -1834,8 +1988,8 @@
 
 
         /* =========================================================
-                           ACTION
-                        ========================================================== */
+                                                   ACTION
+                                                ========================================================== */
 
         .action-group {
             display: flex;
@@ -1892,8 +2046,8 @@
 
 
         /* =========================================================
-                           PAGINATION
-                        ========================================================== */
+                                                   PAGINATION
+                                                ========================================================== */
 
         .pagination-wrapper {
             padding: 16px 20px;
@@ -1953,8 +2107,8 @@
 
 
         /* =========================================================
-                           EMPTY
-                        ========================================================== */
+                                                   EMPTY
+                                                ========================================================== */
 
         .empty-state {
             padding: 65px 20px;
@@ -1989,8 +2143,8 @@
 
 
         /* =========================================================
-                           MODAL
-                        ========================================================== */
+                                                   MODAL
+                                                ========================================================== */
 
         .modal-modern {
             border: 0;
@@ -2117,8 +2271,8 @@
 
 
         /* =========================================================
-                           RESPONSIVE
-                        ========================================================== */
+                                                   RESPONSIVE
+                                                ========================================================== */
 
         @media (max-width: 1100px) {
 
@@ -2152,11 +2306,14 @@
 
             .request-progress {
                 width: 100%;
+            }
+
+            .progress-percent {
                 text-align: left;
             }
 
             .hero-progress {
-                max-width: 400px;
+                max-width: 100%;
             }
 
             .rekap-jenis-grid {
@@ -2183,6 +2340,23 @@
 
             .request-title {
                 font-size: 19px;
+            }
+
+            .progress-head {
+                align-items: flex-start;
+            }
+
+            .btn-sync-drive {
+                min-height: 36px;
+                padding: 0 10px;
+            }
+
+            .sync-text {
+                display: none;
+            }
+
+            .btn-sync-drive .sync-icon {
+                font-size: 14px;
             }
 
             .progress-percent {
