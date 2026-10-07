@@ -580,6 +580,8 @@ Route::middleware('samperin.auth')->group(function () {
 
         Route::post('/rekap-berkas/{permintaanUid}/sync', [SamperinRekapBerkasController::class, 'sync'])->name('rekap.berkas.sync');
 
+        Route::get('/rekap-berkas/{permintaanUid}/export', [SamperinRekapBerkasController::class, 'export'])->name('rekap.berkas.export');
+
         /*
             |--------------------------------------------------------------------------
             | PERMINTAAN BERKAS

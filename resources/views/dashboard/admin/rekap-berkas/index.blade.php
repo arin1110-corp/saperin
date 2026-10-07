@@ -133,24 +133,56 @@
             <div class="request-progress">
 
                 <div class="progress-head">
+
                     <div class="progress-title">
+
                         <span class="progress-title-icon">
                             <i class="bi bi-bar-chart-fill"></i>
                         </span>
 
-                        <span>Tingkat Pengumpulan</span>
+                        <span>
+                            Tingkat Pengumpulan
+                        </span>
+
                     </div>
 
-                    <form action="{{ route('admin.rekap.berkas.sync', $permintaanUid) }}" method="POST" class="sync-form"
-                        onsubmit="return handleSyncSubmit(this);">
-                        @csrf
 
-                        <button type="submit" class="btn-sync-drive">
-                            <i class="bi bi-arrow-repeat sync-icon"></i>
-                            <span class="sync-text">Sinkronkan Drive</span>
-                            <span class="sync-loading">Menyinkronkan...</span>
-                        </button>
-                    </form>
+                    <div class="progress-actions">
+
+                        {{-- EXPORT EXCEL --}}
+                        <a href="{{ route('admin.rekap.berkas.export', $permintaanUid) }}" class="btn-export-excel">
+                            <i class="bi bi-file-earmark-excel"></i>
+
+                            <span>
+                                Export Excel
+                            </span>
+                        </a>
+
+
+                        {{-- SYNC DRIVE --}}
+                        <form action="{{ route('admin.rekap.berkas.sync', $permintaanUid) }}" method="POST"
+                            class="sync-form" onsubmit="return handleSyncSubmit(this);">
+
+                            @csrf
+
+                            <button type="submit" class="btn-sync-drive">
+
+                                <i class="bi bi-arrow-repeat sync-icon"></i>
+
+                                <span class="sync-text">
+                                    Sinkronkan Drive
+                                </span>
+
+                                <span class="sync-loading">
+                                    Menyinkronkan...
+                                </span>
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
                 </div>
 
                 <div class="progress-percent">
@@ -1121,8 +1153,8 @@
 
     <style>
         /* =========================================================
-                                                   PAGE
-                                                ========================================================== */
+       PAGE
+    ========================================================= */
 
         .rekap-page {
             max-width: 1500px;
@@ -1131,8 +1163,8 @@
 
 
         /* =========================================================
-                                                   HEADER
-                                                ========================================================== */
+       HEADER
+    ========================================================= */
 
         .page-header {
             display: flex;
@@ -1152,11 +1184,14 @@
             width: 46px;
             height: 46px;
             border-radius: 13px;
+
             background: rgba(242, 140, 40, .12);
             color: #f28c28;
+
             display: inline-flex;
             align-items: center;
             justify-content: center;
+
             font-size: 21px;
             flex-shrink: 0;
         }
@@ -1179,23 +1214,30 @@
 
 
         /* =========================================================
-                                                   BUTTON KEMBALI
-                                                ========================================================== */
+       BUTTON KEMBALI
+    ========================================================= */
 
         .btn-kembali {
             min-height: 40px;
             padding: 0 14px;
+
             border-radius: 9px;
             border: 1px solid #e2e6ec;
+
             background: #fff;
             color: #374151;
+
             display: inline-flex;
             align-items: center;
             justify-content: center;
+
             gap: 7px;
+
             text-decoration: none;
+
             font-size: 12px;
             font-weight: 600;
+
             transition: .2s ease;
         }
 
@@ -1207,24 +1249,31 @@
 
 
         /* =========================================================
-                                                   HERO
-                                                ========================================================== */
+       HERO
+    ========================================================= */
 
         .request-hero {
             background: #fff;
+
             border: 1px solid #e9edf3;
             border-radius: 18px;
+
             box-shadow: 0 4px 18px rgba(24, 34, 56, .04);
+
             padding: 30px;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
+
             gap: 30px;
+
             margin-bottom: 20px;
         }
 
         .request-hero-content {
             min-width: 0;
+            flex: 1;
         }
 
         .request-category {
@@ -1243,8 +1292,11 @@
         .request-meta {
             display: flex;
             flex-wrap: wrap;
+
             gap: 8px 18px;
+
             margin-top: 9px;
+
             color: #718096;
             font-size: 13px;
         }
@@ -1261,71 +1313,191 @@
 
         .request-description {
             margin-top: 13px;
+
             color: #718096;
             font-size: 13px;
             line-height: 1.5;
         }
 
+
+        /* =========================================================
+       REQUEST PROGRESS
+    ========================================================= */
+
         .request-progress {
-            width: 300px;
+            width: 430px;
             flex-shrink: 0;
         }
+
+
+        /* =========================================================
+       PROGRESS HEAD
+    ========================================================= */
 
         .progress-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
+
             gap: 12px;
+
             margin-bottom: 8px;
+
+            width: 100%;
         }
+
+
+        /* =========================================================
+       PROGRESS TITLE
+    ========================================================= */
 
         .progress-title {
             display: inline-flex;
             align-items: center;
+
             gap: 7px;
+
             color: #718096;
+
             font-size: 12px;
             font-weight: 600;
+
             white-space: nowrap;
+
+            flex-shrink: 0;
         }
 
         .progress-title-icon {
             width: 24px;
             height: 24px;
+
             border-radius: 7px;
+
             display: inline-flex;
             align-items: center;
             justify-content: center;
+
             background: rgba(242, 140, 40, .10);
             color: #f28c28;
+
             font-size: 11px;
+
+            flex-shrink: 0;
         }
+
+
+        /* =========================================================
+       PROGRESS ACTIONS
+    ========================================================= */
+
+        .progress-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+
+            gap: 6px;
+
+            margin-left: auto;
+
+            flex-shrink: 0;
+        }
+
+
+        /* =========================================================
+       EXPORT EXCEL
+    ========================================================= */
+
+        .btn-export-excel {
+            min-height: 34px;
+
+            padding: 0 11px;
+
+            border: 1px solid #dfe5ec;
+            border-radius: 8px;
+
+            background: #f8fafc;
+            color: #475569;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 6px;
+
+            font-size: 11px;
+            font-weight: 600;
+
+            text-decoration: none;
+
+            white-space: nowrap;
+
+            transition:
+                background .2s ease,
+                border-color .2s ease,
+                color .2s ease,
+                transform .2s ease;
+        }
+
+        .btn-export-excel:hover {
+            background: #f0fdf4;
+            border-color: #86efac;
+            color: #15803d;
+
+            transform: translateY(-1px);
+
+            text-decoration: none;
+        }
+
+        .btn-export-excel i {
+            font-size: 13px;
+        }
+
+
+        /* =========================================================
+       SYNC FORM
+    ========================================================= */
 
         .sync-form {
             margin: 0;
         }
 
+
+        /* =========================================================
+       SYNC DRIVE
+    ========================================================= */
+
         .btn-sync-drive {
             min-height: 34px;
+
             padding: 0 11px;
+
             border: 1px solid #e4e8ee;
             border-radius: 8px;
+
             background: #f8fafc;
             color: #475569;
+
             display: inline-flex;
             align-items: center;
             justify-content: center;
+
             gap: 6px;
+
             font-size: 11px;
             font-weight: 600;
+
             white-space: nowrap;
+
             transition: all .2s ease;
+
+            cursor: pointer;
         }
 
         .btn-sync-drive:hover {
             background: #fff7ed;
             border-color: #f28c28;
             color: #ea7d16;
+
             transform: translateY(-1px);
         }
 
@@ -1336,6 +1508,11 @@
         .btn-sync-drive .sync-icon {
             font-size: 12px;
         }
+
+
+        /* =========================================================
+       SYNC LOADING
+    ========================================================= */
 
         .sync-loading {
             display: none;
@@ -1368,27 +1545,50 @@
             }
         }
 
+
+        /* =========================================================
+       PROGRESS PERCENT
+    ========================================================= */
+
         .progress-percent {
             color: #f28c28;
+
             font-size: 38px;
             line-height: 1;
+
             font-weight: 700;
+
             text-align: right;
-            margin-top: 3px;
+
+            margin-top: 7px;
         }
+
+
+        /* =========================================================
+       PROGRESS BAR
+    ========================================================= */
 
         .hero-progress {
             height: 8px;
+
             background: #edf1f5;
+
             border-radius: 99px;
+
             overflow: hidden;
+
             margin-top: 12px;
+
+            width: 100%;
         }
 
         .hero-progress-bar {
             height: 100%;
+
             background: #f28c28;
+
             border-radius: 99px;
+
             transition: width .4s ease;
         }
 
@@ -1397,45 +1597,28 @@
             font-size: 12px;
         }
 
-        .progress-percent {
-            color: #f28c28;
-            font-size: 38px;
-            line-height: 1;
-            font-weight: 700;
-            margin-top: 7px;
-        }
-
-        .hero-progress {
-            height: 8px;
-            background: #edf1f5;
-            border-radius: 99px;
-            overflow: hidden;
-            margin-top: 12px;
-        }
-
-        .hero-progress-bar {
-            height: 100%;
-            background: #f28c28;
-            border-radius: 99px;
-        }
-
 
         /* =========================================================
-                                                   SUMMARY
-                                                ========================================================== */
+       SUMMARY
+    ========================================================= */
 
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
+
             gap: 20px;
+
             margin-bottom: 20px;
         }
 
         .summary-card {
             background: #fff;
+
             border: 1px solid #e9edf3;
             border-radius: 18px;
+
             padding: 27px 30px;
+
             box-shadow: 0 4px 18px rgba(24, 34, 56, .04);
         }
 
@@ -1446,9 +1629,12 @@
 
         .summary-value {
             color: #102342;
+
             font-size: 38px;
             line-height: 1;
+
             font-weight: 700;
+
             margin-top: 13px;
         }
 
@@ -1462,131 +1648,178 @@
 
 
         /* =========================================================
-                                                   REKAP JENIS KERJA
-                                                ========================================================== */
+       REKAP JENIS KERJA
+    ========================================================= */
 
         .rekap-jenis-card {
             background: #fff;
+
             border: 1px solid #e9edf3;
             border-radius: 18px;
+
             box-shadow: 0 4px 18px rgba(24, 34, 56, .04);
+
             margin-bottom: 20px;
+
             overflow: hidden;
         }
 
         .rekap-jenis-header {
             padding: 22px 30px;
+
             border-bottom: 1px solid #edf0f4;
         }
 
         .rekap-jenis-header h5 {
             margin: 0;
+
             color: #102342;
+
             font-size: 17px;
             font-weight: 700;
         }
 
         .rekap-jenis-header p {
             margin: 5px 0 0;
+
             color: #718096;
+
             font-size: 13px;
         }
 
         .rekap-jenis-grid {
             display: grid;
+
             grid-template-columns: repeat(2, 1fr);
+
             gap: 16px;
+
             padding: 22px 30px 28px;
         }
 
         .rekap-jenis-item {
             border: 1px solid #e9edf3;
             border-radius: 14px;
+
             padding: 18px;
+
             background: #fff;
+
             transition: .2s ease;
         }
 
         .rekap-jenis-item:hover {
             border-color: #f3c28f;
+
             box-shadow: 0 4px 14px rgba(24, 34, 56, .05);
         }
 
         .rekap-jenis-top {
             display: flex;
+
             align-items: center;
             justify-content: space-between;
+
             gap: 15px;
         }
 
         .rekap-jenis-name {
             display: flex;
+
             align-items: center;
+
             gap: 11px;
+
             min-width: 0;
         }
 
         .rekap-jenis-icon {
             width: 40px;
             height: 40px;
+
             border-radius: 11px;
+
             background: rgba(242, 140, 40, .10);
             color: #f28c28;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
+
             flex-shrink: 0;
         }
 
         .rekap-jenis-title {
             color: #182238;
+
             font-size: 13px;
             font-weight: 700;
+
             line-height: 1.4;
         }
 
         .rekap-jenis-total {
             color: #8a93a2;
+
             font-size: 11px;
+
             margin-top: 3px;
         }
 
         .rekap-jenis-percent {
             color: #f28c28;
+
             font-size: 20px;
+
             font-weight: 700;
+
             white-space: nowrap;
         }
 
         .rekap-progress {
             width: 100%;
+
             height: 8px;
+
             background: #edf1f5;
+
             border-radius: 99px;
+
             overflow: hidden;
+
             margin-top: 17px;
         }
 
         .rekap-progress-bar {
             height: 100%;
+
             background: #f28c28;
+
             border-radius: 99px;
         }
 
         .rekap-jenis-detail {
             display: flex;
+
             align-items: center;
             justify-content: space-between;
+
             gap: 15px;
+
             margin-top: 13px;
         }
 
         .rekap-detail-sudah,
         .rekap-detail-belum {
             display: flex;
+
             align-items: center;
+
             gap: 6px;
+
             color: #7b8494;
+
             font-size: 11px;
         }
 
@@ -1603,7 +1836,9 @@
         .rekap-detail-dot {
             width: 7px;
             height: 7px;
+
             border-radius: 50%;
+
             background: #16a34a;
         }
 
@@ -1613,71 +1848,95 @@
 
         .rekap-empty {
             grid-column: 1 / -1;
+
             padding: 35px 20px;
+
             text-align: center;
+
             color: #8a93a2;
+
             font-size: 13px;
         }
 
         .rekap-empty i {
             display: block;
+
             font-size: 28px;
+
             margin-bottom: 8px;
         }
 
 
         /* =========================================================
-                                                   FILTER
-                                                ========================================================== */
+       FILTER
+    ========================================================= */
 
         .filter-card {
             background: #fff;
+
             border: 1px solid #e9edf3;
             border-radius: 16px;
+
             box-shadow: 0 4px 18px rgba(24, 34, 56, .04);
+
             padding: 18px 20px;
+
             margin-bottom: 20px;
         }
 
         .filter-form {
             display: flex;
+
             align-items: flex-end;
+
             gap: 12px;
         }
 
         .filter-group {
             width: 220px;
+
             flex-shrink: 0;
         }
 
         .filter-search {
             flex: 1;
+
             min-width: 200px;
         }
 
         .filter-group label,
         .filter-search label {
             display: block;
+
             color: #6b7280;
+
             font-size: 11px;
             font-weight: 600;
+
             margin-bottom: 6px;
         }
 
         .filter-form .form-select,
         .filter-form .form-control {
             min-height: 40px;
+
             border-color: #e2e6ec;
+
             border-radius: 9px;
+
             color: #374151;
+
             font-size: 12px;
+
             box-shadow: none;
         }
 
         .filter-form .form-select:focus,
         .filter-form .form-control:focus {
             border-color: #f28c28;
-            box-shadow: 0 0 0 3px rgba(242, 140, 40, .08);
+
+            box-shadow:
+                0 0 0 3px rgba(242, 140, 40, .08);
         }
 
         .search-input {
@@ -1686,11 +1945,16 @@
 
         .search-input i {
             position: absolute;
+
             left: 13px;
             top: 50%;
+
             transform: translateY(-50%);
+
             color: #9ca3af;
+
             font-size: 13px;
+
             z-index: 2;
         }
 
@@ -1700,98 +1964,136 @@
 
         .filter-actions {
             display: flex;
+
             align-items: center;
+
             gap: 7px;
         }
 
         .btn-filter,
         .btn-reset {
             min-height: 40px;
+
             padding: 0 13px;
+
             border-radius: 9px;
+
             display: inline-flex;
+
             align-items: center;
             justify-content: center;
+
             gap: 6px;
+
             font-size: 12px;
+
             font-weight: 600;
+
             text-decoration: none;
+
             white-space: nowrap;
         }
 
         .btn-filter {
             background: #f28c28;
+
             color: #fff;
+
             border: 1px solid #f28c28;
         }
 
         .btn-filter:hover {
             background: #dc7818;
+
             border-color: #dc7818;
+
             color: #fff;
         }
 
         .btn-reset {
             background: #fff;
+
             color: #6b7280;
+
             border: 1px solid #e2e6ec;
         }
 
         .btn-reset:hover {
             color: #f28c28;
+
             border-color: #f28c28;
         }
 
 
         /* =========================================================
-                                                   TABLE CARD
-                                                ========================================================== */
+       TABLE CARD
+    ========================================================= */
 
         .pegawai-card {
             background: #fff;
+
             border: 1px solid #e9edf3;
+
             border-radius: 18px;
+
             box-shadow: 0 4px 18px rgba(24, 34, 56, .04);
+
             overflow: hidden;
         }
 
         .pegawai-card-header {
             padding: 21px 24px;
+
             border-bottom: 1px solid #edf0f4;
+
             display: flex;
+
             align-items: center;
             justify-content: space-between;
+
             gap: 15px;
         }
 
         .pegawai-card-header h5 {
             margin: 0;
+
             color: #182238;
+
             font-size: 16px;
+
             font-weight: 700;
         }
 
         .pegawai-card-header p {
             margin: 4px 0 0;
+
             color: #7b8494;
+
             font-size: 12px;
         }
 
         .pegawai-count {
             color: #6b7280;
+
             background: #f5f7fa;
+
             border: 1px solid #e8ecf1;
+
             border-radius: 8px;
+
             padding: 7px 10px;
+
             font-size: 11px;
+
             font-weight: 600;
+
             white-space: nowrap;
         }
 
 
         /* =========================================================
-                                                   TABLE
-                                                ========================================================== */
+       TABLE
+    ========================================================= */
 
         .pegawai-table {
             min-width: 1000px;
@@ -1799,19 +2101,29 @@
 
         .pegawai-table thead th {
             background: #f8fafc;
+
             color: #6b7280;
+
             font-size: 10px;
+
             font-weight: 700;
+
             text-transform: uppercase;
+
             letter-spacing: .04em;
+
             border-bottom: 1px solid #e9edf3;
+
             padding: 13px 16px;
+
             white-space: nowrap;
         }
 
         .pegawai-table tbody td {
             padding: 14px 16px;
+
             border-bottom: 1px solid #eef1f5;
+
             vertical-align: middle;
         }
 
@@ -1825,242 +2137,336 @@
 
 
         /* =========================================================
-                                                   NUMBER
-                                                ========================================================== */
+       NUMBER
+    ========================================================= */
 
         .row-number {
             width: 30px;
             height: 30px;
+
             border-radius: 9px;
+
             background: #f3f5f8;
+
             color: #6b7280;
+
             display: inline-flex;
+
             align-items: center;
             justify-content: center;
+
             font-size: 11px;
+
             font-weight: 600;
         }
 
 
         /* =========================================================
-                                                   PEGAWAI
-                                                ========================================================== */
+       PEGAWAI
+    ========================================================= */
 
         .pegawai-info {
             display: flex;
+
             align-items: center;
+
             gap: 10px;
+
             min-width: 220px;
         }
 
         .pegawai-avatar {
             width: 42px;
             height: 42px;
+
             min-width: 42px;
+
             border-radius: 10px;
+
             overflow: hidden;
+
             background: #f3f5f8;
+
             color: #5b6472;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
+
             font-size: 13px;
+
             font-weight: 700;
+
             flex-shrink: 0;
+
             position: relative;
         }
 
         .pegawai-avatar-img {
             width: 100%;
             height: 100%;
+
             display: block;
+
             object-fit: cover;
+
             object-position: center;
         }
 
         .pegawai-avatar-fallback {
             width: 100%;
             height: 100%;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
+
             color: #5b6472;
+
             font-size: 13px;
+
             font-weight: 700;
         }
 
         .pegawai-name {
             color: #182238;
+
             font-size: 12px;
+
             font-weight: 700;
+
             line-height: 1.4;
         }
 
         .pegawai-identitas {
             color: #8a93a2;
+
             font-size: 10px;
+
             margin-top: 2px;
         }
 
 
         /* =========================================================
-                                                   JENIS KERJA
-                                                ========================================================== */
+       JENIS KERJA
+    ========================================================= */
 
         .jenis-badge {
             display: inline-block;
+
             color: #5b6472;
+
             background: #f5f7fa;
+
             border: 1px solid #e7ebf0;
+
             border-radius: 7px;
+
             padding: 5px 8px;
+
             font-size: 10px;
+
             line-height: 1.3;
         }
 
 
         /* =========================================================
-                                                   STATUS
-                                                ========================================================== */
+       STATUS
+    ========================================================= */
 
         .status-badge {
             display: inline-flex;
+
             align-items: center;
+
             gap: 5px;
+
             padding: 6px 9px;
+
             border-radius: 8px;
+
             font-size: 10px;
+
             font-weight: 600;
+
             white-space: nowrap;
         }
 
         .status-badge.sudah {
             color: #15803d;
+
             background: #f0fdf4;
+
             border: 1px solid #dcfce7;
         }
 
         .status-badge.belum {
             color: #6b7280;
+
             background: #f5f7fa;
+
             border: 1px solid #e5e7eb;
         }
 
 
         /* =========================================================
-                                                   BERKAS
-                                                ========================================================== */
+       BERKAS
+    ========================================================= */
 
         .berkas-info {
             display: flex;
+
             align-items: center;
+
             gap: 8px;
+
             min-width: 180px;
         }
 
         .berkas-icon {
             width: 31px;
             height: 31px;
+
             border-radius: 8px;
+
             background: #f0fdf4;
+
             color: #16a34a;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
+
             flex-shrink: 0;
         }
 
         .berkas-name {
             color: #374151;
+
             font-size: 11px;
+
             font-weight: 600;
+
             max-width: 190px;
+
             overflow: hidden;
+
             text-overflow: ellipsis;
+
             white-space: nowrap;
         }
 
         .berkas-date {
             color: #9ca3af;
+
             font-size: 9px;
+
             margin-top: 2px;
         }
 
 
         /* =========================================================
-                                                   ACTION
-                                                ========================================================== */
+       ACTION
+    ========================================================= */
 
         .action-group {
             display: flex;
+
             align-items: center;
+
             gap: 5px;
         }
 
         .btn-action {
             width: 34px;
             height: 34px;
+
             border-radius: 8px;
+
             display: inline-flex;
+
             align-items: center;
             justify-content: center;
+
             text-decoration: none;
+
             font-size: 12px;
+
             transition: .2s ease;
         }
 
         .btn-action.view {
             background: #f5f7fa;
+
             color: #374151;
+
             border: 1px solid #e5e7eb;
         }
 
         .btn-action.view:hover {
             color: #f28c28;
+
             border-color: #f28c28;
+
             background: rgba(242, 140, 40, .05);
         }
 
         .btn-action.edit {
             background: #fff7ed;
+
             color: #ea7d16;
+
             border: 1px solid #fed7aa;
         }
 
         .btn-action.edit:hover {
             background: #f28c28;
+
             color: #fff;
+
             border-color: #f28c28;
         }
 
         .btn-action.upload {
             background: #f28c28;
+
             color: #fff;
+
             border: 1px solid #f28c28;
         }
 
         .btn-action.upload:hover {
             background: #dc7818;
+
             border-color: #dc7818;
         }
 
 
         /* =========================================================
-                                                   PAGINATION
-                                                ========================================================== */
+       PAGINATION
+    ========================================================= */
 
         .pagination-wrapper {
             padding: 16px 20px;
+
             border-top: 1px solid #eef1f5;
+
             display: flex;
+
             align-items: center;
             justify-content: space-between;
+
             gap: 15px;
+
             flex-wrap: wrap;
         }
 
         .pagination-info {
             color: #7b8494;
+
             font-size: 11px;
         }
 
@@ -2070,102 +2476,138 @@
 
         .pagination-container .pagination {
             margin: 0;
+
             gap: 4px;
         }
 
         .pagination-container .page-link {
             color: #374151;
+
             border: 1px solid #e5e7eb;
+
             background: #fff;
+
             font-size: 11px;
+
             min-width: 33px;
+
             height: 33px;
+
             border-radius: 8px !important;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
+
             padding: 0 8px;
+
             box-shadow: none;
         }
 
         .pagination-container .page-link:hover {
             color: #f28c28;
+
             border-color: #f28c28;
+
             background: rgba(242, 140, 40, .05);
         }
 
         .pagination-container .page-item.active .page-link {
             background: #f28c28;
+
             border-color: #f28c28;
+
             color: #fff;
         }
 
         .pagination-container .page-item.disabled .page-link {
             color: #b0b6c0;
+
             background: #f8fafc;
         }
 
 
         /* =========================================================
-                                                   EMPTY
-                                                ========================================================== */
+       EMPTY
+    ========================================================= */
 
         .empty-state {
             padding: 65px 20px;
+
             text-align: center;
         }
 
         .empty-icon {
             width: 64px;
             height: 64px;
+
             border-radius: 18px;
+
             background: #f5f7fa;
+
             color: #9ca3af;
+
             display: inline-flex;
+
             align-items: center;
             justify-content: center;
+
             font-size: 27px;
+
             margin-bottom: 15px;
         }
 
         .empty-state h5 {
             color: #374151;
+
             font-size: 16px;
+
             font-weight: 700;
+
             margin-bottom: 6px;
         }
 
         .empty-state p {
             color: #8a93a2;
+
             font-size: 12px;
+
             margin-bottom: 18px;
         }
 
 
         /* =========================================================
-                                                   MODAL
-                                                ========================================================== */
+       MODAL
+    ========================================================= */
 
         .modal-modern {
             border: 0;
+
             border-radius: 16px;
+
             overflow: hidden;
         }
 
         .modal-modern .modal-header {
             padding: 20px 22px;
+
             border-bottom: 1px solid #edf0f4;
         }
 
         .modal-modern .modal-title {
             color: #182238;
+
             font-size: 16px;
+
             font-weight: 700;
         }
 
         .modal-subtitle {
             color: #8a93a2;
+
             font-size: 11px;
+
             margin: 4px 0 0;
         }
 
@@ -2175,104 +2617,158 @@
 
         .pegawai-selected {
             display: flex;
+
             align-items: center;
+
             gap: 10px;
+
             background: #f8fafc;
+
             border: 1px solid #edf0f4;
+
             border-radius: 11px;
+
             padding: 12px;
+
             margin-bottom: 16px;
         }
 
         .pegawai-selected-icon {
             width: 35px;
             height: 35px;
+
             border-radius: 9px;
+
             background: rgba(242, 140, 40, .1);
+
             color: #f28c28;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
         }
 
         .selected-label {
             color: #9ca3af;
+
             font-size: 9px;
         }
 
         .selected-name {
             color: #374151;
+
             font-size: 12px;
+
             font-weight: 700;
+
             margin-top: 2px;
         }
 
         .upload-box {
             border: 1px dashed #d8dee7;
+
             border-radius: 12px;
+
             padding: 25px 18px;
+
             text-align: center;
         }
 
         .upload-box>i {
             color: #f28c28;
+
             font-size: 30px;
         }
 
         .upload-title {
             color: #374151;
+
             font-size: 13px;
+
             font-weight: 700;
+
             margin-top: 8px;
         }
 
         .upload-description {
             color: #8a93a2;
+
             font-size: 10px;
+
             margin-top: 3px;
         }
 
         .upload-box .form-control {
             font-size: 11px;
+
             border-color: #e1e5eb;
+
             box-shadow: none;
         }
 
         .modal-modern .modal-footer {
             padding: 14px 22px;
+
             border-top: 1px solid #edf0f4;
         }
 
         .btn-modal-cancel,
         .btn-modal-submit {
             min-height: 38px;
+
             padding: 0 13px;
+
             border-radius: 8px;
+
             font-size: 11px;
+
             font-weight: 600;
         }
 
         .btn-modal-cancel {
             color: #6b7280;
+
             background: #fff;
+
             border: 1px solid #e2e6ec;
         }
 
         .btn-modal-submit {
             color: #fff;
+
             background: #f28c28;
+
             border: 1px solid #f28c28;
         }
 
         .btn-modal-submit:hover {
             background: #dc7818;
+
             border-color: #dc7818;
         }
 
 
         /* =========================================================
-                                                   RESPONSIVE
-                                                ========================================================== */
+       RESPONSIVE
+    ========================================================= */
+
+        @media (max-width: 1200px) {
+
+            .request-progress {
+                width: 400px;
+            }
+
+            .progress-actions {
+                gap: 5px;
+            }
+
+            .btn-export-excel,
+            .btn-sync-drive {
+                padding: 0 9px;
+            }
+        }
+
 
         @media (max-width: 1100px) {
 
@@ -2286,21 +2782,27 @@
 
             .filter-search {
                 width: 100%;
+
                 flex: auto;
             }
-
         }
 
+
+        /* =========================================================
+       TABLET
+    ========================================================= */
 
         @media (max-width: 991.98px) {
 
             .summary-grid {
                 grid-template-columns: 1fr;
+
                 gap: 12px;
             }
 
             .request-hero {
                 align-items: flex-start;
+
                 flex-direction: column;
             }
 
@@ -2319,14 +2821,18 @@
             .rekap-jenis-grid {
                 grid-template-columns: 1fr;
             }
-
         }
 
+
+        /* =========================================================
+       MOBILE
+    ========================================================= */
 
         @media (max-width: 767.98px) {
 
             .page-header {
                 align-items: flex-start;
+
                 flex-direction: column;
             }
 
@@ -2343,12 +2849,60 @@
             }
 
             .progress-head {
-                align-items: flex-start;
+                align-items: center;
+
+                gap: 8px;
             }
 
-            .btn-sync-drive {
+            .progress-title {
+                font-size: 11px;
+            }
+
+            .progress-title-icon {
+                width: 23px;
+                height: 23px;
+            }
+
+            .progress-actions {
+                gap: 5px;
+            }
+
+
+            /* =====================================================
+           EXPORT EXCEL MOBILE
+        ===================================================== */
+
+            .btn-export-excel {
+                width: 36px;
+                min-width: 36px;
+
+                height: 36px;
                 min-height: 36px;
-                padding: 0 10px;
+
+                padding: 0;
+            }
+
+            .btn-export-excel span {
+                display: none;
+            }
+
+            .btn-export-excel i {
+                font-size: 14px;
+            }
+
+
+            /* =====================================================
+           SYNC MOBILE
+        ===================================================== */
+
+            .btn-sync-drive {
+                width: 36px;
+                min-width: 36px;
+
+                height: 36px;
+                min-height: 36px;
+
+                padding: 0;
             }
 
             .sync-text {
@@ -2359,9 +2913,27 @@
                 font-size: 14px;
             }
 
+
+            /* =====================================================
+           PROGRESS MOBILE
+        ===================================================== */
+
             .progress-percent {
                 font-size: 32px;
+
+                text-align: left;
+
+                margin-top: 10px;
             }
+
+            .hero-progress {
+                margin-top: 10px;
+            }
+
+
+            /* =====================================================
+           SUMMARY MOBILE
+        ===================================================== */
 
             .summary-card {
                 padding: 21px;
@@ -2371,6 +2943,11 @@
                 font-size: 32px;
             }
 
+
+            /* =====================================================
+           REKAP JENIS MOBILE
+        ===================================================== */
+
             .rekap-jenis-header {
                 padding: 19px;
             }
@@ -2379,18 +2956,25 @@
                 padding: 16px;
             }
 
+
+            /* =====================================================
+           FILTER MOBILE
+        ===================================================== */
+
             .filter-card {
                 padding: 15px;
             }
 
             .filter-form {
                 flex-direction: column;
+
                 align-items: stretch;
             }
 
             .filter-group,
             .filter-search {
                 width: 100%;
+
                 min-width: 0;
             }
 
@@ -2403,27 +2987,41 @@
                 flex: 1;
             }
 
+
+            /* =====================================================
+           TABLE MOBILE
+        ===================================================== */
+
             .pegawai-card-header {
                 padding: 18px;
+
                 align-items: flex-start;
+
                 flex-direction: column;
             }
 
+
+            /* =====================================================
+           PAGINATION MOBILE
+        ===================================================== */
+
             .pagination-wrapper {
                 align-items: flex-start;
+
                 flex-direction: column;
             }
 
             .pagination-container {
                 width: 100%;
+
                 overflow-x: auto;
+
                 padding-bottom: 2px;
             }
 
             .pagination-container .pagination {
                 flex-wrap: nowrap;
             }
-
         }
     </style>
 

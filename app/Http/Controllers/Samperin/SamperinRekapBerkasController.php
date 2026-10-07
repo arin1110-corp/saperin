@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use App\Exports\SamperinRekapBerkasExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SamperinRekapBerkasController extends Controller
 {
@@ -1343,5 +1345,57 @@ class SamperinRekapBerkasController extends Controller
 
             'response' => $result,
         ];
+    }
+
+    /**
+     * ============================================================
+     * EXPORT REKAP BERKAS KE EXCEL
+     * ============================================================
+     */
+    public function export(string $permintaanUid)
+    {
+        /*
+    |--------------------------------------------------------------------------
+    | Ambil permintaan
+    |--------------------------------------------------------------------------
+    */
+
+        $permintaan = SamperinPermintaanBerkas::query()
+            ->where(
+                'permintaan_uid',
+                $permintaanUid
+            )
+            ->where(
+                'permintaan_status',
+                true
+            )
+            ->firstOrFail();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Nama file
+    |--------------------------------------------------------------------------
+    */
+
+        $filename = 'Rekap_Berkas_'
+            . Str::slug(
+                $permintaan->permintaan_judul
+            )
+            . '_'
+            . now()->format('Ymd_His')
+            . '.xlsx';
+
+        /*
+    |--------------------------------------------------------------------------
+    | Download Excel
+    |--------------------------------------------------------------------------
+    */
+
+        return Excel::download(
+            new SamperinRekapBerkasExport(
+                $permintaan
+            ),
+            $filename
+        );
     }
 }
