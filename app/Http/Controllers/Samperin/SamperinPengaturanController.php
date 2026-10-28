@@ -165,8 +165,7 @@ class SamperinPengaturanController extends Controller
                         );
                 });
             })
-            ->orderBy('folder_nama')
-            ->orderBy('folder_jenis_kerja_id')
+            ->orderBy('folder_id', 'desc')
             ->paginate(10)
             ->withQueryString();
 
