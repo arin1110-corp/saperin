@@ -54,6 +54,52 @@
             color: #fff;
         }
 
+        /* SEARCH */
+        .folder-search {
+            padding: 14px 22px;
+            border-bottom: 1px solid #edf0f3;
+            background: #fafbfc;
+        }
+
+        .folder-search-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .folder-search-input {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+            max-width: 420px;
+        }
+
+        .folder-search-input i {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9aa2ae;
+            font-size: 13px;
+        }
+
+        .folder-search-input input {
+            width: 100%;
+            height: 42px;
+            padding: 0 14px 0 36px;
+            border: 1px solid #e1e5ea;
+            border-radius: 9px;
+            font-size: 12px;
+            background: #fff;
+            outline: none;
+        }
+
+        .folder-search-input input:focus {
+            border-color: #f28c28;
+        }
+
+        /* TABLE */
         .folder-table {
             margin: 0;
         }
@@ -160,6 +206,46 @@
             background: #fff5f5;
         }
 
+        /* PAGINATION */
+        .folder-pagination {
+            padding: 16px 22px;
+            border-top: 1px solid #edf0f3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .folder-pagination-info {
+            font-size: 12px;
+            color: #9aa2ae;
+        }
+
+        .folder-pagination .pagination {
+            margin: 0;
+        }
+
+        .folder-pagination .page-link {
+            font-size: 12px;
+            color: #596273;
+            border-color: #e4e7eb;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+
+        .folder-pagination .page-item.active .page-link {
+            background: #f28c28;
+            border-color: #f28c28;
+            color: #fff;
+        }
+
+        .folder-pagination .page-link:hover {
+            background: #fff5ea;
+            color: #dc7415;
+        }
+
+        /* FORM & MODAL */
         .form-label {
             font-size: 12px;
             font-weight: 700;
@@ -242,6 +328,10 @@
                 min-width: 1000px;
             }
 
+            .folder-pagination {
+                justify-content: center;
+            }
+
         }
     </style>
 
@@ -276,6 +366,7 @@
 
     <div class="folder-card">
 
+        {{-- HEADER --}}
         <div class="folder-card-header">
 
             <div>
@@ -301,6 +392,36 @@
         </div>
 
 
+        {{-- SEARCH --}}
+        <div class="folder-search">
+
+            <form action="{{ route('pengaturan.folder') }}" method="GET" class="folder-search-form">
+
+                <div class="folder-search-input">
+
+                    <i class="bi bi-search"></i>
+
+                    <input type="text" name="search" value="{{ $search }}"
+                        placeholder="Cari kode, nama, jenis, prefix, atau Drive ID...">
+
+                </div>
+
+                <button type="submit" class="btn btn-samperin">
+                    Cari
+                </button>
+
+                @if ($search !== '')
+                    <a href="{{ route('pengaturan.folder') }}" class="btn btn-light">
+                        Reset
+                    </a>
+                @endif
+
+            </form>
+
+        </div>
+
+
+        {{-- TABLE --}}
         <div class="folder-table-wrapper">
 
             <table class="table folder-table align-middle">
@@ -339,7 +460,7 @@
                         <tr>
 
                             <td>
-                                {{ $loop->iteration }}
+                                {{ $folders->firstItem() + $loop->index }}
                             </td>
 
                             <td>
@@ -446,210 +567,6 @@
 
                         </tr>
 
-
-                        {{-- MODAL EDIT --}}
-
-                        <div class="modal fade" id="modalEditFolder{{ $folder->folder_uid }}" tabindex="-1"
-                            aria-hidden="true">
-
-                            <div class="modal-dialog modal-lg modal-dialog-centered">
-
-                                <div class="modal-content">
-
-                                    <form action="{{ route('pengaturan.folder.update', $folder->folder_uid) }}"
-                                        method="POST">
-
-                                        @csrf
-
-                                        @method('PUT')
-
-
-                                        <div class="modal-header">
-
-                                            <h5 class="modal-title">
-                                                Edit Folder
-                                            </h5>
-
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-
-                                        </div>
-
-
-                                        <div class="modal-body">
-
-                                            <div class="row g-3">
-
-                                                <div class="col-md-6">
-
-                                                    <label class="form-label">
-                                                        Kode Folder
-                                                    </label>
-
-                                                    <input type="text" name="folder_kode" class="form-control"
-                                                        value="{{ $folder->folder_kode }}" required>
-
-                                                </div>
-
-
-                                                <div class="col-md-6">
-
-                                                    <label class="form-label">
-                                                        Nama Folder
-                                                    </label>
-
-                                                    <input type="text" name="folder_nama" class="form-control"
-                                                        value="{{ $folder->folder_nama }}" required>
-
-                                                </div>
-
-
-                                                <div class="col-md-6">
-
-                                                    <label class="form-label">
-                                                        Jenis Folder
-                                                    </label>
-
-                                                    <select name="folder_jenis" class="form-select" required>
-
-                                                        <option value="">
-                                                            Pilih jenis folder
-                                                        </option>
-
-                                                        <option value="foto"
-                                                            {{ $folder->folder_jenis === 'foto' ? 'selected' : '' }}>
-                                                            Foto
-                                                        </option>
-
-                                                        <option value="berkas"
-                                                            {{ $folder->folder_jenis === 'berkas' ? 'selected' : '' }}>
-                                                            Berkas
-                                                        </option>
-
-                                                        <option value="dokumen"
-                                                            {{ $folder->folder_jenis === 'dokumen' ? 'selected' : '' }}>
-                                                            Dokumen
-                                                        </option>
-
-                                                    </select>
-
-                                                </div>
-
-
-                                                <div class="col-md-6">
-
-                                                    <label class="form-label">
-                                                        Jenis Kerja
-                                                    </label>
-
-                                                    <select name="folder_jenis_kerja_id" class="form-select" required>
-
-                                                        <option value="">
-                                                            Pilih jenis kerja
-                                                        </option>
-
-                                                        @foreach ($jenisKerja as $item)
-                                                            <option value="{{ $item->jenis_kerja_id }}"
-                                                                {{ $folder->folder_jenis_kerja_id == $item->jenis_kerja_id ? 'selected' : '' }}>
-                                                                {{ $item->jenis_kerja_nama }}
-                                                            </option>
-                                                        @endforeach
-
-                                                    </select>
-
-                                                </div>
-
-
-                                                <div class="col-md-6">
-
-                                                    <label class="form-label">
-                                                        Prefix
-                                                    </label>
-
-                                                    <input type="text" name="folder_prefix" class="form-control"
-                                                        value="{{ $folder->folder_prefix }}">
-
-                                                </div>
-
-
-                                                <div class="col-md-6">
-
-                                                    <label class="form-label">
-                                                        Google Drive Folder ID
-                                                    </label>
-
-                                                    <div class="input-group">
-
-                                                        <input type="text" name="folder_drive_id" class="form-control"
-                                                            value="{{ $folder->folder_drive_id }}"
-                                                            id="driveEdit{{ $folder->folder_uid }}" required>
-
-                                                        <button type="button" class="btn btn-outline-secondary"
-                                                            onclick="copyDriveId('driveEdit{{ $folder->folder_uid }}')"
-                                                            title="Copy">
-
-                                                            <i class="bi bi-copy"></i>
-
-                                                        </button>
-
-                                                    </div>
-
-                                                </div>
-
-
-                                                <div class="col-12">
-
-                                                    <label class="form-label">
-                                                        Keterangan
-                                                    </label>
-
-                                                    <textarea name="folder_keterangan" class="form-control">{{ $folder->folder_keterangan }}</textarea>
-
-                                                </div>
-
-
-                                                <div class="col-12">
-
-                                                    <div class="form-check form-switch">
-
-                                                        <input type="checkbox" class="form-check-input"
-                                                            name="folder_status" value="1"
-                                                            id="statusEdit{{ $folder->folder_uid }}"
-                                                            {{ $folder->folder_status ? 'checked' : '' }}>
-
-                                                        <label class="form-check-label small"
-                                                            for="statusEdit{{ $folder->folder_uid }}">
-                                                            Folder Aktif
-                                                        </label>
-
-                                                    </div>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-
-                                        <div class="modal-footer">
-
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                                                Batal
-                                            </button>
-
-                                            <button type="submit" class="btn btn-samperin">
-                                                Simpan Perubahan
-                                            </button>
-
-                                        </div>
-
-                                    </form>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
                     @empty
 
                         <tr>
@@ -661,7 +578,11 @@
                                     <i class="bi bi-folder2-open d-block"></i>
 
                                     <div>
-                                        Belum ada folder yang dikonfigurasi.
+                                        @if ($search !== '')
+                                            Tidak ada folder yang cocok dengan "{{ $search }}".
+                                        @else
+                                            Belum ada folder yang dikonfigurasi.
+                                        @endif
                                     </div>
 
                                 </div>
@@ -678,7 +599,242 @@
 
         </div>
 
+
+        {{-- PAGINATION --}}
+        @if ($folders->hasPages())
+
+            <div class="folder-pagination">
+
+                <div class="folder-pagination-info">
+                    Menampilkan {{ $folders->firstItem() }} - {{ $folders->lastItem() }}
+                    dari {{ $folders->total() }} folder
+                    @if ($search !== '')
+                        untuk "{{ $search }}"
+                    @endif
+                </div>
+
+                {{ $folders->links('pagination::bootstrap-5') }}
+
+            </div>
+
+        @elseif ($folders->total() > 0)
+
+            <div class="folder-pagination">
+
+                <div class="folder-pagination-info">
+                    Menampilkan {{ $folders->total() }} folder
+                    @if ($search !== '')
+                        untuk "{{ $search }}"
+                    @endif
+                </div>
+
+            </div>
+
+        @endif
+
     </div>
+
+
+    {{-- MODAL EDIT (di luar tabel agar HTML valid) --}}
+    @foreach ($folders as $folder)
+
+        <div class="modal fade" id="modalEditFolder{{ $folder->folder_uid }}" tabindex="-1" aria-hidden="true">
+
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+
+                <div class="modal-content">
+
+                    <form action="{{ route('pengaturan.folder.update', $folder->folder_uid) }}" method="POST">
+
+                        @csrf
+
+                        @method('PUT')
+
+
+                        <div class="modal-header">
+
+                            <h5 class="modal-title">
+                                Edit Folder
+                            </h5>
+
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                        </div>
+
+
+                        <div class="modal-body">
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Kode Folder
+                                    </label>
+
+                                    <input type="text" name="folder_kode" class="form-control"
+                                        value="{{ $folder->folder_kode }}" required>
+
+                                </div>
+
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Nama Folder
+                                    </label>
+
+                                    <input type="text" name="folder_nama" class="form-control"
+                                        value="{{ $folder->folder_nama }}" required>
+
+                                </div>
+
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Jenis Folder
+                                    </label>
+
+                                    <select name="folder_jenis" class="form-select" required>
+
+                                        <option value="">
+                                            Pilih jenis folder
+                                        </option>
+
+                                        <option value="foto" {{ $folder->folder_jenis === 'foto' ? 'selected' : '' }}>
+                                            Foto
+                                        </option>
+
+                                        <option value="berkas"
+                                            {{ $folder->folder_jenis === 'berkas' ? 'selected' : '' }}>
+                                            Berkas
+                                        </option>
+
+                                        <option value="dokumen"
+                                            {{ $folder->folder_jenis === 'dokumen' ? 'selected' : '' }}>
+                                            Dokumen
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Jenis Kerja
+                                    </label>
+
+                                    <select name="folder_jenis_kerja_id" class="form-select" required>
+
+                                        <option value="">
+                                            Pilih jenis kerja
+                                        </option>
+
+                                        @foreach ($jenisKerja as $item)
+                                            <option value="{{ $item->jenis_kerja_id }}"
+                                                {{ $folder->folder_jenis_kerja_id == $item->jenis_kerja_id ? 'selected' : '' }}>
+                                                {{ $item->jenis_kerja_nama }}
+                                            </option>
+                                        @endforeach
+
+                                    </select>
+
+                                </div>
+
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Prefix
+                                    </label>
+
+                                    <input type="text" name="folder_prefix" class="form-control"
+                                        value="{{ $folder->folder_prefix }}">
+
+                                </div>
+
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Google Drive Folder ID
+                                    </label>
+
+                                    <div class="input-group">
+
+                                        <input type="text" name="folder_drive_id" class="form-control"
+                                            value="{{ $folder->folder_drive_id }}"
+                                            id="driveEdit{{ $folder->folder_uid }}" required>
+
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            onclick="copyDriveId('driveEdit{{ $folder->folder_uid }}')" title="Copy">
+
+                                            <i class="bi bi-copy"></i>
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-12">
+
+                                    <label class="form-label">
+                                        Keterangan
+                                    </label>
+
+                                    <textarea name="folder_keterangan" class="form-control">{{ $folder->folder_keterangan }}</textarea>
+
+                                </div>
+
+
+                                <div class="col-12">
+
+                                    <div class="form-check form-switch">
+
+                                        <input type="checkbox" class="form-check-input" name="folder_status"
+                                            value="1" id="statusEdit{{ $folder->folder_uid }}"
+                                            {{ $folder->folder_status ? 'checked' : '' }}>
+
+                                        <label class="form-check-label small"
+                                            for="statusEdit{{ $folder->folder_uid }}">
+                                            Folder Aktif
+                                        </label>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="modal-footer">
+
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                                Batal
+                            </button>
+
+                            <button type="submit" class="btn btn-samperin">
+                                Simpan Perubahan
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    @endforeach
 
 
     {{-- MODAL TAMBAH --}}

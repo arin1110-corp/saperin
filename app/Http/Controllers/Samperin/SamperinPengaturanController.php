@@ -144,13 +144,35 @@ class SamperinPengaturanController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function folder()
+    public function folder(Request $request)
     {
-        $folders = SamperinFolder::orderBy('folder_nama')->orderBy('folder_jenis_kerja_id')->get();
+        $search = trim((string) $request->query('search', ''));
+
+        $folders = SamperinFolder::query()
+            ->when($search !== '', function ($query) use ($search) {
+                $like = '%' . $search . '%';
+
+                $query->where(function ($q) use ($like) {
+                    $q->where('folder_kode', 'like', $like)
+                        ->orWhere('folder_nama', 'like', $like)
+                        ->orWhere('folder_jenis', 'like', $like)
+                        ->orWhere('folder_prefix', 'like', $like)
+                        ->orWhere('folder_drive_id', 'like', $like)
+                        ->orWhereIn(
+                            'folder_jenis_kerja_id',
+                            SamperinJenisKerja::where('jenis_kerja_nama', 'like', $like)
+                                ->select('jenis_kerja_id')
+                        );
+                });
+            })
+            ->orderBy('folder_nama')
+            ->orderBy('folder_jenis_kerja_id')
+            ->paginate(10)
+            ->withQueryString();
 
         $jenisKerja = SamperinJenisKerja::orderBy('jenis_kerja_nama')->get();
 
-        return view('dashboard.pengaturan.folder', compact('folders', 'jenisKerja'));
+        return view('dashboard.pengaturan.folder', compact('folders', 'jenisKerja', 'search'));
     }
 
     public function folderStore(Request $request)
