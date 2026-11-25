@@ -690,7 +690,7 @@ class SamperinPegawaiController extends Controller
 
             $statusPerlinsos = $request->input('status_perlinsos');
 
-            $keterangan = 'Status Perlinsos: ' . $statusPerlinsos;
+            $keterangan = $statusPerlinsos;
 
             if (trim((string) $request->input('keterangan')) !== '') {
                 $keterangan .= "\nKeterangan: "
