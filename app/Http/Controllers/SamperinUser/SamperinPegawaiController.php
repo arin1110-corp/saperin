@@ -515,6 +515,7 @@ class SamperinPegawaiController extends Controller
 |
 */
 
+
     public function upload(Request $request, string $permintaanUid)
     {
         set_time_limit(0);
@@ -539,16 +540,14 @@ class SamperinPegawaiController extends Controller
             ],
             [
                 'file.required' => 'File wajib dipilih.',
-
                 'file.file' => 'File tidak valid.',
-
                 'file.max' => 'Ukuran file maksimal 50 MB.',
-            ],
+            ]
         );
 
         /*
     |--------------------------------------------------------------------------
-    | PERMINTAAN
+    | AMBIL DATA PERMINTAAN
     |--------------------------------------------------------------------------
     */
 
@@ -556,7 +555,12 @@ class SamperinPegawaiController extends Controller
             ->with([
                 'jenisBerkas',
                 'target' => function ($query) use ($user) {
-                    $query->where('target_jenis_kerja_id', $user->user_jenis_kerja_id)->where('target_status', true)->with('folder');
+                    $query->where(
+                        'target_jenis_kerja_id',
+                        $user->user_jenis_kerja_id
+                    )
+                        ->where('target_status', true)
+                        ->with('folder');
                 },
             ])
             ->where('permintaan_uid', $permintaanUid)
@@ -565,12 +569,61 @@ class SamperinPegawaiController extends Controller
 
         /*
     |--------------------------------------------------------------------------
+    | CEK PERLINSOS
+    |--------------------------------------------------------------------------
+    */
+
+        $namaPermintaan = strtolower(
+            (string) $permintaan->permintaan_judul
+        );
+
+        $namaJenisBerkas = strtolower(
+            (string) ($permintaan->jenisBerkas?->jenis_berkas_nama ?? '')
+        );
+
+        $isPerlinsos = str_contains($namaPermintaan, 'perlinsos')
+            || str_contains($namaJenisBerkas, 'perlinsos');
+
+        /*
+    |--------------------------------------------------------------------------
+    | VALIDASI KETERANGAN DAN STATUS
+    |--------------------------------------------------------------------------
+    */
+
+        $request->validate(
+            [
+                'keterangan' => [
+                    'nullable',
+                    'string',
+                    'max:2000',
+                ],
+
+                'status_perlinsos' => [
+                    $isPerlinsos ? 'required' : 'nullable',
+                    'in:Layak,Tidak Layak',
+                ],
+            ],
+            [
+                'keterangan.max' => 'Keterangan maksimal 2.000 karakter.',
+                'status_perlinsos.required' => 'Status kelayakan Perlinsos wajib dipilih.',
+                'status_perlinsos.in' => 'Status Perlinsos tidak valid.',
+            ]
+        );
+
+        /*
+    |--------------------------------------------------------------------------
     | CEK WAKTU MULAI
     |--------------------------------------------------------------------------
     */
 
-        if ($permintaan->permintaan_mulai && now()->lt($permintaan->permintaan_mulai)) {
-            return back()->with('error', 'Permintaan berkas belum dibuka.');
+        if (
+            $permintaan->permintaan_mulai
+            && now()->lt($permintaan->permintaan_mulai)
+        ) {
+            return back()->with(
+                'error',
+                'Permintaan berkas belum dibuka.'
+            );
         }
 
         /*
@@ -579,49 +632,85 @@ class SamperinPegawaiController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        if ($permintaan->permintaan_expired && now()->gt($permintaan->permintaan_expired)) {
-            return back()->with('error', 'Batas waktu pengumpulan berkas sudah berakhir.');
+        if (
+            $permintaan->permintaan_expired
+            && now()->gt($permintaan->permintaan_expired)
+        ) {
+            return back()->with(
+                'error',
+                'Batas waktu pengumpulan berkas sudah berakhir.'
+            );
         }
 
         /*
     |--------------------------------------------------------------------------
-    | TARGET PEGAWAI
+    | CEK TARGET PEGAWAI
     |--------------------------------------------------------------------------
     */
 
         $target = $permintaan->target->first();
 
         if (!$target) {
-            return back()->with('error', 'Anda tidak termasuk target permintaan berkas ini.');
+            return back()->with(
+                'error',
+                'Anda tidak termasuk target permintaan berkas ini.'
+            );
         }
 
         /*
     |--------------------------------------------------------------------------
     | FOLDER DRIVE
     |--------------------------------------------------------------------------
-    |
-    | Folder berasal dari target_folder_id yang dipilih
-    | administrator saat membuat/edit permintaan.
-    |
     */
 
         $folder = $target->folder;
 
-        if (!$folder || !$folder->folder_status || !$folder->folder_drive_id) {
-            return back()->with('error', 'Folder penyimpanan berkas belum dikonfigurasi.');
+        if (
+            !$folder
+            || !$folder->folder_status
+            || !$folder->folder_drive_id
+        ) {
+            return back()->with(
+                'error',
+                'Folder penyimpanan berkas belum dikonfigurasi.'
+            );
         }
 
         /*
     |--------------------------------------------------------------------------
-    | CEK APAKAH SUDAH PERNAH UPLOAD
+    | SUSUN KETERANGAN
     |--------------------------------------------------------------------------
     */
 
-        $existing = SamperinPengumpulanBerkas::query()->where('pengumpulan_berkas_user_uid', $user->user_uid)->where('pengumpulan_berkas_permintaan_id', $permintaan->permintaan_id)->first();
+        $keterangan = trim(
+            (string) $request->input('keterangan')
+        );
 
-        // if ($existing) {
-        //     return back()->with('error', 'Berkas untuk permintaan ini sudah pernah dikirim.');
-        // }
+        if ($isPerlinsos) {
+
+            $statusPerlinsos = $request->input('status_perlinsos');
+
+            $keterangan = 'Status Perlinsos: ' . $statusPerlinsos;
+
+            if (trim((string) $request->input('keterangan')) !== '') {
+                $keterangan .= "\nKeterangan: "
+                    . trim((string) $request->input('keterangan'));
+            }
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | CEK PENGUMPULAN SEBELUMNYA
+    |--------------------------------------------------------------------------
+    */
+
+        $existing = SamperinPengumpulanBerkas::query()
+            ->where('pengumpulan_berkas_user_uid', $user->user_uid)
+            ->where(
+                'pengumpulan_berkas_permintaan_id',
+                $permintaan->permintaan_id
+            )
+            ->first();
 
         /*
     |--------------------------------------------------------------------------
@@ -630,41 +719,63 @@ class SamperinPegawaiController extends Controller
     */
 
         try {
-            $upload = $this->uploadToDrive($request->file('file'), $user, $permintaan, $folder);
+
+            $upload = $this->uploadToDrive(
+                $request->file('file'),
+                $user,
+                $permintaan,
+                $folder
+            );
         } catch (\Throwable $e) {
-            return back()->withInput()->with('error', $e->getMessage());
+
+            return back()
+                ->withInput()
+                ->with('error', $e->getMessage());
         }
 
         /*
-|--------------------------------------------------------------------------
-| SIMPAN / REPLACE DATABASE
-|--------------------------------------------------------------------------
-*/
+    |--------------------------------------------------------------------------
+    | DATA FILE
+    |--------------------------------------------------------------------------
+    */
+
+        $file = $request->file('file');
+
+        /*
+    |--------------------------------------------------------------------------
+    | SIMPAN / UPDATE DATABASE
+    |--------------------------------------------------------------------------
+    */
 
         if ($existing) {
+
             $existing->update([
+
                 'pengumpulan_berkas_file' => $upload['url'],
 
-                'pengumpulan_berkas_nama' => $request->file('file')->getClientOriginalName(),
+                'pengumpulan_berkas_nama' => $file->getClientOriginalName(),
 
-                'pengumpulan_berkas_mime' => $request->file('file')->getMimeType(),
+                'pengumpulan_berkas_mime' => $file->getMimeType(),
 
-                'pengumpulan_berkas_size' => $request->file('file')->getSize(),
+                'pengumpulan_berkas_size' => $file->getSize(),
 
                 'pengumpulan_berkas_tanggal' => now(),
 
                 'pengumpulan_berkas_status' => 'terkirim',
 
-                'pengumpulan_berkas_keterangan' => 'Berkas diganti oleh pegawai.',
+                'pengumpulan_berkas_keterangan' => $keterangan,
 
                 'pengumpulan_berkas_sumber' => 'PEGAWAI',
 
                 'pengumpulan_berkas_sumber_id' => null,
 
                 'pengumpulan_berkas_updated_at' => now(),
+
             ]);
         } else {
+
             SamperinPengumpulanBerkas::create([
+
                 'pengumpulan_berkas_uid' => (string) Str::uuid(),
 
                 'pengumpulan_berkas_user_uid' => $user->user_uid,
@@ -673,17 +784,17 @@ class SamperinPegawaiController extends Controller
 
                 'pengumpulan_berkas_file' => $upload['url'],
 
-                'pengumpulan_berkas_nama' => $request->file('file')->getClientOriginalName(),
+                'pengumpulan_berkas_nama' => $file->getClientOriginalName(),
 
-                'pengumpulan_berkas_mime' => $request->file('file')->getMimeType(),
+                'pengumpulan_berkas_mime' => $file->getMimeType(),
 
-                'pengumpulan_berkas_size' => $request->file('file')->getSize(),
+                'pengumpulan_berkas_size' => $file->getSize(),
 
                 'pengumpulan_berkas_tanggal' => now(),
 
                 'pengumpulan_berkas_status' => 'terkirim',
 
-                'pengumpulan_berkas_keterangan' => 'Berkas dikirim oleh pegawai.',
+                'pengumpulan_berkas_keterangan' => $keterangan,
 
                 'pengumpulan_berkas_sumber' => 'PEGAWAI',
 
@@ -692,6 +803,7 @@ class SamperinPegawaiController extends Controller
                 'pengumpulan_berkas_created_at' => now(),
 
                 'pengumpulan_berkas_updated_at' => now(),
+
             ]);
         }
 
@@ -701,8 +813,11 @@ class SamperinPegawaiController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        return redirect()->route('pegawai.index')->with('success', 'Berkas berhasil dikirim.');
+        return redirect()
+            ->route('pegawai.index')
+            ->with('success', 'Berkas berhasil dikirim.');
     }
+
     /*
 |--------------------------------------------------------------------------
 | UPLOAD KE ARINDRIVE

@@ -1878,7 +1878,7 @@
 
                                             <i class="bi bi-file-earmark-text"></i>
                                             {{ $kgb->batch->kgb_batch_nama }}
-                                       
+
                                         </div>
 
                                         <div class="samperin-kgb-item-subtitle">
@@ -2089,6 +2089,8 @@
                         @php
                             $jenisNama = trim((string) ($permintaan->permintaan_judul ?? 'Berkas'));
 
+                            $isPerlinsos = str_contains(strtolower($jenisNama), 'perlinsos');
+
                             $tahun = $permintaan->permintaan_tahun;
 
                             /*
@@ -2120,7 +2122,7 @@
                             data-bs-target="#samperinUploadModal"
                             data-permintaan-uid="{{ $permintaan->permintaan_uid }}"
                             data-permintaan-id="{{ $permintaan->permintaan_id }}"
-                            data-judul="{{ $judulPermintaan }}"
+                            data-judul="{{ $judulPermintaan }}" data-perlinsos="{{ $isPerlinsos ? '1' : '0' }}"
                             data-deadline="{{ $deadline ? $deadline->translatedFormat('d F Y H:i') : '-' }}">
                             <span class="samperin-request-item-icon">
                                 <i class="bi bi-file-earmark-arrow-up"></i>
@@ -2292,6 +2294,10 @@
                 'samperinFileName'
             );
 
+            const perlinsosField = document.getElementById('samperinPerlinsosField');
+            const statusPerlinsos = document.getElementById('samperinStatusPerlinsos');
+            const keterangan = document.getElementById('samperinKeterangan');
+
 
             if (!modal || !form) {
                 return;
@@ -2331,6 +2337,17 @@
                         deadlineText ?
                         'Batas waktu: ' + deadlineText :
                         'Batas waktu: -';
+
+                    const isPerlinsos = button.getAttribute('data-perlinsos') === '1';
+
+                    perlinsosField.style.display = isPerlinsos ? '' : 'none';
+                    statusPerlinsos.required = isPerlinsos;
+
+                    if (!isPerlinsos) {
+                        statusPerlinsos.value = '';
+                    }
+
+                    keterangan.value = '';
 
 
                     /*

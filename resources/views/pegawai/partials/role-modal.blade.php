@@ -171,6 +171,32 @@
 
                     </div>
 
+                    {{-- STATUS PERLINSOS --}}
+                    <div class="samperin-upload-field" id="samperinPerlinsosField" style="display: none;">
+
+                        <label for="samperinStatusPerlinsos">
+                            Status Perlinsos <span>*</span>
+                        </label>
+
+                        <select name="status_perlinsos" id="samperinStatusPerlinsos" class="form-select">
+                            <option value="">Pilih Status</option>
+                            <option value="Layak">Layak</option>
+                            <option value="Tidak Layak">Tidak Layak</option>
+                        </select>
+
+                    </div>
+
+                    {{-- KETERANGAN --}}
+                    <div class="samperin-upload-field">
+
+                        <label for="samperinKeterangan">
+                            Keterangan
+                        </label>
+
+                        <textarea name="keterangan" id="samperinKeterangan" class="form-control" rows="3"
+                            placeholder="Masukkan keterangan jika diperlukan"></textarea>
+
+                    </div>
 
                     <div class="samperin-upload-field">
 
