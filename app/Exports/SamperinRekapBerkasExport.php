@@ -165,6 +165,9 @@ class SamperinRekapBerkasExport implements
 
                 $user->bidang?->bidang_nama ?: '-',
 
+                // Keterangan dari pegawai saat mengunggah berkas
+                $berkas?->pengumpulan_berkas_keterangan ?: '-',
+
                 $file,
             ];
         });
@@ -183,6 +186,7 @@ class SamperinRekapBerkasExport implements
             'Nama',
             'Jenis Kerja',
             'Bidang',
+            'Keterangan',
             'File',
         ];
     }
@@ -200,7 +204,8 @@ class SamperinRekapBerkasExport implements
             'C' => 32, // Nama
             'D' => 22, // Jenis Kerja
             'E' => 30, // Bidang
-            'F' => 55, // File / Link Drive
+            'F' => 40, // Keterangan
+            'G' => 55, // File / Link Drive
         ];
     }
 
@@ -219,7 +224,7 @@ class SamperinRekapBerkasExport implements
         |--------------------------------------------------------------------------
         */
 
-        $sheet->getStyle('A1:F1')->applyFromArray([
+        $sheet->getStyle('A1:G1')->applyFromArray([
             'font' => [
                 'bold' => true,
 
@@ -275,7 +280,7 @@ class SamperinRekapBerkasExport implements
             */
 
             $sheet->getStyle(
-                'A2:F' . $highestRow
+                'A2:G' . $highestRow
             )->applyFromArray([
 
                 'alignment' => [
@@ -392,7 +397,7 @@ class SamperinRekapBerkasExport implements
             */
 
             $sheet->getStyle(
-                'F2:F' . $highestRow
+                'G2:G' . $highestRow
             )->getAlignment()
                 ->setHorizontal(
                     Alignment::HORIZONTAL_LEFT
@@ -463,7 +468,7 @@ class SamperinRekapBerkasExport implements
                 ) {
 
                     $cell = $sheet->getCell(
-                        'F' . $row
+                        'G' . $row
                     );
 
                     $value = $cell->getValue();
@@ -480,7 +485,7 @@ class SamperinRekapBerkasExport implements
                     ) {
 
                         $sheet
-                            ->getStyle('F' . $row)
+                            ->getStyle('G' . $row)
                             ->applyFromArray([
 
                                 'font' => [
@@ -548,7 +553,7 @@ class SamperinRekapBerkasExport implements
                         */
 
                         $sheet
-                            ->getStyle('F' . $row)
+                            ->getStyle('G' . $row)
                             ->getFont()
                             ->setColor(
                                 new Color('0563C1')
@@ -562,7 +567,7 @@ class SamperinRekapBerkasExport implements
                         */
 
                         $sheet
-                            ->getStyle('F' . $row)
+                            ->getStyle('G' . $row)
                             ->getAlignment()
                             ->setHorizontal(
                                 Alignment::HORIZONTAL_LEFT
@@ -591,7 +596,7 @@ class SamperinRekapBerkasExport implements
                 if ($highestRow >= 1) {
 
                     $sheet->setAutoFilter(
-                        'A1:F' . $highestRow
+                        'A1:G' . $highestRow
                     );
                 }
 
